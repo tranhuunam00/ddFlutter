@@ -24,15 +24,25 @@ class OwnFileCard extends StatelessWidget {
             shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
             child: path! != null
-                ? Column(
+                ? Stack(
                     children: [
-                      Expanded(
+                      Container(
+                        height: MediaQuery.of(context).size.height / 2.5,
+                        width: MediaQuery.of(context).size.width / 1.8,
                         child: Image.network(
-                          "http://a96c-14-235-182-226.ngrok.io/upload/8d71630ab0b7047f44a1c8265743c3c7.jpg",
+                          'http://5c35-2401-d800-2103-90fe-601c-87d7-d826-193e.ngrok.io/upload/' +
+                              path!,
                           fit: BoxFit.fitHeight,
                         ),
                       ),
-                      message != null ? Text(message!) : Container()
+                      message != ""
+                          ? Positioned(
+                              bottom: 0,
+                              child: Text(
+                                message.toString(),
+                                style: TextStyle(color: Colors.amber),
+                              ))
+                          : Container()
                     ],
                   )
                 : Container(),

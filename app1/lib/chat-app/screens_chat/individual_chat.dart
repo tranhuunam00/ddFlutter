@@ -63,7 +63,7 @@ class _IndividualChatState extends State<IndividualChat> {
     print("begin connect....................");
 
     socket = io(
-        "http://6241-2401-d800-213-5d8d-d878-4300-acec-2524.ngrok.io",
+        "http://5c35-2401-d800-2103-90fe-601c-87d7-d826-193e.ngrok.io",
         <String, dynamic>{
           "transports": ["websocket"],
           "autoConnect": false,
@@ -118,13 +118,13 @@ class _IndividualChatState extends State<IndividualChat> {
   }
 
   //gửi hình ảnh................................
-  void onImageSend(String path, String? message) async {
-    print("send image.............${path}");
-    if (message != null) {
-      print("send image.............${message}");
-    }
+  void onImageSend(String path, String message) async {
+    print("image.............${path}");
+    print("message.......${message}");
     var request = http.MultipartRequest(
-        "POST", Uri.parse("http://a96c-14-235-182-226.ngrok.io/photos/upload"));
+        "POST",
+        Uri.parse(
+            "http://5c35-2401-d800-2103-90fe-601c-87d7-d826-193e.ngrok.io/photos/upload"));
 
     request.files.add(await http.MultipartFile.fromPath("img", path));
     request.headers.addAll({
@@ -133,14 +133,16 @@ class _IndividualChatState extends State<IndividualChat> {
     http.StreamedResponse response = await request.send();
     var httpResponse = await http.Response.fromStream(response);
     var data = json.decode(httpResponse.body).toString();
-    var pathSV = data.substring(7);
-    print(pathSV);
-    setMessage("source", message ?? "", path);
+    var pathSV = data.substring(11);
+    print(data);
+    setMessage("source", message, pathSV);
+
     socket.emit("message", {
       "message": message,
       "sourceId": widget.sourceChat!.id,
       "targetId": widget.chatModel!.id,
       "path": pathSV,
+      "time": DateTime.now().toString(),
     });
 
     for (var i = 0; i < popTime; i++) {
@@ -269,6 +271,7 @@ class _IndividualChatState extends State<IndividualChat> {
                               if (messages[index].path.length > 0) {
                                 return OwnFileCard(
                                   path: messages[index].path,
+                                  message: messages[index].message,
                                 );
                               } else {
                                 return OwnMessageCard(
