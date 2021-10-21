@@ -30,8 +30,7 @@ class OwnFileCard extends StatelessWidget {
                         height: MediaQuery.of(context).size.height / 2.5,
                         width: MediaQuery.of(context).size.width / 1.8,
                         child: Image.network(
-                          'http://5c35-2401-d800-2103-90fe-601c-87d7-d826-193e.ngrok.io/upload/' +
-                              path!,
+                          'http://d283-14-235-182-226.ngrok.io/upload/' + path!,
                           fit: BoxFit.fitHeight,
                         ),
                       ),

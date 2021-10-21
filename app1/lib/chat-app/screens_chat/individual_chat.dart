@@ -62,12 +62,10 @@ class _IndividualChatState extends State<IndividualChat> {
   void connect() {
     print("begin connect....................");
 
-    socket = io(
-        "http://5c35-2401-d800-2103-90fe-601c-87d7-d826-193e.ngrok.io",
-        <String, dynamic>{
-          "transports": ["websocket"],
-          "autoConnect": false,
-        });
+    socket = io("http://d283-14-235-182-226.ngrok.io", <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": false,
+    });
     socket.connect();
     print(socket.connected);
     socket.emit("signin", widget.sourceChat!.id);
@@ -122,9 +120,7 @@ class _IndividualChatState extends State<IndividualChat> {
     print("image.............${path}");
     print("message.......${message}");
     var request = http.MultipartRequest(
-        "POST",
-        Uri.parse(
-            "http://5c35-2401-d800-2103-90fe-601c-87d7-d826-193e.ngrok.io/photos/upload"));
+        "POST", Uri.parse("http://d283-14-235-182-226.ngrok.io/photos/upload"));
 
     request.files.add(await http.MultipartFile.fromPath("img", path));
     request.headers.addAll({
@@ -282,6 +278,7 @@ class _IndividualChatState extends State<IndividualChat> {
                               if (messages[index].path.length > 0) {
                                 return ReplyFileCard(
                                   path: messages[index].path,
+                                  message: messages[index].message,
                                 );
                               } else {
                                 return ReplyMessageCard(
