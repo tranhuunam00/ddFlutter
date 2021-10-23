@@ -35,6 +35,7 @@ class _IndividualChatState extends State<IndividualChat> {
   bool isSendBtn = false;
   List<MessageModel> messages = [];
   ScrollController _scrollController = ScrollController();
+  late String url = 'http://d283-14-235-182-226.ngrok.io/message';
   int popTime = 0;
   //.......................................................
   @override
@@ -51,6 +52,8 @@ class _IndividualChatState extends State<IndividualChat> {
       }
     });
     connect();
+
+    getMessageInit();
   }
 
   @override
@@ -58,14 +61,57 @@ class _IndividualChatState extends State<IndividualChat> {
     super.didChangeDependencies();
   }
 
+  //ham get api........................
+  Future fetchData() async {
+    http.Response response;
+    String sourceId = widget.sourceChat!.id.toString();
+    String targetId = widget.chatModel!.id.toString();
+    List<MessageModel> data1 = [];
+    //tim tin nhan cua nguoi gui cho ban
+    String query =
+        '?limit=50&offset=0&sourceId=' + targetId + "&targetId=" + sourceId;
+    String path =
+        'http://7718-2401-d800-9ded-1869-855c-2772-6c19-875f.ngrok.io/message/individual' +
+            query;
+    print(query);
+    print(path);
+    response = await http.get(Uri.parse(path));
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else
+      return [];
+  }
+
+  //lay tin nhan ban dau................
+  getMessageInit() async {
+    int i;
+    List data = await fetchData();
+    print("gia tri cua a");
+    print(data);
+    for (i = 0; i < data.length; i++) {
+      MessageModel a = MessageModel(
+        type: "",
+        message: data[i]["message"],
+        path: data[i]["path"],
+        time: "20:00",
+      );
+
+      messages.add(a);
+    }
+    print("get init message done .....................");
+    if (mounted) setState(() {});
+  }
+
   //connect socket_io_client
   void connect() {
     print("begin connect....................");
 
-    socket = io("http://d283-14-235-182-226.ngrok.io", <String, dynamic>{
-      "transports": ["websocket"],
-      "autoConnect": false,
-    });
+    socket = io(
+        "http://7718-2401-d800-9ded-1869-855c-2772-6c19-875f.ngrok.io",
+        <String, dynamic>{
+          "transports": ["websocket"],
+          "autoConnect": false,
+        });
     socket.connect();
     print(socket.connected);
     socket.emit("signin", widget.sourceChat!.id);
@@ -97,7 +143,8 @@ class _IndividualChatState extends State<IndividualChat> {
       "message": message,
       "sourceId": sourceId,
       "targetId": targetId,
-      "path": path
+      "time": DateTime.now().toString(),
+      "path": path,
     });
   }
 
@@ -144,9 +191,10 @@ class _IndividualChatState extends State<IndividualChat> {
     for (var i = 0; i < popTime; i++) {
       Navigator.pop(context);
     }
-    setState(() {
-      popTime = 0;
-    });
+    if (mounted)
+      setState(() {
+        popTime = 0;
+      });
   }
 
   _onEmojiSelected(Emoji emoji) {
@@ -168,6 +216,10 @@ class _IndividualChatState extends State<IndividualChat> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
+      _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+    });
     return Stack(children: [
       Image.asset("assets/images/background.png",
           height: MediaQuery.of(context).size.height,
@@ -184,7 +236,7 @@ class _IndividualChatState extends State<IndividualChat> {
                 padding: const EdgeInsets.only(left: 22, right: 12),
                 child: InkWell(
                     onTap: () {
-                      Navigator.pop(context, true);
+                      Navigator.pop(context);
                     },
                     child: Icon(Icons.arrow_back, size: 24)),
               ),
@@ -349,9 +401,10 @@ class _IndividualChatState extends State<IndividualChat> {
                                                 IconButton(
                                                   icon: Icon(Icons.camera_alt),
                                                   onPressed: () {
-                                                    setState(() {
-                                                      popTime = 2;
-                                                    });
+                                                    if (mounted)
+                                                      setState(() {
+                                                        popTime = 2;
+                                                      });
                                                     Navigator.push(
                                                         context,
                                                         MaterialPageRoute(
@@ -495,9 +548,10 @@ class _IndividualChatState extends State<IndividualChat> {
                     Colors.pink,
                     "Camera",
                     () {
-                      setState(() {
-                        popTime = 3;
-                      });
+                      if (mounted)
+                        setState(() {
+                          popTime = 3;
+                        });
                       Navigator.push(
                           context,
                           MaterialPageRoute(
@@ -514,9 +568,10 @@ class _IndividualChatState extends State<IndividualChat> {
                     Colors.purple,
                     "Gallary",
                     () async {
-                      setState(() {
-                        popTime = 2;
-                      });
+                      if (mounted)
+                        setState(() {
+                          popTime = 2;
+                        });
                       print(
                           "chuyen sang camera................................");
                       final XFile? file =
@@ -570,6 +625,7 @@ class _IndividualChatState extends State<IndividualChat> {
         ));
   }
 
+//widget
   Widget iconcreation(IconData icon, Color color, String text, Function onTap) {
     return InkWell(
       onTap: () => onTap(),
@@ -595,7 +651,7 @@ class _IndividualChatState extends State<IndividualChat> {
 
   @override
   void dispose() {
-    print("chạy");
+    print("dispose      chạy");
     super.dispose();
     socket.disconnect();
     _scrollController.dispose();

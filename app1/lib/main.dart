@@ -1,6 +1,7 @@
 import 'package:app1/chat-app/screens_chat/CameraScreen.dart';
 import 'package:app1/chat-app/screens_chat/LoginScreen.dart';
 import 'package:app1/chat-app/screens_chat/home.dart';
+import 'package:app1/test_emoji.dart';
 
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
@@ -43,6 +44,8 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
             title: "app1",
             // home: LoadScreen())
-            home: ChatLoginScreen()));
+            home: ChatLoginScreen()
+            // home: Test()
+            ));
   }
 }
