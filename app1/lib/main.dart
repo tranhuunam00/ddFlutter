@@ -11,10 +11,12 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'auth_social/google_sign_in.dart';
 import 'package:flutter/foundation.dart';
-
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:provider/provider.dart';
 
+final storage = FlutterSecureStorage();
+const SERVER_IP = 'http://01d2-2402-800-f01c-d27a-d854-8403-baf9-c817.ngrok.io';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -41,10 +43,8 @@ class MyApp extends StatelessWidget {
         create: (context) {
           return GoogleSingInProvider();
         },
-        child: MaterialApp(
-            title: "app1",
-            // home: LoadScreen())
-            home: ChatLoginScreen()
+        child: MaterialApp(title: "app1", home: LoadScreen()
+            // home: ChatLoginScreen()
             // home: Test()
             ));
   }

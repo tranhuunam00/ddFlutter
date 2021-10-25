@@ -9,6 +9,7 @@ import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/chat-app/screens_chat/CameraScreen.dart';
 import 'package:app1/chat-app/screens_chat/CameraView.dart';
+import 'package:app1/main.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -70,9 +71,7 @@ class _IndividualChatState extends State<IndividualChat> {
     //tim tin nhan cua nguoi gui cho ban
     String query =
         '?limit=50&offset=0&sourceId=' + targetId + "&targetId=" + sourceId;
-    String path =
-        'http://7718-2401-d800-9ded-1869-855c-2772-6c19-875f.ngrok.io/message/individual' +
-            query;
+    String path = SERVER_IP + '/message/individual' + query;
     print(query);
     print(path);
     response = await http.get(Uri.parse(path));
@@ -106,12 +105,10 @@ class _IndividualChatState extends State<IndividualChat> {
   void connect() {
     print("begin connect....................");
 
-    socket = io(
-        "http://7718-2401-d800-9ded-1869-855c-2772-6c19-875f.ngrok.io",
-        <String, dynamic>{
-          "transports": ["websocket"],
-          "autoConnect": false,
-        });
+    socket = io(SERVER_IP, <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": false,
+    });
     socket.connect();
     print(socket.connected);
     socket.emit("signin", widget.sourceChat!.id);
@@ -166,8 +163,8 @@ class _IndividualChatState extends State<IndividualChat> {
   void onImageSend(String path, String message) async {
     print("image.............${path}");
     print("message.......${message}");
-    var request = http.MultipartRequest(
-        "POST", Uri.parse("http://d283-14-235-182-226.ngrok.io/photos/upload"));
+    var request =
+        http.MultipartRequest("POST", Uri.parse(SERVER_IP + "/photos/upload"));
 
     request.files.add(await http.MultipartFile.fromPath("img", path));
     request.headers.addAll({

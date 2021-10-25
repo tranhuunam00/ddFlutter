@@ -1,3 +1,8 @@
+import 'dart:convert';
+
+import 'package:app1/Screen/Profile.dart';
+import 'package:app1/main.dart';
+import 'package:app1/model/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import '../widgets/text_input_style.dart';
@@ -26,6 +31,38 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  var urlGetUserJwt = Uri.parse(SERVER_IP + '/user/userJwt');
+  var urlLogin = Uri.parse(SERVER_IP + '/user/login');
+  Future<String> attemptLogIn(String userName, String password) async {
+    var res = await http.post(urlLogin,
+        headers: {
+          'Content-type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({"userName": userName, "password": password}));
+
+    var jwt = (res.body);
+    print(jwt);
+
+    return jwt;
+  }
+
+  Future<UserModel> getUserJwt(String jwt) async {
+    var res = await http.get(
+      urlGetUserJwt,
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt,
+      },
+    );
+
+    var data = json.decode(res.body);
+    print(data);
+    UserModel user = UserModel(userName: data["userName"]);
+    return user;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -83,12 +120,24 @@ class _LoginScreenState extends State<LoginScreen> {
               AppBTnStyle(
                   label: "Đăng nhập",
                   onTap: () async {
-                    
-                    var url = Uri.parse(
-                        'https://b329-2401-d800-5f12-1851-88f5-2a21-5743-ed71.ngrok.io/user');
-                    var response = await http.get(url);
-                    print('Response status: ${response.statusCode}');
-                    print('Response body: ${response.body}');
+                    var userName = _userNameController.text;
+                    var password = _passwordController.text;
+                    print("userName: " + userName + " password: " + password);
+                    var jwt = await attemptLogIn(userName, password);
+                    if (jwt != "") {
+                      print("jwt: " + jwt);
+                      await storage.write(key: "jwt", value: jwt);
+                      UserModel user = await getUserJwt(jwt);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => MainScreen(user: user)));
+                    } else {
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => LoginScreen()));
+                    }
                   }),
               Padding(
                 padding: const EdgeInsets.only(top: 100.0),

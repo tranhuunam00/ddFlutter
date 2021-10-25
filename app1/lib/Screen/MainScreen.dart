@@ -1,11 +1,16 @@
+import 'dart:convert';
+
+import 'package:app1/main.dart';
+import 'package:app1/model/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import './Profile.dart';
 import './HomeScreen.dart';
+import 'package:http/http.dart' as http;
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
-
+  const MainScreen({Key? key, required this.user}) : super(key: key);
+  final UserModel user;
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -24,8 +29,13 @@ class _MainScreenState extends State<MainScreen> {
     Profile(),
   ];
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
+    // final user = FirebaseAuth.instance.currentUser!;
     return Scaffold(
       body: Center(
         child: _widgetOptions.elementAt(_selectedIndex),

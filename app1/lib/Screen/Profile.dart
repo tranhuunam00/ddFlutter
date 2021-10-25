@@ -1,3 +1,4 @@
+import 'package:app1/Screen/MainScreen.dart';
 import 'package:app1/auth_social/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +18,7 @@ class Profile extends StatefulWidget {
 class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser!;
+    // final user = FirebaseAuth.instance.currentUser!;
 
     int numLine = 5;
     Size size = MediaQuery.of(context).size;
@@ -78,7 +79,7 @@ class _ProfileState extends State<Profile> {
           Padding(
             padding: const EdgeInsets.only(top: 32.0),
             child: Center(
-              child: Text(user.displayName!, style: AppStyles.h2),
+              child: Text("userApp.userName", style: AppStyles.h2),
             ),
           ),
           Row(

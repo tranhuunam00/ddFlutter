@@ -76,7 +76,8 @@ class _CustomTextInputState extends State<CustomTextInput> {
         ),
         onChanged: checkValidation,
         keyboardType: getInputType(),
-        obscureText: widget.inputType == InputType.Password && !visibility,
+        obscureText:
+            widget.inputType == InputType.Password ? !visibility : false,
         maxLength: widget.inputType == InputType.PaymentCard
             ? 19
             : widget.maxLength ?? getMaxLength(),

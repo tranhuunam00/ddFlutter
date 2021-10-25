@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:app1/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -30,8 +31,7 @@ class ReplyFileCard extends StatelessWidget {
                           height: MediaQuery.of(context).size.height / 2.5,
                           width: MediaQuery.of(context).size.width / 1.8,
                           child: Image.network(
-                            'http://7718-2401-d800-9ded-1869-855c-2772-6c19-875f.ngrok.io/upload/' +
-                                path!,
+                            SERVER_IP + '/upload/' + path!,
                             fit: BoxFit.fitHeight,
                           ),
                         ),

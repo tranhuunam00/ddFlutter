@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import "../ui.dart";
-import "./Home.dart";
+
 import "LoginScreen.dart";
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -62,8 +62,8 @@ class LoadScreen extends StatelessWidget {
                                         );
                                       }
                                       if (snapshot.hasData) {
-                                        print(snapshot.data);
-                                        return MainScreen();
+                                        // print(snapshot.data);
+                                        // return MainScreen();
                                       }
                                       return LoginScreen();
                                     })));
