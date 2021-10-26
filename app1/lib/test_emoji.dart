@@ -1,70 +1,123 @@
-import 'dart:convert';
-
-import 'package:app1/chat-app/model/message_model.dart';
+import 'package:app1/Screen/LoginScreen.dart';
+import 'package:app1/Screen/MainScreen.dart';
+import 'package:app1/Stream/user_stream.dart';
+import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/user_provider.dart';
+import 'package:app1/ui.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:http/http.dart' as http;
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-class Test extends StatefulWidget {
-  const Test({Key? key}) : super(key: key);
+class MyHomePage extends StatefulWidget {
+  const MyHomePage({Key? key}) : super(key: key);
 
   @override
-  _TestState createState() => _TestState();
+  _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _TestState extends State<Test> {
-  late List data;
-  int i = 0;
-  late List<MessageModel> messages = [];
-  late MessageModel a;
-  late List<int> b = [];
+class _MyHomePageState extends State<MyHomePage> {
+  MyStream myStream = new MyStream();
 
-  Future fetchData() async {
-    http.Response response;
-    List<MessageModel> data1 = [];
-    response = await http
-        .get(Uri.parse('http://4698-14-235-182-226.ngrok.io/message'));
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else
-      return [];
-  }
-
-  getMessage() async {
-    List<int> c;
-    List data = await fetchData();
-    print("gia tri cua a");
-    print(data);
-    for (i = 0; i < data.length; i++) {
-      a = MessageModel(
-          type: "type",
-          message: "message",
-          path: "path",
-          time: DateTime.now().toString().substring(10, 16));
-      print('messageModel');
-      print(a);
-      b.add(i);
-      messages.add(a);
-      print("...................");
-      print(messages);
-      print(b);
-    }
-    print(messages[0].time);
-    setState(() {});
+  @override
+  void dispose() {
+    super.dispose();
+    myStream.dispose();
   }
 
   @override
   void initState() {
     super.initState();
-    getMessage();
+    myStream.userStream;
   }
 
+  UserModel user = new UserModel(userName: "hey");
   @override
   Widget build(BuildContext context) {
-    print("b laf");
-    print(b);
-    if (messages.length > 0) {}
-    return Container(
-      child: Text(messages.length > 0 ? messages[0].message : "hihi"),
+    print("render");
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("heyf"),
+      ),
+      body: Consumer<UserProvider>(builder: (context, userProvider, child) {
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                'You have pushed the button this many times:',
+              ),
+              TextButton(
+                  onPressed: () {
+                    userProvider.userLogin(user);
+                  },
+                  child: Text(userProvider.userP.userName)),
+              StreamBuilder<UserModel>(
+                stream: myStream.userStream,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(
+                      child: CircularProgressIndicator(),
+                    );
+                  }
+                  if (snapshot.hasData) {
+                    var a = snapshot.data;
+                    if (a != null) {
+                      if (a.userName != "") {
+                        print(a.userName);
+                        // Navigator.pushReplacementNamed(context, "/MainScreen");
+                      } else {
+                        return Container();
+                      }
+                    }
+
+                    // print(snapshot.data);
+
+                  }
+                  return Container();
+                },
+
+                //  Text(
+                //   snapshot.hasData ? snapshot.data.toString() : "0",
+                //   style: Theme.of(context).textTheme.headline4,
+                // ),
+              ),
+              RawMaterialButton(
+                  shape: CircleBorder(),
+                  fillColor: Colors.green,
+                  onPressed: () {
+                    // myStream.setUser(user);
+                    print("oki");
+                    UserModel user3 = UserModel(userName: "hihi3");
+
+                    userProvider.userLogin(user3);
+                    // Navigator.push(
+                    //     context,
+                    //     MaterialPageRoute(
+                    //         builder: (context) => StreamBuilder<UserModel>(
+                    //             stream: myStream.userStream,
+                    //             initialData: user,
+                    //             builder: (context, snapshot) {
+                    //               print(snapshot.connectionState);
+                    //               if (snapshot.data != null) {
+                    //                 UserModel a = snapshot.data!;
+                    //                 print("a.........");
+                    //                 print("a.username là " + a.userName);
+                    //               }
+                    //               return LoginScreen();
+                    //             })));
+                  },
+                  child: Image.asset(AppImages.nature))
+            ],
+          ),
+        );
+      }),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          myStream.setUser(user);
+        },
+        tooltip: 'Increment',
+        child: Icon(Icons.add),
+      ),
     );
   }
 }

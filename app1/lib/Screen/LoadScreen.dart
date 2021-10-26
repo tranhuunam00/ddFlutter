@@ -1,4 +1,7 @@
+import 'package:app1/main.dart';
+import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import "../ui.dart";
 
 import "LoginScreen.dart";
@@ -11,6 +14,8 @@ class LoadScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    print(userProvider.userP.userName);
     return Scaffold(
         backgroundColor: AppColors.primaryColor,
         body: Padding(
@@ -41,32 +46,13 @@ class LoadScreen extends StatelessWidget {
                       shape: CircleBorder(),
                       fillColor: Colors.green,
                       onPressed: () {
-                        print("oki");
                         Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => StreamBuilder(
-                                    stream: FirebaseAuth.instance
-                                        .authStateChanges(),
-                                    builder: (context, snapshot) {
-                                      if (snapshot.connectionState ==
-                                          ConnectionState.waiting) {
-                                        return Center(
-                                          child: CircularProgressIndicator(),
-                                        );
-                                      }
-                                      if (snapshot.hasError) {
-                                        return Center(
-                                          child:
-                                              Text("đang nhập google có lỗi"),
-                                        );
-                                      }
-                                      if (snapshot.hasData) {
-                                        // print(snapshot.data);
-                                        // return MainScreen();
-                                      }
-                                      return LoginScreen();
-                                    })));
+                                builder: (builder) =>
+                                    userProvider.userP.userName == ""
+                                        ? LoginScreen()
+                                        : MainScreen()));
                       },
                       child: Image.asset(AppImages.nature)))
             ])));

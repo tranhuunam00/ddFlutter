@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:app1/Screen/Profile.dart';
+import 'package:app1/Stream/user_stream.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import '../widgets/text_input_style.dart';
@@ -27,12 +29,14 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  MyStream myStream = new MyStream();
   late FocusNode? myFocusNode;
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   var urlGetUserJwt = Uri.parse(SERVER_IP + '/user/userJwt');
   var urlLogin = Uri.parse(SERVER_IP + '/user/login');
+  bool isValidInput = false;
   Future<String> attemptLogIn(String userName, String password) async {
     var res = await http.post(urlLogin,
         headers: {
@@ -71,6 +75,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    print(userMain.userName);
     Size size = MediaQuery.of(context).size;
 
     String initText = "";
@@ -117,38 +123,48 @@ class _LoginScreenState extends State<LoginScreen> {
                 textColor: Colors.black,
                 textInit: initText,
               ),
-              AppBTnStyle(
-                  label: "Đăng nhập",
-                  onTap: () async {
-                    var userName = _userNameController.text;
-                    var password = _passwordController.text;
-                    print("userName: " + userName + " password: " + password);
-                    var jwt = await attemptLogIn(userName, password);
-                    if (jwt != "") {
-                      print("jwt: " + jwt);
-                      await storage.write(key: "jwt", value: jwt);
-                      UserModel user = await getUserJwt(jwt);
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => MainScreen(user: user)));
-                    } else {
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => LoginScreen()));
-                    }
-                  }),
+              (_userNameController.text.length >= 6 == true &&
+                      _passwordController.text.length >= 6 == true)
+                  ? AppBTnStyle(
+                      label: "Đăng nhập",
+                      onTap: () async {
+                        print(isValidInput);
+                        var userName = _userNameController.text;
+                        var password = _passwordController.text;
+                        print(
+                            "userName: " + userName + " password: " + password);
+                        var jwt = await attemptLogIn(userName, password);
+                        if (jwt != "") {
+                          print("jwt: " + jwt);
+                          await storage.write(key: "jwt", value: jwt);
+                          UserModel user = await getUserJwt(jwt);
+                          userProvider.userLogin(user);
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MainScreen()));
+                        } else {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginScreen()));
+                        }
+                      })
+                  : AppBTnStyle(
+                      onTap: null,
+                      color: Color.fromRGBO(255, 255, 255, 0.4),
+                      label: "Đăng nhập",
+                    ),
               Padding(
                 padding: const EdgeInsets.only(top: 100.0),
                 child: AppBTnStyle(
                     label: "Đăng nhập bằng facebook",
                     icon: Icons.facebook,
                     onTap: () {
-                      final provider = Provider.of<GoogleSingInProvider>(
-                          context,
-                          listen: false);
-                      provider.FacebookLogin();
+                      // final provider = Provider.of<GoogleSingInProvider>(
+                      //     context,
+                      //     listen: false);
+                      // provider.FacebookLogin();
                     }),
               ),
               AppBTnStyle(

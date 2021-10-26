@@ -1,6 +1,8 @@
 import 'package:app1/chat-app/screens_chat/CameraScreen.dart';
 import 'package:app1/chat-app/screens_chat/LoginScreen.dart';
 import 'package:app1/chat-app/screens_chat/home.dart';
+import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/user_provider.dart';
 import 'package:app1/test_emoji.dart';
 
 import 'package:camera/camera.dart';
@@ -16,7 +18,9 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:provider/provider.dart';
 
 final storage = FlutterSecureStorage();
-const SERVER_IP = 'http://01d2-2402-800-f01c-d27a-d854-8403-baf9-c817.ngrok.io';
+final UserModel userMain = UserModel();
+const SERVER_IP = 'http://dc8e-123-18-252-217.ngrok.io';
+
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -28,23 +32,18 @@ Future main() async {
 class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
-  void initState() {
-    IO.Socket socket = IO.io('http://localhost:3000');
-    socket.onConnect((_) {
-      print('connect');
-      socket.emit('msg', 'test');
-    });
-    socket.on('msg', (data) => print(data));
-  }
+  void initState() {}
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
         create: (context) {
-          return GoogleSingInProvider();
+          // return GoogleSingInProvider();
+          return UserProvider();
         },
         child: MaterialApp(title: "app1", home: LoadScreen()
             // home: ChatLoginScreen()
+            // home: MyHomePage()
             // home: Test()
             ));
   }

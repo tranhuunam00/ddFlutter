@@ -5,8 +5,7 @@ class AppBTnStyle extends StatelessWidget {
   final Color? color;
   final IconData? icon;
   final bool? isIcon;
-
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
   const AppBTnStyle(
       {Key? key,
       required this.label,

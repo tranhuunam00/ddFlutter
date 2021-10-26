@@ -1,5 +1,8 @@
+import 'package:app1/Screen/LoadScreen.dart';
 import 'package:app1/Screen/MainScreen.dart';
 import 'package:app1/auth_social/google_sign_in.dart';
+import 'package:app1/main.dart';
+import 'package:app1/provider/user_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:app1/ui.dart';
@@ -19,7 +22,7 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     // final user = FirebaseAuth.instance.currentUser!;
-
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     int numLine = 5;
     Size size = MediaQuery.of(context).size;
     List<Widget> a = [
@@ -79,7 +82,7 @@ class _ProfileState extends State<Profile> {
           Padding(
             padding: const EdgeInsets.only(top: 32.0),
             child: Center(
-              child: Text("userApp.userName", style: AppStyles.h2),
+              child: Text(userProvider.userP.userName, style: AppStyles.h2),
             ),
           ),
           Row(
@@ -88,10 +91,11 @@ class _ProfileState extends State<Profile> {
               Container(child: AppBTnStyle(label: "Thay đổi 1", onTap: () {})),
               AppBTnStyle(
                   label: "Đăng xuất",
-                  onTap: () {
-                    final provider = Provider.of<GoogleSingInProvider>(context,
-                        listen: false);
-                    provider.GoogleLogout();
+                  onTap: () async {
+                    userProvider.UserLogOut();
+                    await storage.delete(key: "jwt");
+                    Navigator.pushReplacement(context,
+                        MaterialPageRoute(builder: (builder) => LoadScreen()));
                   }),
             ],
           ),
