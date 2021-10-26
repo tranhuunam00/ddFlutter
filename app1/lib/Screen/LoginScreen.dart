@@ -128,27 +128,33 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? AppBTnStyle(
                       label: "Đăng nhập",
                       onTap: () async {
-                        print(isValidInput);
-                        var userName = _userNameController.text;
-                        var password = _passwordController.text;
-                        print(
-                            "userName: " + userName + " password: " + password);
-                        var jwt = await attemptLogIn(userName, password);
-                        if (jwt != "") {
-                          print("jwt: " + jwt);
-                          await storage.write(key: "jwt", value: jwt);
-                          UserModel user = await getUserJwt(jwt);
-                          userProvider.userLogin(user);
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MainScreen()));
-                        } else {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginScreen()));
-                        }
+                        // print(isValidInput);
+                        // var userName = _userNameController.text;
+                        // var password = _passwordController.text;
+                        // print(
+                        //     "userName: " + userName + " password: " + password);
+                        // var jwt = await attemptLogIn(userName, password);
+                        // if (jwt != "") {
+                        //   print("jwt: " + jwt);
+                        //   await storage.write(key: "jwt", value: jwt);
+                        //   UserModel user = await getUserJwt(jwt);
+                        //   userProvider.userLogin(user);
+                        //   Navigator.pushReplacement(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //           builder: (context) => MainScreen()));
+                        // } else {
+                        //   Navigator.push(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //           builder: (context) => LoginScreen()));
+                        // }
+                        UserModel userTest = UserModel(userName: "linh tinh ");
+                        userProvider.userLogin(userTest);
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => MainScreen()));
                       })
                   : AppBTnStyle(
                       onTap: null,
