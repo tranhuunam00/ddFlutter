@@ -35,7 +35,7 @@ class ReplyMessageCard extends StatelessWidget {
                   right: 10,
                   child: Row(
                     children: [
-                      Text(time,
+                      Text(time.substring(11, 17),
                           style: TextStyle(
                             color: Colors.grey[600],
                             fontSize: 12,

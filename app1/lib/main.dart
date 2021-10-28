@@ -19,7 +19,7 @@ import 'package:provider/provider.dart';
 
 final storage = FlutterSecureStorage();
 final UserModel userMain = UserModel();
-const SERVER_IP = 'http://dc8e-123-18-252-217.ngrok.io';
+const SERVER_IP = 'http://097d-123-18-252-217.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,8 +41,10 @@ class MyApp extends StatelessWidget {
           // return GoogleSingInProvider();
           return UserProvider();
         },
-        child: MaterialApp(title: "app1", home: LoadScreen()
-            // home: ChatLoginScreen()
+        child: MaterialApp(
+            title: "app1",
+            //  home: LoadScreen()
+            home: ChatLoginScreen()
             // home: MyHomePage()
             // home: Test()
 
