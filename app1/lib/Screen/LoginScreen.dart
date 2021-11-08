@@ -35,7 +35,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   var urlGetUserJwt = Uri.parse(SERVER_IP + '/user/userJwt');
-  var urlLogin = Uri.parse(SERVER_IP + '/user/login');
+  var urlLogin = Uri.parse(SERVER_IP + '/auth/login');
   bool isValidInput = false;
   Future<String> attemptLogIn(String userName, String password) async {
     var res = await http.post(urlLogin,
@@ -128,33 +128,34 @@ class _LoginScreenState extends State<LoginScreen> {
                   ? AppBTnStyle(
                       label: "Đăng nhập",
                       onTap: () async {
-                        // print(isValidInput);
-                        // var userName = _userNameController.text;
-                        // var password = _passwordController.text;
-                        // print(
-                        //     "userName: " + userName + " password: " + password);
-                        // var jwt = await attemptLogIn(userName, password);
-                        // if (jwt != "") {
-                        //   print("jwt: " + jwt);
-                        //   await storage.write(key: "jwt", value: jwt);
-                        //   UserModel user = await getUserJwt(jwt);
-                        //   userProvider.userLogin(user);
-                        //   Navigator.pushReplacement(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //           builder: (context) => MainScreen()));
-                        // } else {
-                        //   Navigator.push(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //           builder: (context) => LoginScreen()));
-                        // }
-                        UserModel userTest = UserModel(userName: "linh tinh ");
-                        userProvider.userLogin(userTest);
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => MainScreen()));
+                        print(isValidInput);
+                        var userName = _userNameController.text;
+                        var password = _passwordController.text;
+                        print(
+                            "userName: " + userName + " password: " + password);
+                        var jwt = await attemptLogIn(userName, password);
+
+                        if (jwt != "") {
+                          print("jwt: " + jwt);
+                          await storage.write(key: "jwt", value: jwt);
+                          UserModel user = await getUserJwt(jwt);
+                          userProvider.userLogin(user);
+                          Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => MainScreen()));
+                        } else {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginScreen()));
+                        }
+                        // UserModel userTest = UserModel(userName: "linh tinh ");
+                        // userProvider.userLogin(userTest);
+                        // Navigator.pushReplacement(
+                        //     context,
+                        //     MaterialPageRoute(
+                        //         builder: (context) => MainScreen()));
                       })
                   : AppBTnStyle(
                       onTap: null,

@@ -22,7 +22,7 @@ class CustomTextInput extends StatefulWidget {
       required this.hintTextString,
       required this.textEditController,
       required this.inputType,
-      this.enableBorder = true,
+      this.enableBorder = false,
       this.themeColor,
       this.cornerRadius,
       this.maxLength,
@@ -44,7 +44,7 @@ class CustomTextInput extends StatefulWidget {
 class _CustomTextInputState extends State<CustomTextInput> {
   bool _isValidate = true;
   String validationMessage = '';
-  bool visibility = false;
+  bool visibility = true;
   int oldTextSize = 0;
   String textInput = "";
   @override
@@ -77,7 +77,7 @@ class _CustomTextInputState extends State<CustomTextInput> {
         onChanged: checkValidation,
         keyboardType: getInputType(),
         obscureText:
-            widget.inputType == InputType.Password ? !visibility : false,
+            widget.inputType != InputType.Password ? false : !visibility,
         maxLength: widget.inputType == InputType.PaymentCard
             ? 19
             : widget.maxLength ?? getMaxLength(),
@@ -195,7 +195,7 @@ class _CustomTextInputState extends State<CustomTextInput> {
         break;
 
       case InputType.Email:
-        return 36;
+        return 50;
         break;
 
       case InputType.Number:

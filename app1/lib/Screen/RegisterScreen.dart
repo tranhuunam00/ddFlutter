@@ -1,6 +1,11 @@
+import 'dart:convert';
+
+import 'package:app1/Screen/VerifyCodeScreen.dart';
+import 'package:app1/main.dart';
+import 'package:app1/model/create_user.dart';
 import 'package:flutter/material.dart';
 import '../widgets/text_input_style.dart';
-
+import 'package:http/http.dart' as http;
 import "../widgets/dismit_keybord.dart";
 import '../widgets/app_button.dart';
 import "../widgets/background.dart";
@@ -20,6 +25,31 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _rePasswordController = TextEditingController();
+  var urlRegister = Uri.parse(SERVER_IP + '/auth/register');
+  Future<UserCreateModel> registerFunction(
+      String userName, String password, String email) async {
+    http.Response response;
+    response = await http.post(urlRegister,
+        headers: {
+          'Content-type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(
+            {"userName": userName, "password": password, "email": email}));
+
+    print("da lay thanh cong");
+    var a = json.decode(response.body);
+    print(json.decode(response.body)["token"]);
+
+    UserCreateModel b = new UserCreateModel(
+      userName: a["userName"],
+      password: a["password"],
+      email: a["email"],
+      token: a["token"].toString(),
+    );
+
+    return b;
+  }
 
   @override
   void initState() {
@@ -49,7 +79,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: DismissKeyboard(
         child: Background(
             Column: Padding(
-          padding: const EdgeInsets.only(top: 100),
+          padding: const EdgeInsets.only(top: 40),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -64,6 +94,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 textEditController: _userNameController,
                 hintTextString: 'Tên người dùng',
                 inputType: InputType.Default,
+                enableBorder: true,
+                themeColor: Theme.of(context).primaryColor,
+                cornerRadius: 48.0,
+                maxLength: 24,
+                prefixIcon:
+                    Icon(Icons.person, color: Theme.of(context).primaryColor),
+                textColor: Colors.black,
+                textInit: initText,
+              ),
+              CustomTextInput(
+                textEditController: _emailController,
+                hintTextString: 'Email',
+                inputType: InputType.Email,
                 enableBorder: true,
                 themeColor: Theme.of(context).primaryColor,
                 cornerRadius: 48.0,
@@ -122,11 +165,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       });
                     }),
               ),
-              AppBTnStyle(
-                  label: "Đăng ký",
-                  onTap: () {
-                    print(_passwordController.text);
-                  }),
+              //...............Button ..gửi đăng kí.............................
+              (_userNameController.text.length >= 6 == true &&
+                      _passwordController.text.length >= 6 == true &&
+                      _passwordController.text == _rePasswordController.text &&
+                      RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
+                          .hasMatch(_emailController.text))
+                  ? AppBTnStyle(
+                      label: "Đăng Ký",
+                      onTap: () async {
+                        String userName = _userNameController.text;
+                        String password = _passwordController.text;
+                        String email = _emailController.text;
+
+                        UserCreateModel result =
+                            await registerFunction(userName, password, email);
+                        print("name" + result.token);
+                        UserCreateModel user = new UserCreateModel(
+                            userName: result.userName,
+                            token: result.token,
+                            password: result.password,
+                            email: result.email);
+                        print("name 2 " + user.token);
+
+                        if (user.userName == "") {
+                          print("sai roi");
+                          //bắn ra 1 cái thông báo là người dùng hoặc email đã tồn tại
+                        } else {
+                          print("ok");
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (builder) => VerifyCode(
+                                        user: user,
+                                      )));
+                        }
+                      })
+                  : AppBTnStyle(
+                      onTap: null,
+                      color: Color.fromRGBO(255, 255, 255, 0.4),
+                      label: "Đăng ký",
+                    ),
+              //.......................button đã có tài khoản.......................
               TextButton(
                   onPressed: () {
                     Navigator.push(context,

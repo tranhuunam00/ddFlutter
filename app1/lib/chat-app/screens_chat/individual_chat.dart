@@ -145,12 +145,7 @@ class _IndividualChatState extends State<IndividualChat> {
       socket.on("message", (msg) {
         print(msg["message"].toString());
         print(mounted == true);
-        WidgetsBinding.instance!.addPostFrameCallback((_) {
-          _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              duration: Duration(milliseconds: 300),
-              curve: Curves.easeOut);
-        });
+        ;
         setMessage(
           "destion",
           msg["message"].toString(),
@@ -158,6 +153,11 @@ class _IndividualChatState extends State<IndividualChat> {
           msg["targetId"].toString(),
           msg["sourceId"].toString(),
         );
+        WidgetsBinding.instance!.addPostFrameCallback((_) {
+          if (_scrollController.offset > 0)
+            _scrollController
+                .jumpTo(_scrollController.position.maxScrollExtent);
+        });
       });
       // socket.on("test", (msg) {
       //   setMessage("destion", "nam");
@@ -177,6 +177,7 @@ class _IndividualChatState extends State<IndividualChat> {
       "time": DateTime.now().toString(),
       "path": path,
     });
+    // if (mounted) setState(() {});
   }
 
   //
@@ -186,9 +187,9 @@ class _IndividualChatState extends State<IndividualChat> {
         type: type,
         message: message,
         path: path,
-        targetId: widget.chatModel!.id.toString(),
-        sourceId: widget.sourceChat!.id.toString(),
-        time: DateTime.now().toString().substring(10, 16));
+        targetId: targetId,
+        sourceId: sourceId,
+        time: DateTime.now().toString());
 
     if (mounted)
       setState(() {
@@ -277,12 +278,11 @@ class _IndividualChatState extends State<IndividualChat> {
                   padding: const EdgeInsets.only(left: 22, right: 12),
                   child: InkWell(
                       onTap: () async {
-                        // focusNode.unfocus();
-                        // _controller.clear();
-                        // await SystemChannels.textInput
-                        //     .invokeMethod('TextInput.hide')
-                        //     .then((value) => print("quay lại"));
-                        Navigator.pop(context);
+                        focusNode.unfocus();
+                        if (!focusNode.hasFocus) {
+                          Navigator.of(context).pop(true);
+                        }
+
                         //
                       },
                       child: Icon(Icons.arrow_back, size: 24)),
