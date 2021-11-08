@@ -40,7 +40,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     print("da lay thanh cong");
     var a = json.decode(response.body);
     print(json.decode(response.body)["token"]);
-
+    if (a["userName"] == null) {
+      return new UserCreateModel();
+    }
     UserCreateModel b = new UserCreateModel(
       userName: a["userName"],
       password: a["password"],
