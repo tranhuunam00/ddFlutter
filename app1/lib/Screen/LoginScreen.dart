@@ -168,10 +168,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: "Đăng nhập bằng facebook",
                     icon: Icons.facebook,
                     onTap: () {
-                      // final provider = Provider.of<GoogleSingInProvider>(
-                      //     context,
-                      //     listen: false);
-                      // provider.FacebookLogin();
+                      final provider = Provider.of<GoogleSingInProvider>(
+                          context,
+                          listen: false);
+                      provider.FacebookLogin();
                     }),
               ),
               AppBTnStyle(

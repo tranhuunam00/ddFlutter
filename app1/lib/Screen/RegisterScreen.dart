@@ -199,7 +199,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (builder) => VerifyCode(
-                                        user: user,
+                                        userCreate: user,
                                       )));
                         }
                       })

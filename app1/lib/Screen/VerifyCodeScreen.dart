@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:app1/Screen/AgainPassword.dart';
 import 'package:app1/Screen/LoginScreen.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/create_user.dart';
+import 'package:app1/model/forgot_user.dart';
 import 'package:app1/widgets/app_button.dart';
 import 'package:app1/widgets/dismit_keybord.dart';
 import 'package:flutter/foundation.dart';
@@ -10,8 +12,11 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class VerifyCode extends StatefulWidget {
-  const VerifyCode({Key? key, required this.user}) : super(key: key);
-  final UserCreateModel user;
+  const VerifyCode({Key? key, this.userCreate, this.userForgot})
+      : super(key: key);
+  final UserCreateModel? userCreate;
+  final UserForgotModel? userForgot;
+
   @override
   _VerifyCode createState() => _VerifyCode();
 }
@@ -24,6 +29,7 @@ class _VerifyCode extends State<VerifyCode> {
 
   final TextEditingController _4Controller = TextEditingController();
   var urlRegisterConfirm = Uri.parse(SERVER_IP + '/auth/registerConfirm');
+  var urlForgotConfirm = Uri.parse(SERVER_IP + '/auth/forgotPasswordConfirm');
 
   Future<String> registerConfirmFunction(
       UserCreateModel user, String token) async {
@@ -43,9 +49,22 @@ class _VerifyCode extends State<VerifyCode> {
     return json.decode(response.body).toString();
   }
 
+  Future<String> forgotConfirmFunction(
+      UserForgotModel user, String token) async {
+    http.Response response;
+    response = await http.post(urlForgotConfirm,
+        headers: {
+          'Content-type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(
+            {"userName": user.userName, "email": user.email, "token": token}));
+
+    return json.decode(response.body).toString();
+  }
+
   @override
   Widget build(BuildContext context) {
-    print(widget.user.token);
     return DismissKeyboard(
       child: Scaffold(
           resizeToAvoidBottomInset: false,
@@ -126,17 +145,37 @@ class _VerifyCode extends State<VerifyCode> {
                                 _3Controller.text +
                                 _4Controller.text;
                             print("token đã nhâp---  " + token);
-                            String a = await registerConfirmFunction(
-                                widget.user, token);
-                            if (a == "done") {
-                              //dang kis thanh cong
-                              print("dangki thanh cong");
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (builder) => LoginScreen()));
-                            } else {
-                              print("Dang ki that bai");
+                            if (widget.userCreate != null) {
+                              print("----register chạy-------------");
+                              String a = await registerConfirmFunction(
+                                  widget.userCreate!, token);
+                              if (a == "done") {
+                                //dang kis thanh cong
+                                print("dangki thanh cong");
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) => LoginScreen()));
+                              } else {
+                                print("Dang ki that bai");
+                              }
+                            }
+                            if (widget.userForgot != null) {
+                              print("----forgotchạy-------------");
+
+                              String a = await forgotConfirmFunction(
+                                  widget.userForgot!, token);
+                              if (a == "done") {
+                                Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) => AgainForgotScreen(
+                                              userName:
+                                                  widget.userForgot!.userName,
+                                              email: widget.userForgot!.email,
+                                              token: token,
+                                            )));
+                              }
                             }
                           })
                       : AppBTnStyle(

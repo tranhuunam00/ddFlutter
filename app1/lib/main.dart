@@ -19,7 +19,7 @@ import 'package:provider/provider.dart';
 
 final storage = FlutterSecureStorage();
 final UserModel userMain = UserModel();
-const SERVER_IP = 'http://9dcd-2402-800-f078-d594-1889-33c5-8998-723.ngrok.io';
+const SERVER_IP = 'http://1087-14-189-107-126.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
