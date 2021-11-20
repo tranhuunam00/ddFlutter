@@ -131,13 +131,12 @@ class _IndividualChatState extends State<IndividualChat> {
   //connect socket_io_client
   void connect() {
     print("begin connect....................");
-
     socket = io(SERVER_IP, <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
     socket.connect();
-    print(socket.connected);
+
     socket.emit("signin", widget.sourceChat!.id);
     socket.onConnect((data) {
       print("connected");
@@ -166,7 +165,8 @@ class _IndividualChatState extends State<IndividualChat> {
   }
 
   //gui tin nhan......................................
-  void sendMessage(String message, int sourceId, int targetId, String path) {
+  void sendMessage(
+      String message, String sourceId, String targetId, String path) {
     setMessage("source", message, path, widget.chatModel!.id.toString(),
         widget.sourceChat!.id.toString());
 
@@ -305,7 +305,7 @@ class _IndividualChatState extends State<IndividualChat> {
                         mainAxisAlignment: MainAxisAlignment.start,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(widget.chatModel!.name,
+                          Text(widget.chatModel!.userName,
                               style: TextStyle(
                                   fontSize: 18.5, fontWeight: FontWeight.bold)),
                           Text("last seen today 18:05",

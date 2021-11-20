@@ -1,8 +1,18 @@
+import 'dart:convert';
+
+import 'package:app1/chat-app/customs/avatar_card.dart';
+import 'package:app1/feed/model/feed_model.dart';
+import 'package:app1/main.dart';
+import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import "../ui.dart";
+import 'package:http/http.dart' as http;
 
 class CardFeedStyle extends StatefulWidget {
   final int? numLine;
+
   final List<String> imagesList = [
     "assets/images/nature1.jpg",
     "assets/images/nature2.jpg",
@@ -11,16 +21,40 @@ class CardFeedStyle extends StatefulWidget {
     "assets/images/nature2.jpg",
     "assets/images/nature2.jpg",
   ];
-  CardFeedStyle({Key? key, this.numLine = 5}) : super(key: key);
-
+  final FeedBaseModel feed;
+  CardFeedStyle(
+      {Key? key,
+      this.numLine = 5,
+      required this.feed,
+      required this.userOwnUse})
+      : super(key: key);
+  final UserModel userOwnUse;
   @override
   _CardFeedStyleState createState() => _CardFeedStyleState();
 }
 
 class _CardFeedStyleState extends State<CardFeedStyle> {
+  final int totalLike = 0;
+  final int totalComment = 0;
+  FeedBaseModel feedApi = new FeedBaseModel(like: []);
+  late bool isLike = false;
+  @override
+  void initState() {
+    super.initState();
+    feedApi = widget.feed;
+    for (int i = 0; i < feedApi.like!.length; i++) {
+      if (feedApi.like![i] == widget.userOwnUse.id) {
+        print("------đã like-------");
+        isLike = true;
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
     Size size = MediaQuery.of(context).size;
+
     Widget FeedImagesContainer(imagesList) {
       switch (imagesList.length) {
         case 1:
@@ -238,7 +272,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
     }
 
     return Container(
-        margin: const EdgeInsets.only(bottom: 16),
+        margin: const EdgeInsets.only(bottom: 40),
         decoration: BoxDecoration(
           color: Colors.orange[50],
           // border: Border.all(
@@ -248,86 +282,244 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
           boxShadow: [
             BoxShadow(
               color: Colors.black26.withOpacity(0.5),
-
               blurRadius: 4,
               offset: Offset(3, 6), // changes position of shadow
             )
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(mainAxisSize: MainAxisSize.max, children: [
-                CircleAvatar(
-                  radius: 24,
-                ),
-                Container(
-                    width: size.width - 180,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        new Text(" Trà My",
-                            style: AppStyles.h3
-                                .copyWith(fontWeight: FontWeight.bold)),
-                        new Text("    23/09"),
-                      ],
-                    )),
-                TextButton(
-                    style: ButtonStyle(
-                      alignment: Alignment.topRight,
-                    ),
-                    onPressed: () {},
-                    child: Text("...", style: AppStyles.h2.copyWith())),
-              ]),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(left: 30, bottom: 8),
-              child: SizedBox(
-                width: size.width - 150,
-                child: Text(
-                  "Rất tuyệt vời !",
-                  maxLines: 4,
-                  overflow: TextOverflow.fade,
-                  softWrap: false,
-                  style: TextStyle(
-                      color: Colors.black,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0),
+        child: Stack(children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(mainAxisSize: MainAxisSize.max, children: [
+                  CircleAvatar(
+                    radius: 24,
+                  ),
+                  Container(
+                      width: size.width - 180,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          new Text(widget.feed.sourceUserName,
+                              style: AppStyles.h3
+                                  .copyWith(fontWeight: FontWeight.bold)),
+                          new Text("    23/09"),
+                        ],
+                      )),
+                ]),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 30, bottom: 8),
+                child: SizedBox(
+                  width: size.width - 150,
+                  child: Text(
+                    widget.feed.message,
+                    maxLines: 4,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
+                    style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0),
+                  ),
                 ),
               ),
+              widget.imagesList.length == 0
+                  ? Center(
+                      child: FeedImagesContainer(widget.imagesList),
+                    )
+                  : Container(),
+              widget.numLine! > 4
+                  ? Center(
+                      heightFactor: 0.5,
+                      child: TextButton(
+                          onPressed: () {},
+                          child: Icon(Icons.arrow_downward_outlined)),
+                    )
+                  : Container(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  feedApi.like!.length > 0
+                      ? Row(
+                          children: [
+                            CircleAvatar(
+                              radius: 12,
+                            ),
+                            Text(feedApi.like!.length.toString() + " like")
+                          ],
+                        )
+                      : Container(),
+                  totalComment != 0
+                      ? Text(totalComment.toString() + " comment")
+                      : Container()
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  TextButton.icon(
+                      onPressed: () async {
+                        print(feedApi.like!.length);
+                        print("tên người đang dùng là : " +
+                            widget.userOwnUse.userName);
+                        print(widget.feed.feedId);
+                        if (isLike == false) {
+                          List result = await Future.wait([
+                            //lấy feed mới để hiển thị số like.........
+                            getFeedApi(widget.feed.feedId, userProvider.jwtP),
+                            //like bài viết
+                            postApi(
+                                userProvider.jwtP,
+                                {"feedId": widget.feed.feedId, "event": "like"},
+                                "/feed/likeFeed")
+                          ]);
+                          if (mounted) {
+                            setState(() {
+                              isLike = !isLike;
+                              feedApi.like = result[0].like;
+                              feedApi.like!.add(widget.userOwnUse.id);
+                            });
+                          }
+                        } else {
+                          List result = await Future.wait([
+                            //lấy feed mới để hiển thị số like.........
+                            getFeedApi(widget.feed.feedId, userProvider.jwtP),
+                            //like bài viết
+                            postApi(
+                                userProvider.jwtP,
+                                {
+                                  "feedId": widget.feed.feedId,
+                                  "event": "dislike"
+                                },
+                                "/feed/likeFeed")
+                          ]);
+                          if (mounted) {
+                            setState(() {
+                              isLike = !isLike;
+                              feedApi.like = result[0].like;
+                              feedApi.like!.remove(widget.userOwnUse.id);
+                            });
+                          }
+                        }
+                      },
+                      icon: Icon(Icons.tag,
+                          color: isLike ? Colors.blue : Colors.grey),
+                      label: Text("Yêu thích",
+                          style: TextStyle(
+                              color: isLike ? Colors.blue : Colors.grey))),
+                  TextButton.icon(
+                      onPressed: () async {
+                        var result = await postApi(
+                            userProvider.jwtP,
+                            {"feedId": widget.feed.feedId, "event": "like"},
+                            "/feed/likeFeed");
+                        print(result);
+                      },
+                      icon: Icon(Icons.message_outlined, color: Colors.red),
+                      label: Text("Bình luận"))
+                ],
+              )
+            ],
+          ),
+          Positioned(
+            right: 24,
+            child: Material(
+              color: Colors.orange[50],
+              child: Container(
+                  alignment: Alignment.center,
+                  width: 40,
+                  height: 40,
+                  child: InkWell(
+                    onTap: () {
+                      print("hi");
+                    },
+                    overlayColor: MaterialStateProperty.all(Colors.blue),
+                    child: Container(
+                        width: 40,
+                        child: Text(
+                          "...",
+                          style: TextStyle(
+                            fontSize: 24,
+                          ),
+                          textAlign: TextAlign.center,
+                        )),
+                  )),
             ),
-            widget.imagesList.length != 0
-                ? Center(
-                    child: FeedImagesContainer(widget.imagesList),
-                  )
-                : Container(),
-            widget.numLine! > 4
-                ? Center(
-                    heightFactor: 0.5,
-                    child: TextButton(
-                        onPressed: () {},
-                        child: Icon(Icons.arrow_downward_outlined)),
-                  )
-                : Container(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                TextButton.icon(
-                    onPressed: () {},
-                    icon: Icon(Icons.headset_sharp, color: Colors.red),
-                    label: Text("Yêu thích")),
-                TextButton.icon(
-                    onPressed: () {},
-                    icon: Icon(Icons.message_outlined, color: Colors.red),
-                    label: Text("Bình luận"))
-              ],
-            )
-          ],
-        ));
+          ),
+        ]));
+  }
 
-    ;
+  //-------------------GetApi init----------------------------------------
+  Future fetchApiFindFeed(String sourceFeedId, String jwt) async {
+    print("----chạy hàm get api feed---------------");
+    try {
+      http.Response response;
+      String path = SERVER_IP + '/feed/' + sourceFeedId;
+      print(path);
+      response = await http.get(
+        Uri.parse(path),
+        headers: {
+          'Content-type': 'application/json',
+          'Accept': 'application/json',
+          'cookie': "jwt=" + jwt,
+        },
+      );
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return FeedBaseModel();
+      }
+    } catch (e) {
+      return FeedBaseModel();
+    }
+  }
+
+  //-----------------------like func------------
+  getFeedApi(sourceId, jwt) async {
+    FeedBaseModel feedApi = FeedBaseModel(like: []);
+    var data = await fetchApiFindFeed(sourceId, jwt);
+    if (data == "not jwt") {
+      return feedApi;
+    } else {
+      if (data != "error") {
+        FeedBaseModel a = FeedBaseModel(
+          like: data["like"],
+          message: data["messages"],
+          createdAt: data["createdAt"],
+        );
+        return a;
+      } else {
+        return feedApi;
+      }
+    }
+    return feedApi;
+  }
+
+  //--------------------------like và dislike-----------------
+  postApi(String jwt, data, String sourcePath) async {
+    print("----chạy hàm get api feed---------------");
+    try {
+      http.Response response;
+      String path = SERVER_IP + sourcePath;
+      print(path);
+      response = await http.post(Uri.parse(path),
+          headers: {
+            'Content-type': 'application/json',
+            'Accept': 'application/json',
+            'cookie': "jwt=" + jwt,
+          },
+          body: jsonEncode(data));
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return "error";
+      }
+    } catch (e) {
+      return "error";
+    }
   }
 }

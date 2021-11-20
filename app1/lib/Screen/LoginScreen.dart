@@ -1,12 +1,13 @@
 import 'dart:convert';
 
 import 'package:app1/Screen/Profile.dart';
-import 'package:app1/Stream/user_stream.dart';
+
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../widgets/text_input_style.dart';
 import 'package:http/http.dart' as http;
 import "../widgets/dismit_keybord.dart";
@@ -29,7 +30,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  MyStream myStream = new MyStream();
   late FocusNode? myFocusNode;
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -62,9 +62,21 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     var data = json.decode(res.body);
-    print(data);
-    UserModel user = UserModel(userName: data["userName"]);
-    return user;
+    if (data != "not jwt") {
+      if (data["userName"] != null) {
+        print(data);
+        UserModel user = UserModel(
+            userName: data["userName"],
+            email: data["email"],
+            id: data["_id"],
+            friend: data["friend"],
+            avatarImg: data["avatarImg"],
+            coverImg: data["coverImg"]);
+        return user;
+      }
+    }
+
+    return UserModel();
   }
 
   @override
@@ -138,12 +150,24 @@ class _LoginScreenState extends State<LoginScreen> {
                         if (jwt != "") {
                           print("jwt: " + jwt);
                           await storage.write(key: "jwt", value: jwt);
+                          final prefs = await SharedPreferences.getInstance();
+                          prefs.setString('jwt', jwt);
                           UserModel user = await getUserJwt(jwt);
-                          userProvider.userLogin(user);
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => MainScreen()));
+                          if (user.userName != "") {
+                            userProvider.userLogin(user, jwt);
+                            print("user lấy đc khi login---------" +
+                                user.userName);
+
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => MainScreen()));
+                          } else {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => LoginScreen()));
+                          }
                         } else {
                           Navigator.push(
                               context,

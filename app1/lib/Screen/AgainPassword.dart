@@ -54,8 +54,7 @@ class _AgainForgotScreenState extends State<AgainForgotScreen> {
       );
     }
 
-    var urlRegisterConfirm =
-        Uri.parse(SERVER_IP + '/auth/forgotPasswordConfirm');
+    var urlRegisterConfirm = Uri.parse(SERVER_IP + '/auth/forgotNewPassword');
 
     Future<String> forgotPwConfirmFunction(
         String userName, String password, String token, String email) async {
@@ -152,10 +151,11 @@ class _AgainForgotScreenState extends State<AgainForgotScreen> {
                       onTap: () async {
                         print(widget.userName);
                         String a = await forgotPwConfirmFunction(
-                            widget.userName,
-                            _passwordController.text,
-                            widget.token,
-                            widget.token);
+                          widget.userName,
+                          _passwordController.text,
+                          widget.token,
+                          widget.email,
+                        );
                         if (a == "done") {
                           Navigator.pushReplacement(
                               context,

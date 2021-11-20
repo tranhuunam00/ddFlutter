@@ -37,7 +37,7 @@ class CustomCard extends StatelessWidget {
                     height: 37),
                 backgroundColor: Colors.amber),
             title: Text(
-              chatModel!.name,
+              chatModel!.userName,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,

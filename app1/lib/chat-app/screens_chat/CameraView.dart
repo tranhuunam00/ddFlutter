@@ -1,16 +1,27 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:app1/main.dart';
+import 'package:app1/provider/user_provider.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 
 class CameraViewPage extends StatelessWidget {
-  const CameraViewPage({Key? key, this.path, this.onImageSend})
+  const CameraViewPage(
+      {Key? key, this.path, this.onImageSend, this.file, this.event})
       : super(key: key);
   final String? path;
+  final XFile? file;
+  final String? event;
   final Function? onImageSend;
   static TextEditingController _controller = TextEditingController();
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     return Scaffold(
         backgroundColor: Colors.black12,
         appBar: AppBar(
@@ -55,9 +66,17 @@ class CameraViewPage extends StatelessWidget {
                           prefixIcon: Icon(Icons.add_photo_alternate,
                               color: Colors.white),
                           suffixIcon: InkWell(
-                            onTap: () => {
-                              onImageSend!(path, _controller.text),
-                              _controller.clear()
+                            onTap: () async {
+                              print("-----ddang an vao ---");
+                              if (onImageSend != null) {
+                                if (event == "avatar" || event == "cover") {
+                                  onImageSend!(path, event, userProvider.jwtP);
+                                } else {
+                                  onImageSend!(path);
+                                }
+                              }
+
+                              _controller.clear();
                             },
                             child: CircleAvatar(
                                 radius: 27,
@@ -70,5 +89,39 @@ class CameraViewPage extends StatelessWidget {
                 ),
               )
             ])));
+  }
+
+  //--------------------------------
+  postApi(String jwt, data, String sourcePath) async {
+    print("----chạy hàm post api feed---------------");
+    try {
+      http.Response response;
+      String path = SERVER_IP + sourcePath;
+      print(path);
+      response = await http.post(Uri.parse(path),
+          headers: {
+            'Content-type': 'application/json',
+            'Accept': 'application/json',
+            'cookie': "jwt=" + jwt,
+          },
+          body: jsonEncode(data));
+      if (response.statusCode == 200) {
+        return json.decode(response.body);
+      } else {
+        return "error";
+      }
+    } catch (e) {
+      return "error";
+    }
+  }
+
+  //-------------------------------------------
+  ChangeImgUser(String jwt, data, String sourcePath) async {
+    var result = await postApi(jwt, data, sourcePath);
+    if (result == "done") {
+      print("---da post thanh coong ---------");
+    } else {
+      print("---khoong guwri ddc arnh ");
+    }
   }
 }

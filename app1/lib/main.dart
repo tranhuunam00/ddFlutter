@@ -4,7 +4,6 @@ import 'package:app1/chat-app/screens_chat/home.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/test_emoji.dart';
-
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import "package:app1/ui.dart";
@@ -19,7 +18,7 @@ import 'package:provider/provider.dart';
 
 final storage = FlutterSecureStorage();
 final UserModel userMain = UserModel();
-const SERVER_IP = 'http://1087-14-189-107-126.ngrok.io';
+const SERVER_IP = 'http://3afb-2401-d800-f133-7919-56a-c92b-7c2d-9236.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,9 +40,12 @@ class MyApp extends StatelessWidget {
           // return GoogleSingInProvider();
           return UserProvider();
         },
-        child: MaterialApp(title: "app1", home: LoadScreen()
+        child: MaterialApp(
+            title: "app1",
             // home: ChatLoginScreen()
-            // home: MyHomePage()
+            home: LoadScreen()
+
+            // home: Test()
             // home: Test()
 
             ));

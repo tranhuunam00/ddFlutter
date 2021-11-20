@@ -13,9 +13,9 @@ class SelectContact extends StatefulWidget {
 
 class _SelectContactState extends State<SelectContact> {
   List<ChatModel> contacts = [
-    ChatModel(name: "Dev Stack", status: "A full stack developer"),
-    ChatModel(name: "nam", status: "flutter"),
-    ChatModel(name: "my", status: " developer"),
+    ChatModel(userName: "Dev Stack", status: "A full stack developer"),
+    ChatModel(userName: "nam", status: "flutter"),
+    ChatModel(userName: "my", status: " developer"),
   ];
   @override
   Widget build(BuildContext context) {

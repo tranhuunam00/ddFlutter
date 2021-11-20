@@ -1,16 +1,16 @@
 class ChatModel {
-  late String name;
+  late String userName;
   late String icon;
   late bool isGroup;
   late String time;
   late String currentMessage;
   late String status;
   late bool isSelect;
-  late int id;
+  late String id;
 
   ChatModel({
-    this.id = 1,
-    this.name = "",
+    this.id = "",
+    this.userName = "",
     this.icon = "",
     this.isGroup = false,
     this.time = "",

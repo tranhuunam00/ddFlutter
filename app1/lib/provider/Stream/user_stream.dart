@@ -1,26 +1,26 @@
 import 'dart:async';
 
+import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/model/user_model.dart';
 
 class MyStream {
-  int counter = 0;
   UserModel userS = UserModel();
-  StreamController counterController = new StreamController<int>();
+  List<FeedBaseModel> listFeedsS = [];
   StreamController<UserModel> userController =
       new StreamController<UserModel>.broadcast();
 
-  Stream get counterStream => counterController.stream;
+  StreamController<List<FeedBaseModel>> feedController =
+      new StreamController<List<FeedBaseModel>>.broadcast();
+
   Stream<UserModel> get userStream => userController.stream;
-
-  void increment() {
-    counter += 1;
-    counterController.sink.add(counter);
-  }
-
+  Stream<List<FeedBaseModel>> get feedStream => feedController.stream;
   void setUser(user) {
     print("setUser");
-
     userController.sink.add(user);
+  }
+
+  void setFeed(feed) {
+    feedController.sink.add(feed);
   }
 
   void clearUser() {
@@ -29,7 +29,6 @@ class MyStream {
   }
 
   void dispose() {
-    counterController.close();
     userController.close();
   }
 }

@@ -1,11 +1,16 @@
 import 'dart:convert';
 
+import 'package:app1/Screen/SearchScreen.dart';
+import 'package:app1/chat-app/screens_chat/LoginScreen.dart';
+import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:socket_io_client/socket_io_client.dart';
 import './Profile.dart';
 import './HomeScreen.dart';
 import 'package:http/http.dart' as http;
@@ -21,9 +26,39 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
+  int _numberNotifications = 0;
+  late Socket socket;
+  //----------connetc socket--------------------------------------------
+  void connect(String jwt, String id) {
+    print("begin connect....................");
+    socket = io(SERVER_IP, <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": false,
+      'cookie': "jwt=" + jwt,
+    });
+    socket.connect();
+    print(socket.connected);
+    socket.emit("signin", id);
+    socket.onConnect((data) {
+      socket.on("test", (msg) {
+        if (mounted) {
+          setState(() {
+            print("---chạy setstate- số thông báo--");
+            _numberNotifications = _numberNotifications + 1;
+          });
+          print(msg);
+        }
+      });
+      socket.on("likeFeed", (msg) {});
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
+      if (index == 4) {
+        _numberNotifications = 0;
+      }
+      ;
       _selectedIndex = index;
     });
   }
@@ -31,14 +66,25 @@ class _MainScreenState extends State<MainScreen> {
   static List<Widget> _widgetOptions = [
     HomeScreen(),
     Profile(),
+    SearchScreen(),
+    ChatLoginScreen(),
+    Container()
   ];
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final prefs = await SharedPreferences.getInstance();
+      String jwt = await (prefs.getString('jwt') ?? "");
+      connect(jwt, userProvider.userP.id);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    print(_numberNotifications.toString());
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     // final user = FirebaseAuth.instance.currentUser!;
     return Scaffold(
@@ -81,7 +127,13 @@ class _MainScreenState extends State<MainScreen> {
               icon: Icon(
                 Icons.notification_important_outlined,
               ),
-              title: SizedBox(),
+              title: _numberNotifications != 0
+                  ? CircleAvatar(
+                      backgroundColor: Colors.blue,
+                      radius: 9,
+                      child: Text(_numberNotifications.toString()),
+                    )
+                  : SizedBox(),
               backgroundColor: Colors.blue,
             ),
           ],

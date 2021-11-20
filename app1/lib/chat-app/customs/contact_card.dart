@@ -10,7 +10,7 @@ class ContactCard extends StatelessWidget {
   Widget build(BuildContext context) {
     print("render...1.");
     print(contact!.isSelect);
-    print(contact!.name);
+    print(contact!.userName);
 
     return ListTile(
         leading: Container(
@@ -36,7 +36,7 @@ class ContactCard extends StatelessWidget {
           ]),
         ),
         title: Text(
-          contact!.name,
+          contact!.userName,
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
         subtitle: Text(contact!.status, style: TextStyle(fontSize: 13)));
