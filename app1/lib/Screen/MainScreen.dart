@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app1/Screen/Notifications.dart';
 import 'package:app1/Screen/SearchScreen.dart';
 import 'package:app1/chat-app/screens_chat/LoginScreen.dart';
 import 'package:app1/feed/model/feed_model.dart';
@@ -49,6 +50,15 @@ class _MainScreenState extends State<MainScreen> {
           print(msg);
         }
       });
+      socket.on("message", (msg) {
+        if (mounted) {
+          setState(() {
+            print("---chạy setstate- số thông báo--");
+            _numberNotifications = _numberNotifications + 1;
+          });
+          print(msg);
+        }
+      });
       socket.on("likeFeed", (msg) {});
     });
   }
@@ -62,14 +72,6 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
     });
   }
-
-  static List<Widget> _widgetOptions = [
-    HomeScreen(),
-    Profile(),
-    SearchScreen(),
-    ChatLoginScreen(),
-    Container()
-  ];
 
   @override
   void initState() {
@@ -86,6 +88,13 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     print(_numberNotifications.toString());
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    List<Widget> _widgetOptions = [
+      HomeScreen(),
+      Profile(),
+      SearchScreen(),
+      ChatLoginScreen(),
+      NotifiScreen()
+    ];
     // final user = FirebaseAuth.instance.currentUser!;
     return Scaffold(
       body: Center(

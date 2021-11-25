@@ -1,12 +1,19 @@
+import 'dart:convert';
+
 import 'package:app1/chat-app/customs/avatar_card.dart';
 import 'package:app1/chat-app/customs/button_card.dart';
 import 'package:app1/chat-app/customs/contact_card.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
+import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/chat-app/screens_chat/home.dart';
+import 'package:app1/chat-app/screens_chat/individual_chat.dart';
+import 'package:app1/main.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ChatLoginScreen extends StatefulWidget {
   const ChatLoginScreen({Key? key}) : super(key: key);
@@ -16,59 +23,82 @@ class ChatLoginScreen extends StatefulWidget {
 
 class _ChatLoginScreenState extends State<ChatLoginScreen> {
   ChatModel? sourceChat;
-  List<ChatModel> chatFriend = [];
+  Map<String, ChatModel> chatFriend = {};
+  List<ChatModel> hadMessageInit = [];
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-    for (int i = 0; i < userProvider.userP.friend!.length; i++) {
-      chatFriend.add(ChatModel(
+
+    /// chuyen doi listFr thanh chat Model
+    for (var i = 0; i < userProvider.userP.friend!.length; i++) {
+      chatFriend[userProvider.userP.friend![i]] = ChatModel(
           id: userProvider.userP.friend![i],
-          userName: i.toString(),
-          icon: "person",
-          isGroup: false,
-          time: "4.00",
-          currentMessage: "hi 3"));
+          userName: userProvider
+              .listFriendsP[userProvider.userP.friend![i]]!.realName,
+          avatar: userProvider
+              .listFriendsP[userProvider.userP.friend![i]]!.avatarImg![0]);
     }
+    //chuyen doi du lieu hadChatMsg thanh chatmodel
+    Map<String, List<MessageModel>> chatHad = userProvider.listMessageP;
+    for (var i = 0; i < userProvider.userP.hadMessageList!.length; i++) {
+      var a = chatHad[userProvider.userP.id +
+          "/" +
+          userProvider.userP.hadMessageList![i]]![chatHad[
+                  userProvider.userP.id +
+                      "/" +
+                      userProvider.userP.hadMessageList![i]]!
+              .length -
+          1];
+      hadMessageInit.add(ChatModel(
+          id: userProvider.userP.hadMessageList![i],
+          currentMessage: a.message,
+          time: a.time,
+          userName: userProvider
+              .listHadChatP[userProvider.userP.hadMessageList![i]]!.realName));
+    }
+    hadMessageInit.sort((a, b) => b.time.compareTo(a.time));
     return Scaffold(
         appBar: AppBar(),
         body: Stack(children: [
           ListView.builder(
-              itemCount: userProvider.userP.friend!.length + 1,
+              itemCount: hadMessageInit.length + 1,
               itemBuilder: (context, index) {
                 if (index == 0) {
-                  return Container(
-                      height: userProvider.userP.friend!.length > 0 ? 90 : 10);
+                  return Container(height: hadMessageInit.length > 0 ? 90 : 10);
                 }
                 return InkWell(
                     onTap: () {
-                      if (userProvider.userP.friend![index - 1].isSelect ==
-                          false) {
-                        setState(() {
-                          print("--- chon avatar----");
-
-                          // userProvider.userP.friend![index - 1].isSelect = true;
-                          // groups.add(userProvider.userP.friend!.[index - 1]);
-                        });
-                      } else {
-                        setState(() {
-                          print("--- chon avatar----");
-
-                          // userProvider.userP.friend![index - 1].isSelect = false;
-                          // groups.remove(userProvider.userP.friend!.[index - 1]);
-                        });
-                      }
+                      print("--- chon avatar----");
+                      print(hadMessageInit[index - 1].id);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (builder) => IndividualChat(
+                                    chatModel: hadMessageInit[index - 1],
+                                    sourceChat: ChatModel(
+                                        id: userProvider.userP.id,
+                                        avatar: userProvider.userP.avatarImg![
+                                            userProvider
+                                                    .userP.avatarImg!.length -
+                                                1]),
+                                  )));
                     },
                     child: ContactCard(
-                        contact: ChatModel(
-                            userName: userProvider.userP.friend![index - 1])));
+                      contact: hadMessageInit[index - 1],
+                    ));
               }),
-          //head list
+          //----------------------list avatar head -----------------
           userProvider.userP.friend!.length > 0
               ? Column(
                   children: [
                     Container(
-                        height: 75,
+                        height: 80,
                         width: MediaQuery.of(context).size.width,
                         color: Colors.white,
                         child: ListView.builder(
@@ -78,17 +108,12 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
                               if (true)
                                 return InkWell(
                                     onTap: () {
-                                      setState(() {
-                                        print("--- chon avatar----");
-                                        // userProvider.userP.friend![index].isSelect =
-                                        //     false;
-                                        // groups.remove(userProvider.userP.friend!.[index]);
-                                      });
+                                      print("--- chon avatar----");
+                                      print(userProvider.userP.friend![index]);
                                     },
                                     child: AvatarCard(
-                                        contact: ChatModel(
-                                            userName: userProvider
-                                                .userP.friend![index])));
+                                        contact: chatFriend[userProvider
+                                            .userP.friend![index]]));
                               else
                                 return Container();
                             })),
@@ -101,5 +126,30 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
                   height: 0,
                 ),
         ]));
+  }
+}
+
+///////////////////////////////////
+///
+Future getApi(String jwt, String sourcePath) async {
+  print("----chạy hàm get api feed---------------");
+  try {
+    http.Response response;
+    String path = SERVER_IP + sourcePath;
+    print(path);
+    response = await http.get(Uri.parse(path), headers: {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+      'cookie': "jwt=" + jwt,
+    });
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print(json.decode(response.body));
+      return json.decode(response.body);
+    } else {
+      return "error";
+    }
+  } catch (e) {
+    return "error";
   }
 }

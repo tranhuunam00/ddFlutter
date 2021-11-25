@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:app1/main.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -30,9 +31,13 @@ class OwnFileCard extends StatelessWidget {
                       Container(
                         height: MediaQuery.of(context).size.height / 2.5,
                         width: MediaQuery.of(context).size.width / 1.8,
-                        child: Image.network(
-                          SERVER_IP + '/upload/' + path!,
+                        child: CachedNetworkImage(
+                          imageUrl: SERVER_IP + '/upload/' + path!,
                           fit: BoxFit.fitHeight,
+                          placeholder: (context, url) =>
+                              CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
                         ),
                       ),
                       message != ""

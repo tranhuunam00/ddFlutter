@@ -37,54 +37,49 @@ class _HomeScreenState extends State<HomeScreen> {
           'cookie': "jwt=" + jwt,
         },
       );
-
-      return json.decode(response.body);
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return json.decode(response.body);
+      } else {
+        return [];
+      }
     } catch (e) {
       return [];
     }
   }
 
   //lay tin nhan ban dau................
-  getFeedInit(sourceId, jwt) async {
+  getFeedInit(sourceId, jwt, List listFr) async {
     List<FeedBaseModel> listFeedsInit = [];
-
+    List<Future> fetchAllFeedFr = [];
+    for (var i = 0; i < listFr.length; i++) {
+      fetchAllFeedFr.add(
+        fetchApiFeedInit(listFr[i], jwt),
+      );
+    }
     List data = await Future.wait([
       fetchApiFeedInit(sourceId, jwt),
+      ...fetchAllFeedFr
       //  fetchData(targetId, sourceId)
     ]);
     if (data[0] == "not jwt") {
       return listFeedsInit;
     } else {
-      print(data[0]);
-
-      for (int i = 0; i < data[0].length; i++) {
-        FeedBaseModel a = FeedBaseModel(
-          feedId: data[0][i]["_id"].toString(),
-          message: data[0][i]["messages"],
-          like: data[0][i]["like"],
-          sourceUserId: data[0][i]["sourceId"].toString(),
-          createdAt: data[0][i]["createdAt"],
-          sourceUserName: data[0][i]["sourceUserName"].toString(),
-        );
-        listFeedsInit.add(a);
-        // messages.add(a);
-        // }
-        // for (i = 0; i < data[1].length; i++) {
-        //   MessageModel a = MessageModel(
-        //     type: "",
-        //     message: data[1][i]["message"],
-        //     path: data[1][i]["path"],
-        //     sourceId: data[1][i]["sourceId"].toString(),
-        //     targetId: data[1][i]["targetId"].toString(),
-        //     time: data[1][i]["time"],
-        //   );
-
-        //   messages.add(a);
-        // }
-        // messages.sort((a, b) => a.time.compareTo(b.time));
-        // print("get init message done .....................");
-        // if (mounted) setState(() {});
+      for (int k = 0; k <= listFr.length; k++) {
+        for (int i = 0; i < data[k].length; i++) {
+          if (data[k] != []) {
+            FeedBaseModel a = FeedBaseModel(
+              feedId: data[k][i]["_id"].toString(),
+              message: data[k][i]["messages"],
+              like: data[k][i]["like"],
+              sourceUserId: data[k][i]["sourceId"].toString(),
+              createdAt: data[k][i]["createdAt"],
+              sourceUserName: data[k][i]["sourceUserName"].toString(),
+            );
+            listFeedsInit.add(a);
+          }
+        }
       }
+      listFeedsInit.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return listFeedsInit;
     }
   }
@@ -94,8 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
-      List<FeedBaseModel> listFeedsInit =
-          await getFeedInit(userProvider.userP.id, userProvider.jwtP);
+      List<FeedBaseModel> listFeedsInit = await getFeedInit(
+          userProvider.userP.id, userProvider.jwtP, userProvider.userP.friend!);
 
       userProvider.userFeed(listFeedsInit);
       if (mounted) {

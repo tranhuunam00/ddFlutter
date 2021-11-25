@@ -72,7 +72,8 @@ class CameraViewPage extends StatelessWidget {
                                 if (event == "avatar" || event == "cover") {
                                   onImageSend!(path, event, userProvider.jwtP);
                                 } else {
-                                  onImageSend!(path);
+                                  print("chạy hàm gửi");
+                                  onImageSend!(path, "", userProvider.jwtP);
                                 }
                               }
 

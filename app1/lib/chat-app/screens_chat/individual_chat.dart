@@ -10,6 +10,7 @@ import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/chat-app/screens_chat/CameraScreen.dart';
 import 'package:app1/chat-app/screens_chat/CameraView.dart';
 import 'package:app1/main.dart';
+import 'package:app1/provider/user_provider.dart';
 import 'package:app1/widgets/dismit_keybord.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
 class IndividualChat extends StatefulWidget {
@@ -55,9 +57,10 @@ class _IndividualChatState extends State<IndividualChat> {
       }
     });
     connect();
-
-    getMessageInit();
     WidgetsBinding.instance!.addPostFrameCallback((_) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+      getMessageInit(userProvider.jwtP);
       _scrollController.animateTo(_scrollController.position.maxScrollExtent,
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     });
@@ -73,7 +76,7 @@ class _IndividualChatState extends State<IndividualChat> {
   }
 
   //ham get api........................
-  Future fetchData(String id1, String id2) async {
+  Future fetchData(String id1, String id2, String jwt) async {
     http.Response response;
 
     List<MessageModel> data1 = [];
@@ -82,7 +85,14 @@ class _IndividualChatState extends State<IndividualChat> {
     String path = SERVER_IP + '/message/individual' + query;
     print(query);
     print(path);
-    response = await http.get(Uri.parse(path));
+    response = await http.get(
+      Uri.parse(path),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt,
+      },
+    );
     if (response.statusCode == 200) {
       return json.decode(response.body);
     } else
@@ -90,42 +100,51 @@ class _IndividualChatState extends State<IndividualChat> {
   }
 
   //lay tin nhan ban dau................
-  getMessageInit() async {
+  getMessageInit(String jwt) async {
     String sourceId = widget.sourceChat!.id.toString();
     String targetId = widget.chatModel!.id.toString();
     int i;
 
-    List data = await Future.wait(
-        [fetchData(sourceId, targetId), fetchData(targetId, sourceId)]);
+    List data = await Future.wait([
+      fetchData(sourceId, targetId, jwt),
+      fetchData(targetId, sourceId, jwt)
+    ]);
     print("gia tri cua a");
     print(data[0]);
-    for (i = 0; i < data[0].length; i++) {
-      MessageModel a = MessageModel(
-        type: "",
-        message: data[0][i]["message"],
-        path: data[0][i]["path"],
-        sourceId: data[0][i]["sourceId"].toString(),
-        targetId: data[0][i]["targetId"].toString(),
-        time: data[0][i]["time"],
-      );
+    if (data[0] == "not jwt" ||
+        data[1] == "not jwt" ||
+        data[0] == "error" ||
+        data[1] == "error") {
+      print("loi");
+    } else {
+      for (i = 0; i < data[0].length; i++) {
+        MessageModel a = MessageModel(
+          type: "",
+          message: data[0][i]["message"],
+          path: data[0][i]["path"],
+          sourceId: data[0][i]["sourceId"].toString(),
+          targetId: data[0][i]["targetId"].toString(),
+          time: data[0][i]["time"],
+        );
 
-      messages.add(a);
-    }
-    for (i = 0; i < data[1].length; i++) {
-      MessageModel a = MessageModel(
-        type: "",
-        message: data[1][i]["message"],
-        path: data[1][i]["path"],
-        sourceId: data[1][i]["sourceId"].toString(),
-        targetId: data[1][i]["targetId"].toString(),
-        time: data[1][i]["time"],
-      );
+        messages.add(a);
+      }
+      for (i = 0; i < data[1].length; i++) {
+        MessageModel a = MessageModel(
+          type: "",
+          message: data[1][i]["message"],
+          path: data[1][i]["path"],
+          sourceId: data[1][i]["sourceId"].toString(),
+          targetId: data[1][i]["targetId"].toString(),
+          time: data[1][i]["time"],
+        );
 
-      messages.add(a);
+        messages.add(a);
+      }
+      messages.sort((a, b) => a.time.compareTo(b.time));
+      print("get init message done .....................");
+      if (mounted) setState(() {});
     }
-    messages.sort((a, b) => a.time.compareTo(b.time));
-    print("get init message done .....................");
-    if (mounted) setState(() {});
   }
 
   //connect socket_io_client
@@ -167,9 +186,6 @@ class _IndividualChatState extends State<IndividualChat> {
   //gui tin nhan......................................
   void sendMessage(
       String message, String sourceId, String targetId, String path) {
-    setMessage("source", message, path, widget.chatModel!.id.toString(),
-        widget.sourceChat!.id.toString());
-
     socket.emit("message", {
       "message": message,
       "sourceId": sourceId,
@@ -177,6 +193,10 @@ class _IndividualChatState extends State<IndividualChat> {
       "time": DateTime.now().toString(),
       "path": path,
     });
+
+    setMessage("source", message, path, widget.chatModel!.id.toString(),
+        widget.sourceChat!.id.toString());
+
     // if (mounted) setState(() {});
   }
 
@@ -198,39 +218,43 @@ class _IndividualChatState extends State<IndividualChat> {
   }
 
   //gửi hình ảnh................................
-  void onImageSend(String path, String message) async {
+  void onImageSend(String path, String message, String jwt) async {
     print("image.............${path}");
     print("message.......${message}");
-    var request =
-        http.MultipartRequest("POST", Uri.parse(SERVER_IP + "/photos/upload"));
-
+    var request = http.MultipartRequest(
+      "POST",
+      Uri.parse(SERVER_IP + "/file/img/upload"),
+    );
+    request.fields["eventChangeImgUser"] = "message";
+    request.headers.addAll(
+        {"Content-type": "multipart/form-data", "cookie": "jwt=" + jwt});
     request.files.add(await http.MultipartFile.fromPath("img", path));
-    request.headers.addAll({
-      "Content-type": "multipart/form-data",
-    });
+
     http.StreamedResponse response = await request.send();
     var httpResponse = await http.Response.fromStream(response);
-    var data = json.decode(httpResponse.body).toString();
-    var pathSV = data.substring(11);
-    print(data);
-    setMessage("source", message, pathSV, widget.chatModel!.id.toString(),
-        widget.sourceChat!.id.toString());
+    if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201) {
+      var data = json.decode(httpResponse.body).toString();
+      var pathSV = data;
+      print(data);
+      setMessage("source", message, pathSV, widget.chatModel!.id.toString(),
+          widget.sourceChat!.id.toString());
 
-    socket.emit("message", {
-      "message": message,
-      "sourceId": widget.sourceChat!.id,
-      "targetId": widget.chatModel!.id,
-      "path": pathSV,
-      "time": DateTime.now().toString(),
-    });
-
-    for (var i = 0; i < popTime; i++) {
-      if (mounted) Navigator.pop(context);
-    }
-    if (mounted)
-      setState(() {
-        popTime = 0;
+      socket.emit("message", {
+        "message": message,
+        "sourceId": widget.sourceChat!.id,
+        "targetId": widget.chatModel!.id,
+        "path": pathSV,
+        "time": DateTime.now().toString(),
       });
+      
+      for (var i = 0; i < popTime; i++) {
+        if (mounted) Navigator.pop(context);
+      }
+      if (mounted)
+        setState(() {
+          popTime = 0;
+        });
+    } else {}
   }
 
   _onEmojiSelected(Emoji emoji) {
@@ -638,6 +662,7 @@ class _IndividualChatState extends State<IndividualChat> {
                               MaterialPageRoute(
                                   builder: (builder) => CameraViewPage(
                                         path: file.path,
+                                        event: "message",
                                         onImageSend: onImageSend,
                                       )))
                           : print("chọn file");
@@ -711,5 +736,26 @@ class _IndividualChatState extends State<IndividualChat> {
     super.dispose();
     socket.disconnect();
     // _scrollController.dispose();
+  }
+}
+
+Future<dynamic> getApi(String jwt, String pathApi) async {
+  print("get Api " + pathApi);
+  print(jwt);
+  var res = await http.get(
+    Uri.parse(SERVER_IP + pathApi),
+    headers: {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+      'cookie': "jwt=" + jwt,
+    },
+  );
+  if (res.statusCode == 200 || res.statusCode == 201) {
+    var data = json.decode(res.body);
+    print("result " + pathApi);
+    print(data);
+    return data;
+  } else {
+    return "error";
   }
 }

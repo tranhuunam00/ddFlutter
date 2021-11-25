@@ -1,4 +1,5 @@
 import 'package:app1/chat-app/model/chat_modal.dart';
+import 'package:app1/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -9,9 +10,17 @@ class ContactCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     print("render...1.");
-    print(contact!.isSelect);
-    print(contact!.userName);
 
+    String pathImg;
+    if (contact != null) {
+      if (contact!.avatar != "")
+        pathImg = SERVER_IP + "/upload/" + contact!.avatar;
+      else {
+        pathImg = SERVER_IP + "/upload/" + "avatarNull.jpg";
+      }
+    } else {
+      pathImg = SERVER_IP + "/upload/" + "avatarNull.jpg";
+    }
     return ListTile(
         leading: Container(
           height: 50,
@@ -19,26 +28,28 @@ class ContactCard extends StatelessWidget {
           child: Stack(children: [
             CircleAvatar(
               radius: 23,
-              child: Image.asset("assets/icons/man.png", height: 30, width: 30),
-              backgroundColor: Colors.blueGrey[200],
+              backgroundImage: AssetImage('assets/images/load.gif'),
+              child: CircleAvatar(
+                radius: 23,
+                backgroundImage: NetworkImage(pathImg),
+                backgroundColor: Colors.transparent,
+              ),
             ),
-            (contact!.isSelect == true)
-                ? Positioned(
-                    bottom: 4,
-                    right: 3,
-                    child: CircleAvatar(
-                        backgroundColor: Colors.teal,
-                        radius: 9,
-                        child:
-                            Icon(Icons.check, color: Colors.white, size: 18)),
-                  )
-                : Container()
+            Positioned(
+              bottom: 4,
+              right: 3,
+              child: CircleAvatar(
+                  backgroundColor: Colors.teal,
+                  radius: 9,
+                  child: Icon(Icons.check, color: Colors.white, size: 18)),
+            )
           ]),
         ),
         title: Text(
-          contact!.userName,
+          contact != null ? contact!.userName : "userName",
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
-        subtitle: Text(contact!.status, style: TextStyle(fontSize: 13)));
+        subtitle:
+            Text(contact!.currentMessage, style: TextStyle(fontSize: 13)));
   }
 }

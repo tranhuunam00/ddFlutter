@@ -1,8 +1,10 @@
 import 'dart:convert';
 
 import 'package:app1/Screen/Profile.dart';
+import 'package:app1/chat-app/model/message_model.dart';
 
 import 'package:app1/main.dart';
+import 'package:app1/model/friendUser.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
@@ -70,7 +72,10 @@ class _LoginScreenState extends State<LoginScreen> {
             email: data["email"],
             id: data["_id"],
             friend: data["friend"],
+            friendRequest: data["friendRequest"],
+            friendConfirm: data["friendConfirm"],
             avatarImg: data["avatarImg"],
+            hadMessageList: data["hadMessageList"],
             coverImg: data["coverImg"]);
         return user;
       }
@@ -155,9 +160,26 @@ class _LoginScreenState extends State<LoginScreen> {
                           UserModel user = await getUserJwt(jwt);
                           if (user.userName != "") {
                             userProvider.userLogin(user, jwt);
+                            Map<String, List<MessageModel>> listMsgInit = {};
+                            Map<String, UserModel> listFrInit = {};
+                            Map<String, UserModel> listHadChat = {};
+
+                            listMsgInit = await getAllMsgFr(
+                                jwt,
+                                20,
+                                0,
+                                "/message/allMsgFR",
+                                user.id,
+                                user.hadMessageList!);
+                            listFrInit = await getFriendUser(jwt,
+                                "/user/allAvatarFr/" + user.id, user.friend!);
+                            listHadChat = await getFriendUser(jwt,
+                                "/user/allInforHadChat", user.hadMessageList!);
                             print("user lấy đc khi login---------" +
                                 user.userName);
-
+                            userProvider.userMessage(listMsgInit);
+                            userProvider.userFriends(listFrInit);
+                            userProvider.userHadChats(listHadChat);
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
@@ -238,5 +260,79 @@ class _LoginScreenState extends State<LoginScreen> {
         )),
       ),
     );
+  }
+}
+
+Future<Map<String, List<MessageModel>>> getAllMsgFr(String jwt, int limit,
+    int offset, String path, String sourceUserId, List hadMessageList) async {
+  Map<String, List<MessageModel>> chatHad = {};
+
+  print("------chạy get all msg fr---------");
+  String apiPath =
+      path + "?limit=" + limit.toString() + "&offset=" + offset.toString();
+  print(apiPath);
+  var result = await getApi(jwt, apiPath);
+  print("ket qua la :");
+  print(result);
+
+  if (result != "error" && result != "not listFrjwt") {
+    for (var i = 0; i < hadMessageList.length; i++) {
+      List msg = result[sourceUserId + "/" + hadMessageList[i]];
+      List<MessageModel> output = [];
+      for (var j = 0; j < msg.length; j++) {
+        MessageModel a = MessageModel(
+            path: "",
+            time: msg[j]["time"],
+            message: msg[j]["message"],
+            sourceId: msg[j]["message"]);
+
+        output.add(a);
+      }
+      output.sort((a, b) => a.time.compareTo(b.time));
+      chatHad[sourceUserId + "/" + hadMessageList[i]] = output;
+    }
+    return chatHad;
+  }
+  return chatHad;
+}
+
+//----------------------lay thoong tin cua toan bo ban be---------------
+Future<Map<String, UserModel>> getFriendUser(
+    String jwt, String path, List listFr) async {
+  Map<String, UserModel> chatFriend = {};
+
+  print("------chạy get avatar---------");
+  var result = await getApi(jwt, path);
+  print("ket qua la :");
+  print(result);
+  if (result != "error" && result != "not jwt") {
+    for (var i = 0; i < listFr.length; i++) {
+      chatFriend[listFr[i]] = UserModel(
+          id: result[listFr[i]][2],
+          avatarImg: [result[listFr[i]][0]],
+          realName: result[listFr[i]][1]);
+    }
+  }
+  return chatFriend;
+}
+
+Future<dynamic> getApi(String jwt, String pathApi) async {
+  print("get Api " + pathApi);
+  print(jwt);
+  var res = await http.get(
+    Uri.parse(SERVER_IP + pathApi),
+    headers: {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+      'cookie': "jwt=" + jwt,
+    },
+  );
+  if (res.statusCode == 200 || res.statusCode == 201) {
+    var data = json.decode(res.body);
+    print("result " + pathApi);
+    print(data);
+    return data;
+  } else {
+    return "error";
   }
 }

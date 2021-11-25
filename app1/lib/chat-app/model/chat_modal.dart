@@ -7,6 +7,7 @@ class ChatModel {
   late String status;
   late bool isSelect;
   late String id;
+  late String avatar;
 
   ChatModel({
     this.id = "",
@@ -14,6 +15,7 @@ class ChatModel {
     this.icon = "",
     this.isGroup = false,
     this.time = "",
+    this.avatar = "",
     this.currentMessage = "",
     this.status = "",
     this.isSelect = false,
