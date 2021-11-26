@@ -6,7 +6,13 @@ import 'package:app1/model/friendUser.dart';
 import 'package:app1/model/user_model.dart';
 
 class MyStream {
-  UserModel userS = UserModel();
+  UserModel userS = UserModel(
+      friend: [],
+      friendConfirm: [],
+      friendRequest: [],
+      coverImg: [],
+      avatarImg: [],
+      hadMessageList: []);
   List<FeedBaseModel> listFeedsS = [];
   StreamController<UserModel> userController =
       new StreamController<UserModel>.broadcast();
@@ -63,7 +69,13 @@ class MyStream {
 
   void clearUser() {
     print("clearUser");
-    userController.sink.add(UserModel());
+    userController.sink.add(UserModel(
+        friend: [],
+        friendConfirm: [],
+        friendRequest: [],
+        coverImg: [],
+        avatarImg: [],
+        hadMessageList: []));
   }
 
   void dispose() {

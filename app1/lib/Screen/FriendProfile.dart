@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/ui.dart';
 import 'package:app1/widgets/app_button.dart';
@@ -23,7 +24,13 @@ class FriendProfile extends StatefulWidget {
 }
 
 class _FriendProfileState extends State<FriendProfile> {
-  UserModel inforFr = UserModel();
+  UserModel inforFr = UserModel(
+      friend: [],
+      friendConfirm: [],
+      friendRequest: [],
+      coverImg: [],
+      avatarImg: [],
+      hadMessageList: []);
   List<FeedBaseModel> listFeedsInit = [];
   Map<String, UserModel> frOfFr = {};
   String isFr = "Kết bạn";
@@ -33,6 +40,8 @@ class _FriendProfileState extends State<FriendProfile> {
     super.initState();
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final feedProvider = Provider.of<FeedProvider>(context, listen: false);
+
       listFeedsInit = await getFeedInit(userProvider.jwtP, widget.frId);
       inforFr = await getInforFr(userProvider.jwtP, widget.frId);
 
@@ -41,7 +50,7 @@ class _FriendProfileState extends State<FriendProfile> {
             "/user/allAvatarFr/" + inforFr.id, inforFr.friend!);
         if (mounted) {
           userProvider.inforFrP = inforFr;
-          userProvider.listFeedsFrP = listFeedsInit;
+          feedProvider.listFeedsFrP = listFeedsInit;
           setState(() {});
         }
       }
@@ -67,6 +76,9 @@ class _FriendProfileState extends State<FriendProfile> {
             feedId: data[i]["_id"].toString(),
             message: data[i]["messages"],
             like: data[i]["like"],
+            comment: data[i]["comment"],
+            pathImg: data[i]["pathImg"],
+            rule: data[i]["rule"],
             sourceUserId: data[i]["sourceId"].toString(),
             createdAt: data[i]["createdAt"],
             sourceUserName: data[i]["sourceUserName"].toString(),
@@ -92,6 +104,11 @@ class _FriendProfileState extends State<FriendProfile> {
     if (result != "error" && result != "not jwt") {
       for (var i = 0; i < listFr.length; i++) {
         chatFriend[listFr[i]] = UserModel(
+            friend: [],
+            friendConfirm: [],
+            friendRequest: [],
+            coverImg: [],
+            hadMessageList: [],
             id: result[listFr[i]][2],
             avatarImg: [result[listFr[i]][0]],
             realName: result[listFr[i]][1]);
@@ -106,6 +123,8 @@ class _FriendProfileState extends State<FriendProfile> {
     if (data != "not jwt" && data != "error") {
       if (data["userName"] != null) {
         UserModel user = UserModel(
+            friendRequest: data["friendRequest"],
+            friendConfirm: data["friendConfirm"],
             userName: data["userName"],
             realName: data["realName"],
             email: data["email"],
@@ -118,16 +137,29 @@ class _FriendProfileState extends State<FriendProfile> {
             coverImg: data["coverImg"]);
         return user;
       } else {
-        return UserModel();
+        return UserModel(
+            friend: [],
+            friendConfirm: [],
+            friendRequest: [],
+            coverImg: [],
+            avatarImg: [],
+            hadMessageList: []);
       }
     } else {
-      return UserModel();
+      return UserModel(
+          friend: [],
+          friendConfirm: [],
+          friendRequest: [],
+          coverImg: [],
+          avatarImg: [],
+          hadMessageList: []);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final feedProvider = Provider.of<FeedProvider>(context, listen: false);
 
     Future<String> addFr(String isFrTextModal, String jwt, String id) async {
       if (isFrTextModal == "Hủy kết bạn") {
@@ -168,6 +200,11 @@ class _FriendProfileState extends State<FriendProfile> {
           userProvider.userP.friend!.add(widget.frId);
           userProvider.userP.friendConfirm!.remove(widget.frId);
           userProvider.listFriendsP[widget.frId] = UserModel(
+              friend: [],
+              friendConfirm: [],
+              friendRequest: [],
+              coverImg: [],
+              hadMessageList: [],
               id: result["_id"].toString(),
               avatarImg: [result["avatarImg"][0].toString],
               realName: result["realName"]);
@@ -301,7 +338,7 @@ class _FriendProfileState extends State<FriendProfile> {
           child: ListView.builder(
               shrinkWrap: true,
               controller: _scrollController,
-              itemCount: userProvider.listFeedsFrP.length + 3,
+              itemCount: feedProvider.listFeedsFrP.length + 3,
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return Container(
@@ -353,14 +390,13 @@ class _FriendProfileState extends State<FriendProfile> {
                                 backgroundImage: userProvider
                                                 .inforFrP.avatarImg !=
                                             null &&
-                                        userProvider
-                                                .inforFrP.avatarImg!.length >
+                                        userProvider.inforFrP.avatarImg.length >
                                             0
                                     ? NetworkImage(SERVER_IP +
                                         "/upload/" +
-                                        userProvider.inforFrP.avatarImg![
-                                            userProvider.inforFrP.avatarImg!
-                                                    .length -
+                                        userProvider.inforFrP.avatarImg[
+                                            userProvider
+                                                    .inforFrP.avatarImg.length -
                                                 1])
                                     : NetworkImage(
                                         SERVER_IP + "/upload/avatarNull.jpg"),
@@ -452,7 +488,7 @@ class _FriendProfileState extends State<FriendProfile> {
                             children: frGirdView(
                                 frOfFr,
                                 userProvider.inforFrP.friend != null
-                                    ? userProvider.inforFrP.friend!
+                                    ? userProvider.inforFrP.friend
                                     : [])),
                       ),
                       AppBTnStyle(
@@ -470,7 +506,7 @@ class _FriendProfileState extends State<FriendProfile> {
                 }
 
                 return CardFeedStyle(
-                    feed: userProvider.listFeedsFrP[index - 3],
+                    feed: feedProvider.listFeedsFrP[index - 3],
                     userOwnUse: inforFr);
               })),
     );

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/main.dart';
+import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/widgets/dismit_keybord.dart';
 import 'package:flutter/cupertino.dart';
@@ -21,6 +22,8 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final feedProvider = Provider.of<FeedProvider>(context, listen: false);
+
     var urlPostFeed = Uri.parse(SERVER_IP + '/feed');
 
     Future<String> PostFeedFunction(FeedBaseModel feed) async {
@@ -39,6 +42,8 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
             "pathImg": feed.pathImg,
             "messages": feed.message,
             "rule": feed.rule,
+            "like": [],
+            "comment": [],
             "createdAt": feed.createdAt,
           }));
       print(json.decode(response.body).toString());
@@ -65,6 +70,10 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                 child: Text("gửi"),
                 onTap: () async {
                   FeedBaseModel feed = new FeedBaseModel(
+                      like: [],
+                      rule: [],
+                      comment: [],
+                      pathImg: [],
                       createdAt: DateTime.now().toString(),
                       sourceUserId: userProvider.userP.id,
                       message: _textController.text,
@@ -76,13 +85,17 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                   } else {
                     if (newIdFeed != "error") {
                       FeedBaseModel a = new FeedBaseModel(
+                          like: [],
+                          comment: [],
+                          rule: [],
+                          pathImg: [],
                           feedId: newIdFeed,
                           message: _textController.text,
                           sourceUserName: userProvider.userP.userName);
-                      List<FeedBaseModel> b = userProvider.listFeedsP;
+                      List<FeedBaseModel> b = feedProvider.listFeedsP;
                       b.insert(0, feed);
                       print("đã tạo mới bài viết rồi!");
-                      userProvider.userFeed(b);
+                      feedProvider.userFeed(b);
                       Navigator.pop(context);
                     }
                   }

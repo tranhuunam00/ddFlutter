@@ -1,7 +1,10 @@
 import 'package:app1/chat-app/screens_chat/CameraScreen.dart';
 import 'package:app1/chat-app/screens_chat/LoginScreen.dart';
 import 'package:app1/chat-app/screens_chat/home.dart';
+import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/feed_provider.dart';
+import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/test_emoji.dart';
 import 'package:camera/camera.dart';
@@ -17,8 +20,15 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:provider/provider.dart';
 
 final storage = FlutterSecureStorage();
-final UserModel userMain = UserModel();
-const SERVER_IP = 'http://cccd-113-191-157-89.ngrok.io';
+final UserModel userMain = UserModel(
+    friend: [],
+    friendConfirm: [],
+    friendRequest: [],
+    coverImg: [],
+    avatarImg: [],
+    hadMessageList: []);
+const SERVER_IP =
+    'http://ef10-2401-d800-5ee6-192e-3078-c758-1ac3-edbc.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -35,16 +45,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-        create: (context) {
-          // return GoogleSingInProvider();
-          return UserProvider();
-        },
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (context) {
+            return UserProvider();
+          }),
+          ChangeNotifierProvider(create: (context) {
+            return MessageProvider();
+          }),
+          ChangeNotifierProvider(create: (context) {
+            return FeedProvider();
+          })
+        ],
         child: MaterialApp(
             title: "app1",
             // home: ChatLoginScreen()
-            home: LoadScreen()
-
+            // home: LoadScreen()
+            home: CommentUser()
             // home: Test()
             // home: Test()
 

@@ -2,7 +2,8 @@ import 'dart:convert';
 
 import 'package:app1/Screen/VerifyCodeScreen.dart';
 import 'package:app1/main.dart';
-import 'package:app1/model/create_user.dart';
+import 'package:app1/model/user_model.dart';
+
 import 'package:flutter/material.dart';
 import '../widgets/text_input_style.dart';
 import 'package:http/http.dart' as http;
@@ -41,9 +42,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     var a = json.decode(response.body);
     print(json.decode(response.body)["token"]);
     if (a["userName"] == null) {
-      return new UserCreateModel();
+      return new UserCreateModel(
+        friend: [],
+        friendConfirm: [],
+        friendRequest: [],
+        avatarImg: [],
+        coverImg: [],
+        hadMessageList: [],
+      );
     }
     UserCreateModel b = new UserCreateModel(
+      friendConfirm: [],
+      friendRequest: [],
+      avatarImg: [],
+      coverImg: [],
+      hadMessageList: [],
+      friend: [],
       userName: a["userName"],
       password: a["password"],
       email: a["email"],
@@ -184,6 +198,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             await registerFunction(userName, password, email);
                         print("name" + result.token);
                         UserCreateModel user = new UserCreateModel(
+                            friend: [],
+                            friendConfirm: [],
+                            friendRequest: [],
+                            avatarImg: [],
+                            coverImg: [],
+                            hadMessageList: [],
                             userName: result.userName,
                             token: result.token,
                             password: result.password,

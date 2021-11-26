@@ -6,6 +6,7 @@ import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/friendUser.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
@@ -62,26 +63,32 @@ class _LoginScreenState extends State<LoginScreen> {
         'cookie': "jwt=" + jwt,
       },
     );
-
-    var data = json.decode(res.body);
-    if (data != "not jwt") {
-      if (data["userName"] != null) {
-        print(data);
-        UserModel user = UserModel(
-            userName: data["userName"],
-            email: data["email"],
-            id: data["_id"],
-            friend: data["friend"],
-            friendRequest: data["friendRequest"],
-            friendConfirm: data["friendConfirm"],
-            avatarImg: data["avatarImg"],
-            hadMessageList: data["hadMessageList"],
-            coverImg: data["coverImg"]);
-        return user;
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      var data = json.decode(res.body);
+      if (data != "not jwt") {
+        if (data["userName"] != null) {
+          print(data);
+          UserModel user = UserModel(
+              userName: data["userName"],
+              email: data["email"],
+              id: data["_id"],
+              friend: data["friend"],
+              friendRequest: data["friendRequest"],
+              friendConfirm: data["friendConfirm"],
+              avatarImg: data["avatarImg"],
+              hadMessageList: data["hadMessageList"],
+              coverImg: data["coverImg"]);
+          return user;
+        }
       }
     }
-
-    return UserModel();
+    return UserModel(
+        friend: [],
+        friendConfirm: [],
+        friendRequest: [],
+        coverImg: [],
+        avatarImg: [],
+        hadMessageList: []);
   }
 
   @override
@@ -93,6 +100,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final messageProvider =
+        Provider.of<MessageProvider>(context, listen: false);
     print(userMain.userName);
     Size size = MediaQuery.of(context).size;
 
@@ -177,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 "/user/allInforHadChat", user.hadMessageList!);
                             print("user lấy đc khi login---------" +
                                 user.userName);
-                            userProvider.userMessage(listMsgInit);
+                            messageProvider.userMessage(listMsgInit);
                             userProvider.userFriends(listFrInit);
                             userProvider.userHadChats(listHadChat);
                             Navigator.pushReplacement(
@@ -281,10 +290,11 @@ Future<Map<String, List<MessageModel>>> getAllMsgFr(String jwt, int limit,
       List<MessageModel> output = [];
       for (var j = 0; j < msg.length; j++) {
         MessageModel a = MessageModel(
-            path: "",
+            path: msg[j]["path"],
             time: msg[j]["time"],
             message: msg[j]["message"],
-            sourceId: msg[j]["message"]);
+            targetId: msg[j]["targetId"],
+            sourceId: msg[j]["sourceId"]);
 
         output.add(a);
       }
@@ -308,6 +318,11 @@ Future<Map<String, UserModel>> getFriendUser(
   if (result != "error" && result != "not jwt") {
     for (var i = 0; i < listFr.length; i++) {
       chatFriend[listFr[i]] = UserModel(
+          friend: [],
+          friendConfirm: [],
+          friendRequest: [],
+          coverImg: [],
+          hadMessageList: [],
           id: result[listFr[i]][2],
           avatarImg: [result[listFr[i]][0]],
           realName: result[listFr[i]][1]);

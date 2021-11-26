@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:app1/Screen/AgainPassword.dart';
 import 'package:app1/Screen/VerifyCodeScreen.dart';
 import 'package:app1/main.dart';
-import 'package:app1/model/create_user.dart';
+
 import 'package:app1/model/forgot_user.dart';
 import 'package:flutter/material.dart';
 import '../ui.dart';

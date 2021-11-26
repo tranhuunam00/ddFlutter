@@ -4,6 +4,7 @@ import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/feed/screen/post_feed.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -20,12 +21,14 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<FeedBaseModel> listFeeds = [];
-  Future fetchApiFeedInit(String sourceId, String jwt) async {
+  Future fetchApiFeedInit(
+      String sourceId, String jwt, String limit, String offset) async {
     try {
       http.Response response;
       List<FeedBaseModel> data1 = [];
       //tim tin nhan cua nguoi gui cho ban
-      String query = '?limit=15&offset=0&sourceId=' + sourceId;
+      String query =
+          '?limit=' + limit + '&offset=' + offset + '&sourceId=' + sourceId;
       String path = SERVER_IP + '/feed/limitFeedOwn' + query;
       print(query);
       print(path);
@@ -53,32 +56,40 @@ class _HomeScreenState extends State<HomeScreen> {
     List<Future> fetchAllFeedFr = [];
     for (var i = 0; i < listFr.length; i++) {
       fetchAllFeedFr.add(
-        fetchApiFeedInit(listFr[i], jwt),
+        fetchApiFeedInit(listFr[i], jwt, 20.toString(), 0.toString()),
       );
     }
     List data = await Future.wait([
-      fetchApiFeedInit(sourceId, jwt),
+      fetchApiFeedInit(sourceId, jwt, 3.toString(), 0.toString()),
       ...fetchAllFeedFr
       //  fetchData(targetId, sourceId)
     ]);
-    if (data[0] == "not jwt") {
+    if (data[0] == "not jwt" && data[0] == "error") {
       return listFeedsInit;
     } else {
+      print("data 0");
+      print(data[0]);
       for (int k = 0; k <= listFr.length; k++) {
-        for (int i = 0; i < data[k].length; i++) {
-          if (data[k] != []) {
-            FeedBaseModel a = FeedBaseModel(
-              feedId: data[k][i]["_id"].toString(),
-              message: data[k][i]["messages"],
-              like: data[k][i]["like"],
-              sourceUserId: data[k][i]["sourceId"].toString(),
-              createdAt: data[k][i]["createdAt"],
-              sourceUserName: data[k][i]["sourceUserName"].toString(),
-            );
-            listFeedsInit.add(a);
+        if (data[k].length > 0) {
+          for (int i = 0; i < data[k].length; i++) {
+            if (data[k] != []) {
+              FeedBaseModel a = FeedBaseModel(
+                pathImg: data[k][i]["pathImg"],
+                rule: data[k][i]["rule"],
+                comment: data[k][i]["comment"],
+                feedId: data[k][i]["_id"].toString(),
+                message: data[k][i]["messages"],
+                like: data[k][i]["like"],
+                sourceUserId: data[k][i]["sourceUserId"].toString(),
+                createdAt: data[k][i]["createdAt"],
+                sourceUserName: data[k][i]["sourceUserName"].toString(),
+              );
+              listFeedsInit.add(a);
+            }
           }
         }
       }
+
       listFeedsInit.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return listFeedsInit;
     }
@@ -89,10 +100,23 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
+      final feedProvider = Provider.of<FeedProvider>(context, listen: false);
+
       List<FeedBaseModel> listFeedsInit = await getFeedInit(
           userProvider.userP.id, userProvider.jwtP, userProvider.userP.friend!);
+      List<FeedBaseModel> newListFeedOwnInit = [];
+      List<FeedBaseModel> newListFeedFrInit = [];
 
-      userProvider.userFeed(listFeedsInit);
+      for (int i = 0; i < listFeedsInit.length; i++) {
+        if (listFeedsInit[i].sourceUserId == userProvider.userP.id) {
+          newListFeedOwnInit.add(listFeedsInit[i]);
+        } else {
+          newListFeedFrInit.add(listFeedsInit[i]);
+        }
+      }
+      feedProvider.userFeed(newListFeedOwnInit);
+      feedProvider.userFrFeed(newListFeedFrInit);
+
       if (mounted) {
         setState(() {});
       }
@@ -108,69 +132,82 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final feedProvider = Provider.of<FeedProvider>(context, listen: false);
+
     Size size = MediaQuery.of(context).size;
     ScrollController _scrollController = new ScrollController();
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      height: size.height,
-      child: ListView.builder(
-          shrinkWrap: true,
-          controller: _scrollController,
-          itemCount: userProvider.listFeedsP.length + 2,
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Gốc gạo", style: AppStyles.h2),
-                    Icon(Icons.message_sharp)
-                  ],
-                ),
-              );
-            }
-            if (index == 1) {
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12.0),
-                child: Row(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(top: 8, right: 8.0),
-                      child: CircleAvatar(
-                        radius: 24,
+    List<FeedBaseModel> listFeedAll = [];
+
+    return Consumer<FeedProvider>(builder: (context, feedProvider, child) {
+      if (feedProvider.listFeedsP.length > 0) {
+        listFeedAll.addAll(feedProvider.listFeedsP);
+      }
+      if (feedProvider.listFeedsFrP.length > 0) {
+        listFeedAll.addAll(feedProvider.listFeedsFrP);
+      }
+      listFeedAll.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      return Container(
+        padding: const EdgeInsets.all(8.0),
+        height: size.height,
+        child: ListView.builder(
+            shrinkWrap: true,
+            controller: _scrollController,
+            itemCount: listFeedAll.length + 2,
+            itemBuilder: (context, index) {
+              if (index == 0) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text("Gốc gạo", style: AppStyles.h2),
+                      Icon(Icons.message_sharp)
+                    ],
+                  ),
+                );
+              }
+              if (index == 1) {
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12.0),
+                  child: Row(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 8, right: 8.0),
+                        child: CircleAvatar(
+                          radius: 24,
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                        width: size.width - 150,
-                        child: InkWell(
-                            child: Text("Bạn đang nghĩ gì"),
-                            onTap: () {
-                              Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (builder) =>
-                                              PostFeedScreen()))
-                                  .then((value) => setState(() {}));
-                            }))
-                  ],
-                ),
-              );
-            }
-            return index % 2 == 0
-                ? Padding(
-                    padding: const EdgeInsets.only(left: 16.0),
-                    child: CardFeedStyle(
-                        feed: userProvider.listFeedsP[index - 2],
-                        userOwnUse: userProvider.userP),
-                  )
-                : Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
-                    child: CardFeedStyle(
-                        feed: userProvider.listFeedsP[index - 2],
-                        userOwnUse: userProvider.userP),
-                  );
-          }),
-    );
+                      SizedBox(
+                          width: size.width - 150,
+                          child: InkWell(
+                              child: Text("Bạn đang nghĩ gì"),
+                              onTap: () {
+                                Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (builder) =>
+                                                PostFeedScreen()))
+                                    .then((value) => setState(() {}));
+                              }))
+                    ],
+                  ),
+                );
+              }
+              return index % 2 == 0
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 16.0),
+                      child: CardFeedStyle(
+                          feed: listFeedAll[index - 2],
+                          userOwnUse: userProvider.userP),
+                    )
+                  : Padding(
+                      padding: const EdgeInsets.only(right: 16.0),
+                      child: CardFeedStyle(
+                          feed: listFeedAll[index - 2],
+                          userOwnUse: userProvider.userP),
+                    );
+            }),
+      );
+    });
   }
 }

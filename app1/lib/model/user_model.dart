@@ -3,23 +3,50 @@ List<String> friendNull = [''];
 class UserModel {
   late String userName;
   late String email;
-  late List? friend;
-  late List? hadMessageList;
+  late List friend;
+  late List hadMessageList;
   late String realName;
   late String id;
-  late List? avatarImg;
-  late List? coverImg;
-  late List? friendRequest;
-  late List? friendConfirm;
+  late List avatarImg;
+  late List coverImg;
+  late List friendRequest;
+  late List friendConfirm;
   UserModel(
       {this.userName = "",
       this.email = "",
       this.realName = "",
-      this.friend = null,
+      required this.friend,
       this.id = "",
-      this.hadMessageList = null,
-      this.coverImg = null,
-      this.friendConfirm = null,
-      this.friendRequest = null,
-      this.avatarImg = null});
+      required this.hadMessageList,
+      required this.coverImg,
+      required this.friendConfirm,
+      required this.friendRequest,
+      required this.avatarImg});
+}
+
+class UserCreateModel {
+  late String userName;
+  late String email;
+  late String password;
+  late List friend;
+  late String token;
+  late List hadMessageList;
+  late String realName;
+
+  late List avatarImg;
+  late List coverImg;
+  late List friendRequest;
+  late List friendConfirm;
+  UserCreateModel(
+      {this.userName = "",
+      this.email = "",
+      this.realName = "",
+      this.password = "",
+      required this.friend,
+      this.token = "",
+      required this.hadMessageList,
+      required this.coverImg,
+      required this.friendConfirm,
+      required this.friendRequest,
+      required this.avatarImg});
 }

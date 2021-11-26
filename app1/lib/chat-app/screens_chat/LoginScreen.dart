@@ -8,6 +8,7 @@ import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/chat-app/screens_chat/home.dart';
 import 'package:app1/chat-app/screens_chat/individual_chat.dart';
 import 'package:app1/main.dart';
+import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -34,18 +35,24 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final messageProvider =
+        Provider.of<MessageProvider>(context, listen: false);
+    hadMessageInit = [];
 
     /// chuyen doi listFr thanh chat Model
     for (var i = 0; i < userProvider.userP.friend!.length; i++) {
-      chatFriend[userProvider.userP.friend![i]] = ChatModel(
-          id: userProvider.userP.friend![i],
-          userName: userProvider
-              .listFriendsP[userProvider.userP.friend![i]]!.realName,
-          avatar: userProvider
-              .listFriendsP[userProvider.userP.friend![i]]!.avatarImg![0]);
+      if (userProvider.listFriendsP.length > 0) {
+        chatFriend[userProvider.userP.friend![i]] = ChatModel(
+            id: userProvider.userP.friend![i],
+            userName: userProvider
+                .listFriendsP[userProvider.userP.friend![i]]!.realName,
+            avatar: userProvider
+                .listFriendsP[userProvider.userP.friend![i]]!.avatarImg![0]);
+      }
     }
     //chuyen doi du lieu hadChatMsg thanh chatmodel
-    Map<String, List<MessageModel>> chatHad = userProvider.listMessageP;
+    Map<String, List<MessageModel>> chatHad = messageProvider.listMessageP;
+
     for (var i = 0; i < userProvider.userP.hadMessageList!.length; i++) {
       var a = chatHad[userProvider.userP.id +
           "/" +

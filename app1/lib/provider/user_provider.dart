@@ -10,14 +10,26 @@ import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 
 class UserProvider with ChangeNotifier {
   MyStream myStream = new MyStream();
-  UserModel userP = UserModel(userName: "");
-  UserModel inforFrP = UserModel(userName: "");
+  UserModel userP = UserModel(
+      userName: "",
+      friend: [],
+      friendConfirm: [],
+      friendRequest: [],
+      coverImg: [],
+      avatarImg: [],
+      hadMessageList: []);
+  UserModel inforFrP = UserModel(
+      userName: "",
+      friend: [],
+      friendConfirm: [],
+      friendRequest: [],
+      coverImg: [],
+      avatarImg: [],
+      hadMessageList: []);
   String jwtP = "";
-  Map<String, List<MessageModel>> listMessageP = {};
+
   Map<String, UserModel> listFriendsP = {};
   Map<String, UserModel> listHadChatP = {};
-  List<FeedBaseModel> listFeedsP = [];
-  List<FeedBaseModel> listFeedsFrP = [];
 
   Future userLogin(UserModel user, String jwt) async {
     try {
@@ -33,30 +45,6 @@ class UserProvider with ChangeNotifier {
       inforFrP = user;
 
       myStream.setUser(user);
-    } catch (e) {}
-    notifyListeners();
-  }
-
-  Future userFeed(List<FeedBaseModel> newFeeds) async {
-    try {
-      listFeedsP = newFeeds;
-      myStream.setFeed(newFeeds);
-    } catch (e) {}
-    notifyListeners();
-  }
-
-  Future userFrFeed(List<FeedBaseModel> newFeeds) async {
-    try {
-      listFeedsFrP = newFeeds;
-      // myStream.setFeed(newFeeds);
-    } catch (e) {}
-    notifyListeners();
-  }
-
-  Future userMessage(Map<String, List<MessageModel>> newMessagesList) async {
-    try {
-      listMessageP = newMessagesList;
-      myStream.setMessage(newMessagesList);
     } catch (e) {}
     notifyListeners();
   }
@@ -78,6 +66,12 @@ class UserProvider with ChangeNotifier {
   }
 
   Future UserLogOut() async {
-    userP = UserModel();
+    userP = UserModel(
+        friend: [],
+        friendConfirm: [],
+        friendRequest: [],
+        coverImg: [],
+        avatarImg: [],
+        hadMessageList: []);
   }
 }

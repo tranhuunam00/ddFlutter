@@ -6,9 +6,10 @@ import 'package:app1/Screen/test3.dart';
 import 'package:app1/auth_social/google_sign_in.dart';
 import 'package:app1/chat-app/screens_chat/CameraView.dart';
 import 'package:app1/main.dart';
-import 'package:app1/model/create_user.dart';
+
 import 'package:app1/model/friendUser.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
@@ -35,6 +36,8 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final feedProvider = Provider.of<FeedProvider>(context, listen: false);
+
     String pathAvatar = userProvider.userP.avatarImg != null &&
             userProvider.userP.avatarImg!.length != 0
         ? SERVER_IP +
@@ -109,7 +112,7 @@ class _ProfileState extends State<Profile> {
           child: ListView.builder(
               shrinkWrap: true,
               controller: _scrollController,
-              itemCount: userProvider.listFeedsP.length + 4,
+              itemCount: feedProvider.listFeedsP.length + 4,
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return Container(
@@ -278,7 +281,11 @@ class _ProfileState extends State<Profile> {
                             onPressed: () {},
                             icon: Icon(Icons.wysiwyg),
                             label: Text("   Xem chi tiết")),
-                        AppBTnStyle(label: "Cài đặt riêng tư", onTap: () {}),
+                        AppBTnStyle(
+                            label: "Cài đặt riêng tư",
+                            onTap: () {
+                              print(feedProvider.listFeedsFrP[5].sourceUserId);
+                            }),
                         Divider(height: 60, color: Colors.black),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -447,7 +454,7 @@ class _ProfileState extends State<Profile> {
                   );
                 }
                 return CardFeedStyle(
-                    feed: userProvider.listFeedsP[index - 4],
+                    feed: feedProvider.listFeedsP[index - 4],
                     userOwnUse: userProvider.userP);
               })),
     );

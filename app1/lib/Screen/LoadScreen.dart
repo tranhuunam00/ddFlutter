@@ -4,6 +4,7 @@ import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/friendUser.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +28,13 @@ class _LoadScreenState extends State<LoadScreen> {
   int _counter = 0;
   bool isLoading = true;
   String jwt = "";
-  UserModel userInit = UserModel();
+  UserModel userInit = UserModel(
+      friend: [],
+      friendConfirm: [],
+      friendRequest: [],
+      coverImg: [],
+      avatarImg: [],
+      hadMessageList: []);
   Map<String, List<MessageModel>> listMsgInit = {};
   Map<String, UserModel> listFrInit = {};
   Map<String, UserModel> listHadChat = {};
@@ -87,6 +94,9 @@ class _LoadScreenState extends State<LoadScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final messageProvider =
+        Provider.of<MessageProvider>(context, listen: false);
+
     Future.delayed(const Duration(milliseconds: 4000), () {
       setState(() {
         isLoading = false;
@@ -126,7 +136,7 @@ class _LoadScreenState extends State<LoadScreen> {
                           ? () async {
                               if (userInit.userName != "") {
                                 userProvider.userLogin(userInit, jwt);
-                                userProvider.userMessage(listMsgInit);
+                                messageProvider.userMessage(listMsgInit);
                                 userProvider.userFriends(listFrInit);
                                 userProvider.userHadChats(listHadChat);
                               }
@@ -185,7 +195,13 @@ Future<UserModel> getUserJwt(String jwt) async {
     }
   }
 
-  return UserModel();
+  return UserModel(
+      friend: [],
+      friendConfirm: [],
+      friendRequest: [],
+      coverImg: [],
+      avatarImg: [],
+      hadMessageList: []);
 }
 
 //--------------------lay tat ca tin nhan ----------------------
@@ -208,10 +224,11 @@ Future<Map<String, List<MessageModel>>> getAllMsgFr(String jwt, int limit,
       List<MessageModel> output = [];
       for (var j = 0; j < msg.length; j++) {
         MessageModel a = MessageModel(
-            path: "",
+            path: msg[j]["path"],
             time: msg[j]["time"],
             message: msg[j]["message"],
-            sourceId: msg[j]["message"]);
+            targetId: msg[j]["targetId"],
+            sourceId: msg[j]["sourceId"]);
 
         output.add(a);
       }
@@ -235,6 +252,11 @@ Future<Map<String, UserModel>> getFriendUser(
   if (result != "error" && result != "not jwt") {
     for (var i = 0; i < listFr.length; i++) {
       chatFriend[listFr[i]] = UserModel(
+          friend: [],
+          friendConfirm: [],
+          friendRequest: [],
+          coverImg: [],
+          hadMessageList: [],
           id: result[listFr[i]][2],
           avatarImg: [result[listFr[i]][0]],
           realName: result[listFr[i]][1]);

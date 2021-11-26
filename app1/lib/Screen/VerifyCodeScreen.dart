@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'package:app1/Screen/AgainPassword.dart';
 import 'package:app1/Screen/LoginScreen.dart';
 import 'package:app1/main.dart';
-import 'package:app1/model/create_user.dart';
+
 import 'package:app1/model/forgot_user.dart';
+import 'package:app1/model/user_model.dart';
 import 'package:app1/widgets/app_button.dart';
 import 'package:app1/widgets/dismit_keybord.dart';
 import 'package:flutter/foundation.dart';

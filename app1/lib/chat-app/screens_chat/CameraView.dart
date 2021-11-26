@@ -73,7 +73,7 @@ class CameraViewPage extends StatelessWidget {
                                   onImageSend!(path, event, userProvider.jwtP);
                                 } else {
                                   print("chạy hàm gửi");
-                                  onImageSend!(path, "", userProvider.jwtP);
+                                  onImageSend!(path, userProvider.jwtP);
                                 }
                               }
 

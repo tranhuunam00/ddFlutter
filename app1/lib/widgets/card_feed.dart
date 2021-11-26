@@ -36,13 +36,14 @@ class CardFeedStyle extends StatefulWidget {
 class _CardFeedStyleState extends State<CardFeedStyle> {
   final int totalLike = 0;
   final int totalComment = 0;
-  FeedBaseModel feedApi = new FeedBaseModel(like: []);
+  FeedBaseModel feedApi =
+      new FeedBaseModel(like: [], rule: [], comment: [], pathImg: []);
   late bool isLike = false;
   @override
   void initState() {
     super.initState();
     feedApi = widget.feed;
-    for (int i = 0; i < feedApi.like!.length; i++) {
+    for (int i = 0; i < feedApi.like.length; i++) {
       if (feedApi.like![i] == widget.userOwnUse.id) {
         print("------đã like-------");
         isLike = true;
@@ -343,13 +344,13 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  feedApi.like!.length > 0
+                  feedApi.like.length > 0
                       ? Row(
                           children: [
                             CircleAvatar(
                               radius: 12,
                             ),
-                            Text(feedApi.like!.length.toString() + " like")
+                            Text(feedApi.like.length.toString() + " like")
                           ],
                         )
                       : Container(),
@@ -381,7 +382,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                             setState(() {
                               isLike = !isLike;
                               feedApi.like = result[0].like;
-                              feedApi.like!.add(widget.userOwnUse.id);
+                              feedApi.like.add(widget.userOwnUse.id);
                             });
                           }
                         } else {
@@ -401,7 +402,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                             setState(() {
                               isLike = !isLike;
                               feedApi.like = result[0].like;
-                              feedApi.like!.remove(widget.userOwnUse.id);
+                              feedApi.like.remove(widget.userOwnUse.id);
                             });
                           }
                         }
@@ -471,16 +472,17 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
       if (response.statusCode == 200) {
         return json.decode(response.body);
       } else {
-        return FeedBaseModel();
+        return FeedBaseModel(like: [], rule: [], comment: [], pathImg: []);
       }
     } catch (e) {
-      return FeedBaseModel();
+      return FeedBaseModel(like: [], rule: [], comment: [], pathImg: []);
     }
   }
 
   //-----------------------like func------------
   getFeedApi(sourceId, jwt) async {
-    FeedBaseModel feedApi = FeedBaseModel(like: []);
+    FeedBaseModel feedApi =
+        FeedBaseModel(like: [], rule: [], comment: [], pathImg: []);
     var data = await fetchApiFindFeed(sourceId, jwt);
     if (data == "not jwt") {
       return feedApi;
@@ -488,6 +490,9 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
       if (data != "error") {
         FeedBaseModel a = FeedBaseModel(
           like: data["like"],
+          comment: data["comment"],
+          pathImg: data["pathImg"],
+          rule: data["rule"],
           message: data["messages"],
           createdAt: data["createdAt"],
         );
