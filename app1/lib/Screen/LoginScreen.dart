@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app1/Screen/Profile.dart';
+import 'package:app1/Screen/SettingUser.dart';
 import 'package:app1/chat-app/model/message_model.dart';
 
 import 'package:app1/main.dart';
@@ -191,6 +192,13 @@ class _LoginScreenState extends State<LoginScreen> {
                             messageProvider.userMessage(listMsgInit);
                             userProvider.userFriends(listFrInit);
                             userProvider.userHadChats(listHadChat);
+                            if (user.realName == "user") {
+                              print("---chưa nhập thông tin---mới ");
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SettingUser()));
+                            }
                             Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
