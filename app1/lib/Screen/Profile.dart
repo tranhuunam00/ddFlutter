@@ -39,18 +39,17 @@ class _ProfileState extends State<Profile> {
     final feedProvider = Provider.of<FeedProvider>(context, listen: false);
 
     String pathAvatar = userProvider.userP.avatarImg != null &&
-            userProvider.userP.avatarImg!.length != 0
+            userProvider.userP.avatarImg.length != 0
         ? SERVER_IP +
             "/upload/" +
             userProvider
-                .userP.avatarImg![userProvider.userP.avatarImg!.length - 1]
+                .userP.avatarImg[userProvider.userP.avatarImg.length - 1]
         : SERVER_IP + "/upload/avatarNull.jpg";
     String pathCover = userProvider.userP.coverImg != null &&
-            userProvider.userP.coverImg!.length != 0
+            userProvider.userP.coverImg.length != 0
         ? SERVER_IP +
             "/upload/" +
-            userProvider
-                .userP.coverImg![userProvider.userP.coverImg!.length - 1]
+            userProvider.userP.coverImg[userProvider.userP.coverImg.length - 1]
         : SERVER_IP + "/upload/avatarNull.jpg";
 
     void onImageSend(String path, String event, String jwt) async {
@@ -75,12 +74,12 @@ class _ProfileState extends State<Profile> {
           print(data);
           UserModel user = userProvider.userP;
           if (event == "avatar") {
-            List avatar = user.avatarImg!;
+            List avatar = user.avatarImg;
             avatar.add(data);
             user.avatarImg = avatar;
           }
           if (event == "cover") {
-            List cover = user.coverImg!;
+            List cover = user.coverImg;
             cover.add(data);
             user.coverImg = cover;
           }
@@ -309,11 +308,12 @@ class _ProfileState extends State<Profile> {
                               shrinkWrap:
                                   true, // You won't see infinite size error
                               children: frGirdView(userProvider.listFriendsP,
-                                  userProvider.userP.friend!)),
+                                  userProvider.userP.friend)),
                         ),
                         AppBTnStyle(
                             label: "Xem tất cả bạn bè",
                             onTap: () {
+                              print(userProvider.listFriendsP);
                               print("----xem tất cả bạn bè-----------");
                             }),
                         Divider(
@@ -453,8 +453,10 @@ class _ProfileState extends State<Profile> {
                     ),
                   );
                 }
+
                 return CardFeedStyle(
                     feed: feedProvider.listFeedsP[index - 4],
+                    ownFeedUser: userProvider.userP,
                     userOwnUse: userProvider.userP);
               })),
     );
@@ -516,9 +518,9 @@ List<Widget> frGirdView(Map<String, UserModel> inforFr, List listFr) {
       list.add(AvatarFriendBtn(
         id: inforFr[listFr[i]]!.id,
         frName: inforFr[listFr[i]]!.realName,
-        frImage: inforFr[listFr[i]]!.avatarImg == null
-            ? "avatarNull.jpg"
-            : inforFr[listFr[i]]!.avatarImg![0],
+        frImage: inforFr[listFr[i]]!.avatarImg.length > 0
+            ? inforFr[listFr[i]]!.avatarImg[0]!
+            : "avatarNull.jpg",
       ));
     }
   }

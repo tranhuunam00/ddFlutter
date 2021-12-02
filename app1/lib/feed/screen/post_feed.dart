@@ -46,8 +46,13 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
             "comment": [],
             "createdAt": feed.createdAt,
           }));
-      print(json.decode(response.body).toString());
-      return json.decode(response.body).toString();
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print(json.decode(response.body).toString());
+        return json.decode(response.body).toString();
+      } else {
+        return "error";
+      }
     }
 
     return DismissKeyboard(
@@ -80,7 +85,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                       sourceUserName: userProvider.userP.userName);
                   print(_textController.text);
                   String newIdFeed = await PostFeedFunction(feed);
-                  if (newIdFeed == "not jwt") {
+                  if (newIdFeed == "not jwt" || newIdFeed == "error") {
                     print(newIdFeed);
                   } else {
                     if (newIdFeed != "error") {

@@ -21,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   List<FeedBaseModel> listFeeds = [];
+  Map<String, UserModel> listUsers = {};
   Future fetchApiFeedInit(
       String sourceId, String jwt, String limit, String offset) async {
     try {
@@ -64,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ...fetchAllFeedFr
       //  fetchData(targetId, sourceId)
     ]);
-    if (data[0] == "not jwt" && data[0] == "error") {
+    if (data[0] == "not jwt" || data[0] == "error") {
       return listFeedsInit;
     } else {
       print("data 0");
@@ -103,7 +104,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final feedProvider = Provider.of<FeedProvider>(context, listen: false);
 
       List<FeedBaseModel> listFeedsInit = await getFeedInit(
-          userProvider.userP.id, userProvider.jwtP, userProvider.userP.friend!);
+          userProvider.userP.id, userProvider.jwtP, userProvider.userP.friend);
       List<FeedBaseModel> newListFeedOwnInit = [];
       List<FeedBaseModel> newListFeedFrInit = [];
 
@@ -137,7 +138,8 @@ class _HomeScreenState extends State<HomeScreen> {
     Size size = MediaQuery.of(context).size;
     ScrollController _scrollController = new ScrollController();
     List<FeedBaseModel> listFeedAll = [];
-
+    listUsers = userProvider.listFriendsP;
+    listUsers[userProvider.userP.id] = userProvider.userP;
     return Consumer<FeedProvider>(builder: (context, feedProvider, child) {
       if (feedProvider.listFeedsP.length > 0) {
         listFeedAll.addAll(feedProvider.listFeedsP);
@@ -198,12 +200,34 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: const EdgeInsets.only(left: 16.0),
                       child: CardFeedStyle(
                           feed: listFeedAll[index - 2],
+                          ownFeedUser: listUsers[
+                                      listFeedAll[index - 2].sourceUserId] !=
+                                  null
+                              ? listUsers[listFeedAll[index - 2].sourceUserId]!
+                              : UserModel(
+                                  friend: [],
+                                  hadMessageList: [],
+                                  coverImg: [],
+                                  friendConfirm: [],
+                                  friendRequest: [],
+                                  avatarImg: []),
                           userOwnUse: userProvider.userP),
                     )
                   : Padding(
                       padding: const EdgeInsets.only(right: 16.0),
                       child: CardFeedStyle(
                           feed: listFeedAll[index - 2],
+                          ownFeedUser: listUsers[
+                                      listFeedAll[index - 2].sourceUserId] !=
+                                  null
+                              ? listUsers[listFeedAll[index - 2].sourceUserId]!
+                              : UserModel(
+                                  friend: [],
+                                  hadMessageList: [],
+                                  coverImg: [],
+                                  friendConfirm: [],
+                                  friendRequest: [],
+                                  avatarImg: []),
                           userOwnUse: userProvider.userP),
                     );
             }),

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app1/chat-app/customs/avatar_card.dart';
 import 'package:app1/feed/model/feed_model.dart';
+import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
@@ -11,8 +12,6 @@ import "../ui.dart";
 import 'package:http/http.dart' as http;
 
 class CardFeedStyle extends StatefulWidget {
-  final int? numLine;
-
   final List<String> imagesList = [
     "assets/images/nature1.jpg",
     "assets/images/nature2.jpg",
@@ -24,11 +23,12 @@ class CardFeedStyle extends StatefulWidget {
   final FeedBaseModel feed;
   CardFeedStyle(
       {Key? key,
-      this.numLine = 5,
       required this.feed,
-      required this.userOwnUse})
+      required this.userOwnUse,
+      required this.ownFeedUser})
       : super(key: key);
   final UserModel userOwnUse;
+  final UserModel ownFeedUser;
   @override
   _CardFeedStyleState createState() => _CardFeedStyleState();
 }
@@ -44,7 +44,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
     super.initState();
     feedApi = widget.feed;
     for (int i = 0; i < feedApi.like.length; i++) {
-      if (feedApi.like![i] == widget.userOwnUse.id) {
+      if (feedApi.like[i] == widget.userOwnUse.id) {
         print("------đã like-------");
         isLike = true;
       }
@@ -304,7 +304,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          new Text(widget.feed.sourceUserName,
+                          new Text(widget.ownFeedUser.id,
                               style: AppStyles.h3
                                   .copyWith(fontWeight: FontWeight.bold)),
                           new Text("    23/09"),
@@ -333,14 +333,6 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                       child: FeedImagesContainer(widget.imagesList),
                     )
                   : Container(),
-              widget.numLine! > 4
-                  ? Center(
-                      heightFactor: 0.5,
-                      child: TextButton(
-                          onPressed: () {},
-                          child: Icon(Icons.arrow_downward_outlined)),
-                    )
-                  : Container(),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -364,7 +356,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                 children: [
                   TextButton.icon(
                       onPressed: () async {
-                        print(feedApi.like!.length);
+                        print(feedApi.like.length);
                         print("tên người đang dùng là : " +
                             widget.userOwnUse.userName);
                         print(widget.feed.feedId);
@@ -414,11 +406,15 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                               color: isLike ? Colors.blue : Colors.grey))),
                   TextButton.icon(
                       onPressed: () async {
-                        var result = await postApi(
-                            userProvider.jwtP,
-                            {"feedId": widget.feed.feedId, "event": "like"},
-                            "/feed/likeFeed");
-                        print(result);
+                        print(widget.ownFeedUser.id);
+                        print("bình luận");
+                        FeedBaseModel feed1 = widget.feed;
+                        print(widget.feed);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (builder) =>
+                                    CommentScreen(feed: widget.feed)));
                       },
                       icon: Icon(Icons.message_outlined, color: Colors.red),
                       label: Text("Bình luận"))

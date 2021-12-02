@@ -47,10 +47,21 @@ class _FriendProfileState extends State<FriendProfile> {
 
       if (inforFr.userName != "") {
         frOfFr = await getFriendUser(userProvider.jwtP,
-            "/user/allAvatarFr/" + inforFr.id, inforFr.friend!);
+            "/user/allAvatarFr/" + inforFr.id, inforFr.friend);
         if (mounted) {
+          bool isHadFeed;
           userProvider.inforFrP = inforFr;
-          feedProvider.listFeedsFrP = listFeedsInit;
+          // for(var i=0;i<=listFeedsInit.length;i++) {
+          //   for(var i=0;i<=feedProvider.listFeedsFrP.length;i++) {
+
+          //     if(feedProvider.listFeedsFrP[i]!=null){
+          //       if(feedProvider.listFeedsFrP[i].feedId==listFeedsInit[i].feedId){
+          //         bool
+          //       }
+          //     }
+          //   }
+          // }
+          // feedProvider.listFeedsFrP= listFeedsInit;
           setState(() {});
         }
       }
@@ -169,7 +180,7 @@ class _FriendProfileState extends State<FriendProfile> {
             result != "error" &&
             result != "not friend") {
           userProvider.listFriendsP.remove(widget.frId);
-          userProvider.userP.friend!.remove(widget.frId);
+          userProvider.userP.friend.remove(widget.frId);
           return "Kết bạn";
         } else {
           print(result);
@@ -183,7 +194,7 @@ class _FriendProfileState extends State<FriendProfile> {
             result != "had friendConfirm" &&
             result != "had friendRequest" &&
             result != "had friend") {
-          userProvider.userP.friendRequest!.add(widget.frId);
+          userProvider.userP.friendRequest.add(widget.frId);
           return "Đã gửi lời mời";
         } else {
           print(result);
@@ -197,8 +208,8 @@ class _FriendProfileState extends State<FriendProfile> {
             result != "had not request" &&
             result != "had not confirm" &&
             result != "had friend") {
-          userProvider.userP.friend!.add(widget.frId);
-          userProvider.userP.friendConfirm!.remove(widget.frId);
+          userProvider.userP.friend.add(widget.frId);
+          userProvider.userP.friendConfirm.remove(widget.frId);
           userProvider.listFriendsP[widget.frId] = UserModel(
               friend: [],
               friendConfirm: [],
@@ -206,7 +217,7 @@ class _FriendProfileState extends State<FriendProfile> {
               coverImg: [],
               hadMessageList: [],
               id: result["_id"].toString(),
-              avatarImg: [result["avatarImg"][0].toString],
+              avatarImg: result["avatarImg"],
               realName: result["realName"]);
           print("----đã kết bạn--");
           return "Bạn bè";
@@ -220,7 +231,7 @@ class _FriendProfileState extends State<FriendProfile> {
             result != "had not confirm" &&
             result != "had not request") {
           if (mounted) {
-            userProvider.userP.friendRequest!.remove(widget.frId);
+            userProvider.userP.friendRequest.remove(widget.frId);
             return "Kết bạn";
           }
         } else {
@@ -236,7 +247,7 @@ class _FriendProfileState extends State<FriendProfile> {
             result != "had not confirm" &&
             result != "had not request") {
           if (mounted) {
-            userProvider.userP.friendConfirm!.remove(widget.frId);
+            userProvider.userP.friendConfirm.remove(widget.frId);
             return "Kết bạn";
           }
         } else {
@@ -309,7 +320,7 @@ class _FriendProfileState extends State<FriendProfile> {
             list.add(AvatarFriendBtn(
               id: frOfFr[listFr[i]]!.id,
               frName: frOfFr[listFr[i]]!.realName,
-              frImage: frOfFr[listFr[i]]!.avatarImg![0],
+              frImage: frOfFr[listFr[i]]!.avatarImg[0],
             ));
           }
         }
@@ -319,16 +330,16 @@ class _FriendProfileState extends State<FriendProfile> {
     }
 
     if (userProvider.userP.friend != null &&
-        userProvider.userP.friend!.contains(widget.frId)) {
+        userProvider.userP.friend.contains(widget.frId)) {
       isFr = "Bạn bè";
     }
 
     if (userProvider.userP.friendConfirm != null &&
-        userProvider.userP.friendConfirm!.contains(widget.frId)) {
+        userProvider.userP.friendConfirm.contains(widget.frId)) {
       isFr = "Chấp nhận lời mời";
     }
     if (userProvider.userP.friendRequest != null &&
-        userProvider.userP.friendRequest!.contains(widget.frId)) {
+        userProvider.userP.friendRequest.contains(widget.frId)) {
       isFr = "Đã gửi lời mời";
     }
 
@@ -338,7 +349,7 @@ class _FriendProfileState extends State<FriendProfile> {
           child: ListView.builder(
               shrinkWrap: true,
               controller: _scrollController,
-              itemCount: feedProvider.listFeedsFrP.length + 3,
+              itemCount: listFeedsInit.length + 3,
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return Container(
@@ -356,13 +367,13 @@ class _FriendProfileState extends State<FriendProfile> {
                                 topLeft: Radius.circular(20)),
                           ),
                           child: userProvider.inforFrP.coverImg != null &&
-                                  userProvider.inforFrP.coverImg!.length > 0
+                                  userProvider.inforFrP.coverImg.length > 0
                               ? CachedNetworkImage(
                                   imageUrl: SERVER_IP +
                                       "/upload/" +
-                                      userProvider.inforFrP.coverImg![
+                                      userProvider.inforFrP.coverImg[
                                           userProvider
-                                                  .inforFrP.coverImg!.length -
+                                                  .inforFrP.coverImg.length -
                                               1],
                                   fit: BoxFit.fitWidth,
                                   placeholder: (context, url) =>
@@ -504,10 +515,14 @@ class _FriendProfileState extends State<FriendProfile> {
                     ],
                   );
                 }
-
-                return CardFeedStyle(
-                    feed: feedProvider.listFeedsFrP[index - 3],
-                    userOwnUse: inforFr);
+                if (listFeedsInit.length > 0) {
+                  return CardFeedStyle(
+                      feed: listFeedsInit[index - 3],
+                      ownFeedUser: inforFr,
+                      userOwnUse: inforFr);
+                } else {
+                  return Text("chưa có bài viết nào");
+                }
               })),
     );
   }

@@ -24,7 +24,6 @@ class LoadScreen extends StatefulWidget {
 }
 
 class _LoadScreenState extends State<LoadScreen> {
-  late Socket socket;
   int _counter = 0;
   bool isLoading = true;
   String jwt = "";
@@ -45,25 +44,6 @@ class _LoadScreenState extends State<LoadScreen> {
     _loadJwtAndUserInit();
   }
 
-  //--------------------connect socket và đăng nhập nếu oki-----------------------
-  void connect(String jwt, String id) {
-    print("---------begin connect.. socket..................");
-    socket = io(SERVER_IP, <String, dynamic>{
-      "transports": ["websocket"],
-      "autoConnect": false,
-      'cookie': "jwt=" + jwt,
-    });
-    socket.connect();
-    print(socket.connected);
-    socket.emit("signin", id);
-    socket.onConnect((data) {
-      print("connected");
-      socket.on("test", (msg) {
-        print(msg);
-      });
-    });
-  }
-
   //-------------------load jwt lưu trong local và chạy hàm gét userinit---------------------------
   void _loadJwtAndUserInit() async {
     final prefs = await SharedPreferences.getInstance();
@@ -77,11 +57,11 @@ class _LoadScreenState extends State<LoadScreen> {
       if (userInit.userName != "") {
         var result = await Future.wait([
           getFriendUser(
-              jwt, "/user/allAvatarFr/" + userInit.id, userInit.friend!),
-          getFriendUser(jwt, "/user/allInforHadChat", userInit.hadMessageList!)
+              jwt, "/user/allAvatarFr/" + userInit.id, userInit.friend),
+          getFriendUser(jwt, "/user/allInforHadChat", userInit.hadMessageList)
         ]);
         listMsgInit = await getAllMsgFr(jwt, 20, 0, "/message/allMsgFR",
-            userInit.id, userInit.hadMessageList!);
+            userInit.id, userInit.hadMessageList);
         listFrInit = result[0];
         listHadChat = result[1];
         setState(() {

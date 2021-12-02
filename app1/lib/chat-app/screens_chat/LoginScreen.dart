@@ -40,34 +40,33 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
     hadMessageInit = [];
 
     /// chuyen doi listFr thanh chat Model
-    for (var i = 0; i < userProvider.userP.friend!.length; i++) {
+    for (var i = 0; i < userProvider.userP.friend.length; i++) {
       if (userProvider.listFriendsP.length > 0) {
-        chatFriend[userProvider.userP.friend![i]] = ChatModel(
-            id: userProvider.userP.friend![i],
+        chatFriend[userProvider.userP.friend[i]] = ChatModel(
+            id: userProvider.userP.friend[i],
             userName: userProvider
-                .listFriendsP[userProvider.userP.friend![i]]!.realName,
+                .listFriendsP[userProvider.userP.friend[i]]!.realName,
             avatar: userProvider
-                .listFriendsP[userProvider.userP.friend![i]]!.avatarImg![0]);
+                .listFriendsP[userProvider.userP.friend[i]]!.avatarImg[0]);
       }
     }
     //chuyen doi du lieu hadChatMsg thanh chatmodel
     Map<String, List<MessageModel>> chatHad = messageProvider.listMessageP;
 
-    for (var i = 0; i < userProvider.userP.hadMessageList!.length; i++) {
+    for (var i = 0; i < userProvider.userP.hadMessageList.length; i++) {
       var a = chatHad[userProvider.userP.id +
           "/" +
-          userProvider.userP.hadMessageList![i]]![chatHad[
-                  userProvider.userP.id +
-                      "/" +
-                      userProvider.userP.hadMessageList![i]]!
+          userProvider.userP.hadMessageList[i]]![chatHad[userProvider.userP.id +
+                  "/" +
+                  userProvider.userP.hadMessageList[i]]!
               .length -
           1];
       hadMessageInit.add(ChatModel(
-          id: userProvider.userP.hadMessageList![i],
+          id: userProvider.userP.hadMessageList[i],
           currentMessage: a.message,
           time: a.time,
           userName: userProvider
-              .listHadChatP[userProvider.userP.hadMessageList![i]]!.realName));
+              .listHadChatP[userProvider.userP.hadMessageList[i]]!.realName));
     }
     hadMessageInit.sort((a, b) => b.time.compareTo(a.time));
     return Scaffold(
@@ -90,9 +89,9 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
                                     chatModel: hadMessageInit[index - 1],
                                     sourceChat: ChatModel(
                                         id: userProvider.userP.id,
-                                        avatar: userProvider.userP.avatarImg![
+                                        avatar: userProvider.userP.avatarImg[
                                             userProvider
-                                                    .userP.avatarImg!.length -
+                                                    .userP.avatarImg.length -
                                                 1]),
                                   )));
                     },
@@ -101,7 +100,7 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
                     ));
               }),
           //----------------------list avatar head -----------------
-          userProvider.userP.friend!.length > 0
+          userProvider.userP.friend.length > 0
               ? Column(
                   children: [
                     Container(
@@ -110,17 +109,17 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
                         color: Colors.white,
                         child: ListView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: userProvider.userP.friend!.length,
+                            itemCount: userProvider.userP.friend.length,
                             itemBuilder: (context, index) {
                               if (true)
                                 return InkWell(
                                     onTap: () {
                                       print("--- chon avatar----");
-                                      print(userProvider.userP.friend![index]);
+                                      print(userProvider.userP.friend[index]);
                                     },
                                     child: AvatarCard(
-                                        contact: chatFriend[userProvider
-                                            .userP.friend![index]]));
+                                        contact: chatFriend[
+                                            userProvider.userP.friend[index]]));
                               else
                                 return Container();
                             })),

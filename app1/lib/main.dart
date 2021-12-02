@@ -27,8 +27,7 @@ final UserModel userMain = UserModel(
     coverImg: [],
     avatarImg: [],
     hadMessageList: []);
-const SERVER_IP =
-    'http://ef10-2401-d800-5ee6-192e-3078-c758-1ac3-edbc.ngrok.io';
+const SERVER_IP = 'http://ff33-14-189-140-58.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -60,8 +59,8 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
             title: "app1",
             // home: ChatLoginScreen()
-            // home: LoadScreen()
-            home: CommentUser()
+            home: LoadScreen()
+            // home: Test123()
             // home: Test()
             // home: Test()
 

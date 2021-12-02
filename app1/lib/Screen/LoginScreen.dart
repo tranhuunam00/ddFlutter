@@ -47,11 +47,12 @@ class _LoginScreenState extends State<LoginScreen> {
           'Accept': 'application/json',
         },
         body: jsonEncode({"userName": userName, "password": password}));
-
-    var jwt = (res.body);
-    print(jwt);
-
-    return jwt;
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      var jwt = (res.body);
+      print(jwt);
+      return jwt;
+    }
+    return "error";
   }
 
   Future<UserModel> getUserJwt(String jwt) async {
@@ -72,6 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
               userName: data["userName"],
               email: data["email"],
               id: data["_id"],
+              realName: data["realName"],
               friend: data["friend"],
               friendRequest: data["friendRequest"],
               friendConfirm: data["friendConfirm"],
@@ -161,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             "userName: " + userName + " password: " + password);
                         var jwt = await attemptLogIn(userName, password);
 
-                        if (jwt != "") {
+                        if (jwt != "" && jwt != "isLogin" && jwt != "error") {
                           print("jwt: " + jwt);
                           await storage.write(key: "jwt", value: jwt);
                           final prefs = await SharedPreferences.getInstance();
@@ -179,11 +181,11 @@ class _LoginScreenState extends State<LoginScreen> {
                                 0,
                                 "/message/allMsgFR",
                                 user.id,
-                                user.hadMessageList!);
+                                user.hadMessageList);
                             listFrInit = await getFriendUser(jwt,
-                                "/user/allAvatarFr/" + user.id, user.friend!);
+                                "/user/allAvatarFr/" + user.id, user.friend);
                             listHadChat = await getFriendUser(jwt,
-                                "/user/allInforHadChat", user.hadMessageList!);
+                                "/user/allInforHadChat", user.hadMessageList);
                             print("user lấy đc khi login---------" +
                                 user.userName);
                             messageProvider.userMessage(listMsgInit);

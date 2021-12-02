@@ -11,10 +11,16 @@ import 'package:provider/provider.dart';
 
 class CameraViewPage extends StatelessWidget {
   const CameraViewPage(
-      {Key? key, this.path, this.onImageSend, this.file, this.event})
+      {Key? key,
+      this.path,
+      this.onImageSend,
+      this.file,
+      this.feedId,
+      this.event})
       : super(key: key);
   final String? path;
   final XFile? file;
+  final String? feedId;
   final String? event;
   final Function? onImageSend;
   static TextEditingController _controller = TextEditingController();
@@ -71,9 +77,13 @@ class CameraViewPage extends StatelessWidget {
                               if (onImageSend != null) {
                                 if (event == "avatar" || event == "cover") {
                                   onImageSend!(path, event, userProvider.jwtP);
-                                } else {
+                                }
+                                if (event == "message") {
                                   print("chạy hàm gửi");
                                   onImageSend!(path, userProvider.jwtP);
+                                }
+                                if (event == "comment") {
+                                  onImageSend!(path, userProvider.jwtP, feedId);
                                 }
                               }
 
