@@ -291,7 +291,9 @@ class _ProfileState extends State<Profile> {
                           children: [
                             Column(children: [
                               Text("Bạn bè", style: AppStyles.h4),
-                              Text(userProvider.listFriendsP.length.toString(),
+                              Text(
+                                  (userProvider.listFriendsP.length - 1)
+                                      .toString(),
                                   style: AppStyles.h4)
                             ]),
                             Icon(Icons.search)
@@ -511,7 +513,7 @@ class _ProfileState extends State<Profile> {
 
 List<Widget> frGirdView(Map<String, UserModel> inforFr, List listFr) {
   List<Widget> list = [];
-  if (inforFr[listFr[0]] == null && inforFr.length == 0) {
+  if (inforFr.length == 0) {
   } else {
     int pop = inforFr.length < 6 ? listFr.length : 6;
     for (var i = 0; i < pop; i++) {

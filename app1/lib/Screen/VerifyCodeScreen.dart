@@ -44,7 +44,10 @@ class _VerifyCode extends State<VerifyCode> {
           "userName": user.userName,
           "password": user.password,
           "email": user.email,
-          "token": token
+          "token": token,
+          "realName": user.realName,
+          "avatarImg": user.avatarImg,
+          "coverImg": user.coverImg,
         }));
 
     return json.decode(response.body).toString();
@@ -148,6 +151,7 @@ class _VerifyCode extends State<VerifyCode> {
                             print("token đã nhâp---  " + token);
                             if (widget.userCreate != null) {
                               print("----register chạy-------------");
+                              print(widget.userCreate!.realName);
                               String a = await registerConfirmFunction(
                                   widget.userCreate!, token);
                               if (a == "done") {
