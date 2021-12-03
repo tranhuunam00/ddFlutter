@@ -184,6 +184,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: InkWell(
                               child: Text("Bạn đang nghĩ gì"),
                               onTap: () {
+                                print(listFeedAll.length);
                                 Navigator.push(
                                         context,
                                         MaterialPageRoute(
@@ -195,41 +196,50 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               }
-              return index % 2 == 0
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 16.0),
-                      child: CardFeedStyle(
-                          feed: listFeedAll[index - 2],
-                          ownFeedUser: listUsers[
-                                      listFeedAll[index - 2].sourceUserId] !=
-                                  null
-                              ? listUsers[listFeedAll[index - 2].sourceUserId]!
-                              : UserModel(
-                                  friend: [],
-                                  hadMessageList: [],
-                                  coverImg: [],
-                                  friendConfirm: [],
-                                  friendRequest: [],
-                                  avatarImg: []),
-                          userOwnUse: userProvider.userP),
-                    )
-                  : Padding(
-                      padding: const EdgeInsets.only(right: 16.0),
-                      child: CardFeedStyle(
-                          feed: listFeedAll[index - 2],
-                          ownFeedUser: listUsers[
-                                      listFeedAll[index - 2].sourceUserId] !=
-                                  null
-                              ? listUsers[listFeedAll[index - 2].sourceUserId]!
-                              : UserModel(
-                                  friend: [],
-                                  hadMessageList: [],
-                                  coverImg: [],
-                                  friendConfirm: [],
-                                  friendRequest: [],
-                                  avatarImg: []),
-                          userOwnUse: userProvider.userP),
-                    );
+              if (listFeedAll.length != 0) {
+                return index % 2 == 0
+                    ? Padding(
+                        padding: const EdgeInsets.only(left: 16.0),
+                        child: CardFeedStyle(
+                            feed: listFeedAll[index - 2],
+                            ownFeedUser: listUsers[
+                                        listFeedAll[index - 2].sourceUserId] !=
+                                    null
+                                ? listUsers[
+                                    listFeedAll[index - 2].sourceUserId]!
+                                : UserModel(
+                                    friend: [],
+                                    hadMessageList: [],
+                                    coverImg: [],
+                                    friendConfirm: [],
+                                    friendRequest: [],
+                                    avatarImg: []),
+                            userOwnUse: userProvider.userP),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.only(right: 16.0),
+                        child: CardFeedStyle(
+                            feed: listFeedAll[index - 2],
+                            ownFeedUser: listUsers[
+                                        listFeedAll[index - 2].sourceUserId] !=
+                                    null
+                                ? listUsers[
+                                    listFeedAll[index - 2].sourceUserId]!
+                                : UserModel(
+                                    friend: [],
+                                    hadMessageList: [],
+                                    coverImg: [],
+                                    friendConfirm: [],
+                                    friendRequest: [],
+                                    avatarImg: []),
+                            userOwnUse: userProvider.userP),
+                      );
+              } else {
+                return Container(
+                    height: 300,
+                    color: Colors.amber,
+                    child: Text("Chưa có bài viết nào"));
+              }
             }),
       );
     });

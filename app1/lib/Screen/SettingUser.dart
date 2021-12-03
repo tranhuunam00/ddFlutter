@@ -1,13 +1,20 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'dart:ui';
 
+import 'package:app1/Screen/LoginScreen.dart';
+import 'package:app1/Screen/MainScreen.dart';
 import 'package:app1/Screen/Profile.dart';
+import 'package:app1/main.dart';
+import 'package:app1/provider/user_provider.dart';
 import 'package:app1/widgets/app_button.dart';
 import 'package:app1/widgets/app_button_icon.dart';
 import 'package:app1/widgets/dismit_keybord.dart';
 import 'package:app1/widgets/text_input_style.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 import '../ui.dart';
 
@@ -107,43 +114,20 @@ class _SettingUser extends State<SettingUser> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     return DismissKeyboard(
         child: Scaffold(
             resizeToAvoidBottomInset: false,
-            appBar: AppBar(
-              backgroundColor: AppColors.primaryColor,
-              title: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      print("Trở về ");
-                      Navigator.pushReplacement(context,
-                          MaterialPageRoute(builder: (builder) => Profile()));
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.only(right: 4),
-                      child: Icon(Icons.arrow_back,
-                          size: 30, color: Colors.black87),
-                    ),
-                  ), // nút trở về
-                  Text(
-                    "Thiết lập tài khoản",
-                    style: TextStyle(
-                        fontSize: 30,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black),
-                  )
-                ],
-              ),
-            ),
             body: Padding(
               padding: EdgeInsets.symmetric(vertical: 24, horizontal: 32),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     SizedBox(
-                      height: 4,
+                      height: 90,
                     ),
+                    Text("Thông tin cá nhân"),
                     Text(
                       "Họ và tên",
                       style:
@@ -359,24 +343,82 @@ class _SettingUser extends State<SettingUser> {
                     AppBTnStyle(
                         label: "Lưu cài đặt",
                         onTap: () async {
+                          String sex;
                           String selectTinh = valueChooseTinh;
                           print("Họ, Tên  ---  " + _inputNameController.text);
                           print("Tỉnh đã chọn là ---  " + selectTinh);
                           //  print("Huyện đã chọn là ---  " + selectTinh);
                           //  print("Xã đã chọn là ---  " + selectTinh);
                           print("Ngày sinh  ---  " + dateBirth);
-                          if (valueCheckSexBoy) print("Giới tính  --- Nam ");
-                          if (valueCheckSexBoy)
+                          if (valueCheckSexBoy) {
+                            sex = "Nam";
                             print("Giới tính  --- Nam ");
-                          else if (valueCheckSexGirl)
+                          } else if (valueCheckSexGirl) {
                             print("Giới tính  --- Nữ ");
-                          else
+                            sex = "Nữ";
+                          } else {
+                            sex = "Other";
                             print("Giới tính  ---  Khác ");
+                          }
+
                           log('Đã lưu cài đặt');
+                          var result = await PostApi(
+                              userProvider.jwtP,
+                              {
+                                "realName": _inputNameController.text,
+                                "sex": sex,
+                                "addressTinh": selectTinh,
+                                "addressDetails": "",
+                                "birthDate": dateBirth
+                              },
+                              "/user/setting");
+                          print("kết quả là ---------");
+                          if (result == "not jwt") {
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (builder) => LoginScreen()));
+                          }
+                          if (result == "done") {
+                            userProvider.userP.realName =
+                                _inputNameController.text;
+                            userProvider.userP.sex = sex;
+                            userProvider.userP.addressTinh = selectTinh;
+                            userProvider.userP.addressDetails = "";
+                            userProvider.userP.birthDate = dateBirth;
+                            if (_inputNameController.text != "user") {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (builder) => MainScreen()));
+                            }
+                          }
+                          print(result);
                         }),
                   ], //nút lưu
                 ),
               ),
             )));
+  }
+}
+
+Future PostApi(String jwt, data, String pathApi) async {
+  http.Response response;
+  print("----post---------" + pathApi);
+  response = await http.post(Uri.parse(SERVER_IP + pathApi),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt
+      },
+      body: jsonEncode(data));
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("-----kêt quả post--------");
+    print(json.decode(response.body).toString());
+    return json.decode(response.body);
+  } else {
+    print("---------------post lỗi---------");
+    return "error";
   }
 }

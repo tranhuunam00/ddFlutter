@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app1/Screen/SettingUser.dart';
 import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/friendUser.dart';
@@ -121,17 +122,26 @@ class _LoadScreenState extends State<LoadScreen> {
                                 userProvider.userHadChats(listHadChat);
                               }
                               print(userProvider.userP.userName);
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (builder) =>
-                                          userProvider.userP.userName != "" ||
-                                                  userInit.userName != ""
-                                              ? MainScreen()
-                                              : LoginScreen())).then(
-                                  (value) => setState(() {
-                                        isLoading = true;
-                                      }));
+                              print("realName");
+                              print(userProvider.userP.realName);
+                              if (userProvider.userP.realName == "user") {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) => SettingUser()));
+                              } else {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) =>
+                                            userProvider.userP.userName != "" ||
+                                                    userInit.userName != ""
+                                                ? MainScreen()
+                                                : LoginScreen())).then(
+                                    (value) => setState(() {
+                                          isLoading = true;
+                                        }));
+                              }
                             }
                           : null,
                       child: Image.asset(AppImages.nature)))
@@ -166,8 +176,14 @@ Future<UserModel> getUserJwt(String jwt) async {
             friendRequest: data["friendRequest"],
             friendConfirm: data["friendConfirm"],
             friend: data["friend"],
+            sex: data["sex"],
+            createdAt: data["createdAt"],
+            addressTinh: data["addressTinh"],
+            addressDetails: data["addressDetails"],
+            birthDate: data["birthDate"],
             hadMessageList: data["hadMessageList"],
             avatarImg: data["avatarImg"],
+            realName: data["realName"],
             coverImg: data["coverImg"]);
 
         return user;

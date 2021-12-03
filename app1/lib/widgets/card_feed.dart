@@ -454,6 +454,9 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
   Future fetchApiFindFeed(String sourceFeedId, String jwt) async {
     print("----chạy hàm get api feed---------------");
     try {
+      print("source feed id là ");
+      print(sourceFeedId);
+
       http.Response response;
       String path = SERVER_IP + '/feed/' + sourceFeedId;
       print(path);
@@ -465,7 +468,9 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
           'cookie': "jwt=" + jwt,
         },
       );
-      if (response.statusCode == 200) {
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        print("kết quả là feed ");
+        print(json.decode(response.body));
         return json.decode(response.body);
       } else {
         return FeedBaseModel(like: [], rule: [], comment: [], pathImg: []);
@@ -484,6 +489,9 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
       return feedApi;
     } else {
       if (data != "error") {
+        print("data:feed là");
+        print(data);
+        print(data["like"]);
         FeedBaseModel a = FeedBaseModel(
           like: data["like"],
           comment: data["comment"],
@@ -497,7 +505,6 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
         return feedApi;
       }
     }
-    return feedApi;
   }
 
   //--------------------------like và dislike-----------------

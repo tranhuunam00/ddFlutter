@@ -79,6 +79,11 @@ class _LoginScreenState extends State<LoginScreen> {
               friendRequest: data["friendRequest"],
               friendConfirm: data["friendConfirm"],
               avatarImg: data["avatarImg"],
+              sex: data["sex"],
+              createdAt: data["createdAt"],
+              addressTinh: data["addressTinh"],
+              addressDetails: data["addressDetails"],
+              birthDate: data["birthDate"],
               hadMessageList: data["hadMessageList"],
               coverImg: data["coverImg"]);
           return user;
@@ -198,11 +203,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (context) => SettingUser()));
+                            } else {
+                              Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => MainScreen()));
                             }
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => MainScreen()));
                           } else {
                             Navigator.push(
                                 context,

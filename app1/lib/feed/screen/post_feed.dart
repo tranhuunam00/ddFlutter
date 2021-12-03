@@ -358,12 +358,13 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                   rule: [],
                                   comment: [],
                                   pathImg: [],
+                                  feedId: newIdFeed,
                                   createdAt: DateTime.now().toString(),
                                   sourceUserId: userProvider.userP.id,
                                   message: _controller.text,
                                   sourceUserName: userProvider.userP.userName);
                               List<FeedBaseModel> b = feedProvider.listFeedsP;
-                              b.insert(0, feed);
+                              b.insert(0, a);
                               print("đã tạo mới bài viết rồi!");
                               feedProvider.userFeed(b);
                               Navigator.pop(context);
@@ -523,11 +524,6 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
     );
   }
 
-  @override
-  void dispose() {
-    print("dispose      chạy");
-    super.dispose();
-    // socket.disconnect();
-    // _scrollController.dispose();
-  }
+// _scrollController.dispose();
+
 }

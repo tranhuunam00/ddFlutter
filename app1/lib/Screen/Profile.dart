@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:app1/Screen/FriendProfile.dart';
 import 'package:app1/Screen/LoadScreen.dart';
 import 'package:app1/Screen/MainScreen.dart';
+import 'package:app1/Screen/SettingUser.dart';
 import 'package:app1/Screen/test3.dart';
 import 'package:app1/auth_social/google_sign_in.dart';
 import 'package:app1/chat-app/screens_chat/CameraView.dart';
@@ -232,7 +233,7 @@ class _ProfileState extends State<Profile> {
                   return Padding(
                     padding: const EdgeInsets.only(top: 32.0),
                     child: Center(
-                      child: Text(userProvider.userP.userName,
+                      child: Text(userProvider.userP.realName,
                           style: AppStyles.h2),
                     ),
                   );
@@ -266,13 +267,22 @@ class _ProfileState extends State<Profile> {
                         Row(
                           children: [
                             Icon(Icons.lock_clock),
-                            Text("   Bắt đầu từ 9/2021", style: AppStyles.h4),
+                            Text(
+                                "   Bắt đầu từ " + userProvider.userP.createdAt,
+                                style: AppStyles.h4),
                           ],
                         ),
                         Row(
                           children: [
                             Icon(Icons.badge),
                             Text("   Học tại đh Công Nghệ",
+                                style: AppStyles.h4),
+                          ],
+                        ),
+                        Row(
+                          children: [
+                            Icon(Icons.add_to_home_screen_sharp),
+                            Text("  Quê quán " + userProvider.userP.addressTinh,
                                 style: AppStyles.h4),
                           ],
                         ),
@@ -283,7 +293,11 @@ class _ProfileState extends State<Profile> {
                         AppBTnStyle(
                             label: "Cài đặt riêng tư",
                             onTap: () {
-                              print(feedProvider.listFeedsFrP[5].sourceUserId);
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (builder) => SettingUser()));
+                              // print(feedProvider.listFeedsFrP[5].sourceUserId);
                             }),
                         Divider(height: 60, color: Colors.black),
                         Row(
