@@ -44,13 +44,21 @@ class _VerifyCode extends State<VerifyCode> {
           "userName": user.userName,
           "password": user.password,
           "email": user.email,
+          "createdAt": user.createdAt,
+          "sex": user.sex,
+          "addressTinh": user.addressTinh,
+          "addressDetails": user.addressDetails,
+          "birthDate": user.birthDate,
           "token": token,
           "realName": user.realName,
           "avatarImg": user.avatarImg,
           "coverImg": user.coverImg,
         }));
-
-    return json.decode(response.body).toString();
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return json.decode(response.body).toString();
+    } else {
+      return "error";
+    }
   }
 
   Future<String> forgotConfirmFunction(

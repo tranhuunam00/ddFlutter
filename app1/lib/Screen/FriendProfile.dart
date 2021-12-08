@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:app1/chat-app/model/chat_modal.dart';
+import 'package:app1/chat-app/screens_chat/individual_chat.dart';
 import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
@@ -446,35 +448,65 @@ class _FriendProfileState extends State<FriendProfile> {
                           onPressed: () {},
                           icon: Icon(Icons.wysiwyg),
                           label: Text("   Xem chi tiết")),
-                      AppBTnStyle(
-                          label: isFr,
-                          onTap: () async {
-                            print("--- ấn vào nút bạn bè------------");
-                            await showModalBottomSheet<String>(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return Container(
-                                  height: 200,
-                                  child: Center(
-                                    child: Column(
-                                      // crossAxisAlignment:
-                                      //     CrossAxisAlignment.center,
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: <Widget>[
-                                        SizedBox(),
-                                        modalChild(""),
-                                        isFr == "Chấp nhận lời mời"
-                                            ? modalChild("Xóa lời mời")
-                                            : Container(),
-                                        SizedBox(),
-                                      ],
-                                    ),
-                                  ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          AppBTnStyle(
+                              label: "Nhắn tin",
+                              onTap: () {
+                                print("nhắn tin");
+                                ChatModel chatModel = ChatModel(
+                                  id: widget.frId,
+                                  userName: inforFr.userName,
+                                  avatar: inforFr
+                                      .avatarImg[inforFr.avatarImg.length - 1],
                                 );
-                              },
-                            );
-                          }),
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) => IndividualChat(
+                                              chatModel: chatModel,
+                                              sourceChat: ChatModel(
+                                                  id: userProvider.userP.id,
+                                                  avatar: userProvider.userP
+                                                      .avatarImg[userProvider
+                                                          .userP
+                                                          .avatarImg
+                                                          .length -
+                                                      1]),
+                                            )));
+                              }),
+                          AppBTnStyle(
+                              label: isFr,
+                              onTap: () async {
+                                print("--- ấn vào nút bạn bè------------");
+                                await showModalBottomSheet<String>(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return Container(
+                                      height: 200,
+                                      child: Center(
+                                        child: Column(
+                                          // crossAxisAlignment:
+                                          //     CrossAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: <Widget>[
+                                            SizedBox(),
+                                            modalChild(""),
+                                            isFr == "Chấp nhận lời mời"
+                                                ? modalChild("Xóa lời mời")
+                                                : Container(),
+                                            SizedBox(),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              }),
+                        ],
+                      ),
                       Divider(height: 60, color: Colors.black),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,

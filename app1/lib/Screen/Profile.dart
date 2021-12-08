@@ -268,7 +268,9 @@ class _ProfileState extends State<Profile> {
                           children: [
                             Icon(Icons.lock_clock),
                             Text(
-                                "   Bắt đầu từ " + userProvider.userP.createdAt,
+                                "   Bắt đầu từ " +
+                                    userProvider.userP.createdAt
+                                        .substring(4, 15),
                                 style: AppStyles.h4),
                           ],
                         ),

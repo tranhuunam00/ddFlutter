@@ -43,7 +43,12 @@ class UserCreateModel {
   late String token;
   late List hadMessageList;
   late String realName;
+  late String createdAt;
 
+  late String sex;
+  late String addressTinh;
+  late String addressDetails;
+  late String birthDate;
   late List avatarImg;
   late List coverImg;
   late List friendRequest;
@@ -52,6 +57,11 @@ class UserCreateModel {
       {this.userName = "",
       this.email = "",
       this.realName = "",
+      this.sex = "",
+      this.birthDate = "",
+      this.addressTinh = "",
+      this.createdAt = "",
+      this.addressDetails = "",
       this.password = "",
       required this.friend,
       this.token = "",
