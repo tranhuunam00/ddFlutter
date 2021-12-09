@@ -46,7 +46,7 @@ class ContactCard extends StatelessWidget {
           ]),
         ),
         title: Text(
-          contact != null ? contact!.userName : "userName",
+          contact != null ? contact!.realName : "userName",
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
         subtitle:

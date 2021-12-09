@@ -50,7 +50,7 @@ class AvatarCard extends StatelessWidget {
             SizedBox(
               height: 2,
             ),
-            Text(contact != null ? contact!.userName : "",
+            Text(contact != null ? contact!.realName : "",
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(fontSize: 12))

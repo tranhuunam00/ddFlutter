@@ -117,17 +117,67 @@ class _IndividualChatState extends State<IndividualChat> {
 
   //gui tin nhan......................................
   void sendMessage(
-      String message, String sourceId, String targetId, String path) {
-    socket.emit("message", {
-      "message": message,
-      "sourceId": sourceId,
-      "targetId": targetId,
-      "time": DateTime.now().toString(),
-      "path": path,
-    });
+      String message, String sourceId, String targetId, String path) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final messageProvider =
+        Provider.of<MessageProvider>(context, listen: false);
+    if (userProvider.userP.hadMessageList
+            .indexOf(widget.chatModel!.id.toString()) <
+        0) {
+      print("---đây là lần đầu nhắn tin ---");
+      print(userProvider.userP.hadMessageList);
+      var result = await PostApi(userProvider.jwtP,
+          {"frId": widget.chatModel!.id.toString()}, "/user/createHadMsg");
+      print("kết quả new user chat là");
+      print(result);
+      if (result == "done") {
+        userProvider.userP.hadMessageList.add(widget.chatModel!.id.toString());
+        MessageModel messageModel = MessageModel(
+            message: message,
+            path: path,
+            targetId: targetId,
+            sourceId: sourceId,
+            time: DateTime.now().toString());
 
-    setMessage(message, path, widget.chatModel!.id.toString(),
-        widget.sourceChat!.id.toString());
+        List<MessageModel> listMsg = [];
+        socket.emit("message", {
+          "message": message,
+          "sourceId": sourceId,
+          "targetId": targetId,
+          "time": DateTime.now().toString(),
+          "path": path,
+        });
+        listMsg.add(messageModel);
+        Map<String, List<MessageModel>> newMsg = messageProvider.listMessageP;
+        newMsg[sourceId + "/" + targetId] = listMsg;
+        userProvider.listHadChatP[targetId] = UserModel(
+            avatarImg: [widget.chatModel!.avatar],
+            hadMessageList: [],
+            friendConfirm: [],
+            friendRequest: [],
+            friend: [],
+            coverImg: [],
+            realName: widget.chatModel!.realName,
+            id: widget.chatModel!.id);
+        print("list cả người mới");
+        print(sourceId);
+        print(targetId);
+        print(newMsg[targetId + "/" + sourceId]);
+        print(userProvider.userP.hadMessageList);
+        messageProvider.userMessage(newMsg);
+      }
+    } else {
+      socket.emit("message", {
+        "message": message,
+        "sourceId": sourceId,
+        "targetId": targetId,
+        "time": DateTime.now().toString(),
+        "path": path,
+      });
+
+      setMessage(message, path, widget.chatModel!.id.toString(),
+          widget.sourceChat!.id.toString());
+    }
 
     // if (mounted) setState(() {});
   }
@@ -145,7 +195,7 @@ class _IndividualChatState extends State<IndividualChat> {
         time: DateTime.now().toString());
 
     List<MessageModel> listMsg = [];
-    messageProvider.listMessageP[sourceId + "/" + targetId]!;
+
     if (messageProvider.listMessageP[sourceId + "/" + targetId] != null) {
       listMsg = messageProvider.listMessageP[sourceId + "/" + targetId]!;
       listMsg.add(messageModel);
@@ -234,8 +284,14 @@ class _IndividualChatState extends State<IndividualChat> {
         _scrollController.animateTo(_scrollController.position.maxScrollExtent,
             duration: Duration(milliseconds: 100), curve: Curves.bounceIn);
       });
-      messages = messageProvider
-          .listMessageP[widget.sourceChat!.id + "/" + widget.chatModel!.id]!;
+      if (messageProvider.listMessageP[
+              widget.sourceChat!.id + "/" + widget.chatModel!.id] !=
+          null) {
+        messages = messageProvider
+            .listMessageP[widget.sourceChat!.id + "/" + widget.chatModel!.id]!;
+      }
+      print("message tổng là");
+      print(messages);
       return DismissKeyboard(
         child: Stack(children: [
           Image.asset("assets/images/background.png",
@@ -280,7 +336,7 @@ class _IndividualChatState extends State<IndividualChat> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(widget.chatModel!.userName,
+                            Text(widget.chatModel!.realName,
                                 style: TextStyle(
                                     fontSize: 18.5,
                                     fontWeight: FontWeight.bold)),
@@ -719,7 +775,6 @@ Future<dynamic> getApi(String jwt, String pathApi) async {
   }
 }
 
-
 ////////////////////////////////////////////////////////////////
 // getMessageInit(String jwt) async {
 //     String sourceId = widget.sourceChat!.id.toString();
@@ -767,3 +822,23 @@ Future<dynamic> getApi(String jwt, String pathApi) async {
 //       if (mounted) setState(() {});
 //     }
 //   }
+Future PostApi(String jwt, data, String pathApi) async {
+  http.Response response;
+  print("----post---------" + pathApi);
+  response = await http.post(Uri.parse(SERVER_IP + pathApi),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt
+      },
+      body: jsonEncode(data));
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("-----kêt quả post--------");
+    print(json.decode(response.body).toString());
+    return json.decode(response.body);
+  } else {
+    print("---------------post lỗi---------");
+    return "error";
+  }
+}

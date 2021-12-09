@@ -44,7 +44,7 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
       if (userProvider.listFriendsP.length > 0) {
         chatFriend[userProvider.userP.friend[i]] = ChatModel(
             id: userProvider.userP.friend[i],
-            userName: userProvider
+            realName: userProvider
                 .listFriendsP[userProvider.userP.friend[i]]!.realName,
             avatar: userProvider
                 .listFriendsP[userProvider.userP.friend[i]]!.avatarImg[0]);
@@ -65,7 +65,7 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
           id: userProvider.userP.hadMessageList[i],
           currentMessage: a.message,
           time: a.time,
-          userName: userProvider
+          realName: userProvider
               .listHadChatP[userProvider.userP.hadMessageList[i]]!.realName));
     }
     hadMessageInit.sort((a, b) => b.time.compareTo(a.time));

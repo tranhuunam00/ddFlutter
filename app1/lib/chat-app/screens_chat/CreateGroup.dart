@@ -14,11 +14,11 @@ class CreateGroup extends StatefulWidget {
 class _CreateGroupState extends State<CreateGroup> {
   List<ChatModel> contacts = [
     ChatModel(
-        userName: "Dev Stack",
+        realName: "Dev Stack",
         status: "A full stack developer",
         isSelect: false),
-    ChatModel(userName: "nam", status: "flutter", isSelect: false),
-    ChatModel(userName: "my", status: " developer", isSelect: true),
+    ChatModel(realName: "nam", status: "flutter", isSelect: false),
+    ChatModel(realName: "my", status: " developer", isSelect: true),
   ];
   List<ChatModel> groups = [];
   @override

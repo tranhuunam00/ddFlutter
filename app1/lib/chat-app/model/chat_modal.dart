@@ -1,5 +1,5 @@
 class ChatModel {
-  late String userName;
+  late String realName;
   late String icon;
   late bool isGroup;
   late String time;
@@ -11,7 +11,7 @@ class ChatModel {
 
   ChatModel({
     this.id = "",
-    this.userName = "",
+    this.realName = "",
     this.icon = "",
     this.isGroup = false,
     this.time = "",

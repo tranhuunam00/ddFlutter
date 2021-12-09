@@ -453,29 +453,35 @@ class _FriendProfileState extends State<FriendProfile> {
                         children: [
                           AppBTnStyle(
                               label: "Nhắn tin",
-                              onTap: () {
-                                print("nhắn tin");
-                                ChatModel chatModel = ChatModel(
-                                  id: widget.frId,
-                                  userName: inforFr.userName,
-                                  avatar: inforFr
-                                      .avatarImg[inforFr.avatarImg.length - 1],
-                                );
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (builder) => IndividualChat(
-                                              chatModel: chatModel,
-                                              sourceChat: ChatModel(
-                                                  id: userProvider.userP.id,
-                                                  avatar: userProvider.userP
-                                                      .avatarImg[userProvider
-                                                          .userP
-                                                          .avatarImg
-                                                          .length -
-                                                      1]),
-                                            )));
-                              }),
+                              onTap: inforFr.id == ""
+                                  ? null
+                                  : () {
+                                      print("nhắn tin");
+                                      ChatModel chatModel = ChatModel(
+                                        id: widget.frId,
+                                        realName: inforFr.realName,
+                                        avatar: inforFr.avatarImg[
+                                            inforFr.avatarImg.length - 1],
+                                      );
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (builder) =>
+                                                  IndividualChat(
+                                                    chatModel: chatModel,
+                                                    sourceChat: ChatModel(
+                                                        id: userProvider
+                                                            .userP.id,
+                                                        avatar: userProvider
+                                                                .userP
+                                                                .avatarImg[
+                                                            userProvider
+                                                                    .userP
+                                                                    .avatarImg
+                                                                    .length -
+                                                                1]),
+                                                  )));
+                                    }),
                           AppBTnStyle(
                               label: isFr,
                               onTap: () async {
