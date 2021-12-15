@@ -1,33 +1,71 @@
+import 'package:app1/Screen/FriendProfile.dart';
+import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class Notify_Card extends StatelessWidget {
-  const Notify_Card({Key? key}) : super(key: key);
-
+  const Notify_Card(
+      {Key? key,
+      required this.idUserSource,
+      required this.pathImgSource,
+      required this.realNameSource,
+      required this.type,
+      required this.isSeen,
+      required this.createdAt,
+      required this.content})
+      : super(key: key);
+  final String pathImgSource;
+  final String realNameSource;
+  final String idUserSource;
+  final String type;
+  final String content;
+  final String createdAt;
+  final bool isSeen;
   @override
   Widget build(BuildContext context) {
     return Column(
       children: [
         Container(
-          child: ListTile(
-              leading: CustomPaint(
-                child: CircleAvatar(
-                  radius: 26,
+          child: InkWell(
+            hoverColor: Colors.amber,
+            onTap: () {
+              print(pathImgSource);
+              print(idUserSource);
+              if (type == "addFr") {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (builder) =>
+                            FriendProfile(frId: idUserSource)));
+              }
+            },
+            child: ListTile(
+                leading: CustomPaint(
                   child: CircleAvatar(
+                    backgroundImage: AssetImage('assets/images/load.gif'),
                     radius: 26,
-                    backgroundColor: Colors.amber,
+                    child: CircleAvatar(
+                      radius: 26,
+                      backgroundImage:
+                          NetworkImage(SERVER_IP + "/upload/" + pathImgSource),
+                      backgroundColor: Colors.transparent,
+                    ),
                   ),
                 ),
-              ),
-              title: Text(
-                "Nam đã gửi tin nhắn cho bạn",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-              ),
-              subtitle: Text(
-                "Today at 8:00",
-                style: TextStyle(color: Colors.grey[900], fontSize: 11),
-              )),
+                title: Text(
+                  realNameSource + " đã " + type + " cho bạn",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                subtitle: Text(
+                  createdAt,
+                  style: TextStyle(color: Colors.grey[900], fontSize: 11),
+                )),
+          ),
+        ),
+        Divider(
+          height: 1,
+          thickness: 2,
         )
       ],
     );

@@ -6,8 +6,10 @@ import 'package:app1/chat-app/model/message_model.dart';
 
 import 'package:app1/main.dart';
 import 'package:app1/model/friendUser.dart';
+import 'package:app1/model/notifi_modal.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/message_provider.dart';
+import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
@@ -34,6 +36,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool isLoading = false;
   late FocusNode? myFocusNode;
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -108,6 +111,8 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
+
     final messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
     print(userMain.userName);
@@ -161,73 +166,119 @@ class _LoginScreenState extends State<LoginScreen> {
                       _passwordController.text.length >= 6 == true)
                   ? AppBTnStyle(
                       label: "Đăng nhập",
-                      onTap: () async {
-                        print(isValidInput);
-                        var userName = _userNameController.text;
-                        var password = _passwordController.text;
-                        print(
-                            "userName: " + userName + " password: " + password);
-                        var jwt = await attemptLogIn(userName, password);
+                      onTap: isLoading == false
+                          ? () async {
+                              isLoading = true;
+                              print(isValidInput);
+                              var userName = _userNameController.text;
+                              var password = _passwordController.text;
+                              print("userName: " +
+                                  userName +
+                                  " password: " +
+                                  password);
+                              var jwt = await attemptLogIn(userName, password);
+                              print("jwt: " + jwt);
+                              if (jwt != "" &&
+                                  jwt != "isLogin" &&
+                                  jwt != "error") {
+                                if (jwt.substring(36, 37) == ".") {
+                                  await storage.write(key: "jwt", value: jwt);
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  prefs.setString('jwt', jwt);
+                                  UserModel user = await getUserJwt(jwt);
+                                  if (user.userName != "") {
+                                    userProvider.userLogin(user, jwt);
+                                    Map<String, List<MessageModel>>
+                                        listMsgInit = {};
+                                    Map<String, UserModel> listFrInit = {};
+                                    Map<String, UserModel> listHadChat = {};
 
-                        if (jwt != "" && jwt != "isLogin" && jwt != "error") {
-                          print("jwt: " + jwt);
-                          await storage.write(key: "jwt", value: jwt);
-                          final prefs = await SharedPreferences.getInstance();
-                          prefs.setString('jwt', jwt);
-                          UserModel user = await getUserJwt(jwt);
-                          if (user.userName != "") {
-                            userProvider.userLogin(user, jwt);
-                            Map<String, List<MessageModel>> listMsgInit = {};
-                            Map<String, UserModel> listFrInit = {};
-                            Map<String, UserModel> listHadChat = {};
+                                    listMsgInit = await getAllMsgFr(
+                                        jwt,
+                                        20,
+                                        0,
+                                        "/message/allMsgFR",
+                                        user.id,
+                                        user.hadMessageList);
+                                    var result = await Future.wait([
+                                      getApi(
+                                          jwt, "/user/allAvatarFr/" + user.id),
+                                      getApi(jwt, "/user/allInforHadChat"),
+                                      getApi(
+                                          jwt,
+                                          "/notification/findLimit?limit=50&offset=0&targetUserId=" +
+                                              user.id)
+                                    ]);
+                                    listFrInit =
+                                        getFriendUser(result[0], user.friend);
+                                    listHadChat = getFriendUser(
+                                        result[1], user.hadMessageList);
+                                    var notifiInitNotAvatar =
+                                        getNotiifiUserInitNotAvatar(
+                                            result[2], jwt);
+                                    var userListResultApi = await Future.wait([
+                                      PostApi(
+                                          jwt,
+                                          {"listUser": notifiInitNotAvatar[1]},
+                                          "/user/listUser")
+                                    ]);
+                                    print("lấy user notifiInit");
+                                    print(userListResultApi[0]);
+                                    List<NotifiModel> notifiInit = [];
+                                    notifiInit = getNotiifiUserAll(
+                                        userListResultApi[0],
+                                        notifiInitNotAvatar[0],
+                                        notifiInitNotAvatar[1]);
 
-                            listMsgInit = await getAllMsgFr(
-                                jwt,
-                                20,
-                                0,
-                                "/message/allMsgFR",
-                                user.id,
-                                user.hadMessageList);
-                            listFrInit = await getFriendUser(jwt,
-                                "/user/allAvatarFr/" + user.id, user.friend);
-                            listHadChat = await getFriendUser(jwt,
-                                "/user/allInforHadChat", user.hadMessageList);
-                            print("user lấy đc khi login---------" +
-                                user.userName);
-                            messageProvider.userMessage(listMsgInit);
-                            userProvider.userFriends(listFrInit);
-                            userProvider.userHadChats(listHadChat);
-                            if (user.realName == "user") {
-                              print("---chưa nhập thông tin---mới ");
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => SettingUser()));
-                            } else {
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (context) => MainScreen()));
+                                    notifiProvider.userNotifi(notifiInit);
+                                    messageProvider.userMessage(listMsgInit);
+                                    userProvider.userFriends(listFrInit);
+                                    userProvider.userHadChats(listHadChat);
+                                    isLoading = false;
+
+                                    if (user.realName == "user") {
+                                      print("---chưa nhập thông tin---mới ");
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SettingUser()));
+                                    } else {
+                                      Navigator.pushReplacement(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) => MainScreen(
+                                                    UserId: user.id,
+                                                  )));
+                                    }
+                                  } else {
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (context) =>
+                                                LoginScreen()));
+                                  }
+                                } else {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => LoginScreen()));
+                                }
+                              } else {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => LoginScreen()));
+                              }
+                              // UserModel userTest = UserModel(userName: "linh tinh ");
+                              // userProvider.userLogin(userTest);
+                              // Navigator.pushReplacement(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //         builder: (context) => MainScreen()));
                             }
-                          } else {
-                            Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => LoginScreen()));
-                          }
-                        } else {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginScreen()));
-                        }
-                        // UserModel userTest = UserModel(userName: "linh tinh ");
-                        // userProvider.userLogin(userTest);
-                        // Navigator.pushReplacement(
-                        //     context,
-                        //     MaterialPageRoute(
-                        //         builder: (context) => MainScreen()));
-                      })
+                          : null)
                   : AppBTnStyle(
                       onTap: null,
                       color: Color.fromRGBO(255, 255, 255, 0.4),
@@ -323,12 +374,11 @@ Future<Map<String, List<MessageModel>>> getAllMsgFr(String jwt, int limit,
 }
 
 //----------------------lay thoong tin cua toan bo ban be---------------
-Future<Map<String, UserModel>> getFriendUser(
-    String jwt, String path, List listFr) async {
+getFriendUser(result, List listFr) {
   Map<String, UserModel> chatFriend = {};
 
   print("------chạy get avatar---------");
-  var result = await getApi(jwt, path);
+
   print("ket qua la :");
   print(result);
   if (result != "error" && result != "not jwt") {
@@ -366,4 +416,55 @@ Future<dynamic> getApi(String jwt, String pathApi) async {
   } else {
     return "error";
   }
+}
+
+getNotiifiUserAll(result, List<NotifiModel> notifiInit, List idSources) {
+  Map<String, UserModel> notifiUser = {};
+
+  if (result != "error" && result != "not jwt") {
+    for (var i = 0; i < idSources.length; i++) {
+      notifiUser[idSources[i]] = UserModel(
+          friend: [],
+          friendConfirm: [],
+          friendRequest: [],
+          coverImg: [],
+          hadMessageList: [],
+          id: result[i]["_id"],
+          avatarImg: result[i]["avatarImg"],
+          realName: result[i]["realName"]);
+    }
+  }
+  for (int i = 0; i < notifiInit.length; i++) {
+    notifiInit[i].sourceRealnameUser =
+        notifiUser[notifiInit[i].sourceIdUser]!.realName;
+    notifiInit[i].sourceUserPathImg =
+        notifiUser[notifiInit[i].sourceIdUser]!.avatarImg[
+            notifiUser[notifiInit[i].sourceIdUser]!.avatarImg.length - 1];
+  }
+  return notifiInit;
+}
+
+getNotiifiUserInitNotAvatar(result, String jwt) {
+  List<NotifiModel> notifiInit = [];
+  List<String> idSources = [];
+  print("------chạy get notifi Init---------");
+  print("ket qua la :");
+  print(result);
+  if (result != "error" && result != "not jwt") {
+    for (int i = 0; i < result.length; i++) {
+      NotifiModel not = NotifiModel(
+        type: result[i]["type"],
+        sourceIdUser: result[i]["sourceUserId"],
+        targetIdUser: result[i]["targetUserId"],
+        content: result[i]["content"],
+        isSeen: result[i]["isSeen"],
+        createdAt: result[i]["createdAt"],
+      );
+      if (idSources.indexOf(result[i]["sourceUserId"]) < 0) {
+        idSources.add(result[i]["sourceUserId"]);
+      }
+      notifiInit.add(not);
+    }
+  }
+  return [notifiInit, idSources];
 }

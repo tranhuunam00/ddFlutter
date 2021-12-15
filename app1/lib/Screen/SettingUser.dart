@@ -390,7 +390,8 @@ class _SettingUser extends State<SettingUser> {
                               Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
-                                      builder: (builder) => MainScreen()));
+                                      builder: (builder) => MainScreen(
+                                          UserId: userProvider.userP.id)));
                             }
                           }
                           print(result);

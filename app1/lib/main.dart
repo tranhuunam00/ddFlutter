@@ -5,6 +5,7 @@ import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
+import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/test_emoji.dart';
 import 'package:camera/camera.dart';
@@ -27,7 +28,7 @@ final UserModel userMain = UserModel(
     coverImg: [],
     avatarImg: [],
     hadMessageList: []);
-const SERVER_IP = 'http://cf69-171-255-114-69.ngrok.io';
+const SERVER_IP = 'http://36f7-113-184-15-220.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -54,6 +55,9 @@ class MyApp extends StatelessWidget {
           }),
           ChangeNotifierProvider(create: (context) {
             return FeedProvider();
+          }),
+          ChangeNotifierProvider(create: (context) {
+            return NotifiProvider();
           })
         ],
         child: MaterialApp(

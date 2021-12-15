@@ -7,9 +7,11 @@ import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/chat-app/screens_chat/LoginScreen.dart';
 import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/main.dart';
+import 'package:app1/model/notifi_modal.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
+import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -21,10 +23,8 @@ import './HomeScreen.dart';
 import 'package:http/http.dart' as http;
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({
-    Key? key,
-  }) : super(key: key);
-
+  const MainScreen({Key? key, required this.UserId}) : super(key: key);
+  final String UserId;
   @override
   _MainScreenState createState() => _MainScreenState();
 }
@@ -32,22 +32,27 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   int _numberNotifications = 0;
+  bool isSigninSocket = true;
   late Socket socket;
   //----------connetc socket--------------------------------------------
-  void connect(String jwt, String id) {
+  void connect(String id) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     print("begin connect....................");
     socket = io(SERVER_IP, <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
-      'cookie': "jwt=" + jwt,
     });
     socket.connect();
     print(socket.connected);
     socket.emit("signin", id);
     socket.onConnect((data) {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+      final messageProvider =
+          Provider.of<MessageProvider>(context, listen: false);
+      final notifiProvider =
+          Provider.of<NotifiProvider>(context, listen: false);
       socket.on("test", (feed) {
-        final userProvider = Provider.of<UserProvider>(context, listen: false);
         if (mounted) {
           print("---chạy setstate- số thông báo--");
           setListFeedP(feed);
@@ -56,16 +61,132 @@ class _MainScreenState extends State<MainScreen> {
           print(feed);
         }
       });
-      socket.on("message", (msg) {
+      socket.on("message", (msg) async {
+        if (userProvider.userP.hadMessageList.indexOf(msg["sourceId"]) < 0) {
+          userProvider.userP.hadMessageList.add(msg["sourceId"]);
+          messageProvider.listMessageP;
+          var result =
+              await getApi(userProvider.jwtP, "/user/" + msg["sourceId"]);
+          if (result != "not jwt" && result != "error") {
+            userProvider.listHadChatP[msg["sourceId"]] = UserModel(
+                friend: [],
+                hadMessageList: [],
+                coverImg: [],
+                friendConfirm: [],
+                friendRequest: [],
+                realName: result["realName"],
+                id: result["_id"],
+                avatarImg: result["avatarImg"]);
+          }
+          messageProvider
+              .listMessageP[msg["targetId"] + "/" + msg["sourceId"]] = [];
+        }
+        print("message");
+        print(msg);
         if (mounted) {
           setState(() {
             setListMessageP(msg);
             _numberNotifications = _numberNotifications + 1;
           });
-          print(msg);
         }
       });
       socket.on("likeFeed", (msg) {});
+      socket.on("handleFr", (data) async {
+        print(data);
+        print(data["type"]);
+        print("type là là là");
+        if (data["type"] == "removeFrRequest") {
+          userProvider.userP.friendConfirm.remove(data["sourceUserId"]);
+        }
+        if (data["type"] == "removeFrConfirm") {
+          userProvider.userP.friendRequest.remove(data["sourceUserId"]);
+
+          if (mounted) {
+            setState(() {});
+          }
+        }
+
+        if (data["type"] == "removeFriend") {
+          userProvider.userP.friend.remove(data["sourceUserId"]);
+          userProvider.listFriendsP.remove(data["sourceUserId"]);
+
+          if (mounted) {
+            setState(() {});
+          }
+        }
+        if (data["type"] == "confirmFr") {
+          List<NotifiModel> notifiInit = [];
+          userProvider.userP.friend.add(data["sourceUserId"]);
+          userProvider.userP.friendRequest.remove(data["sourceUserId"]);
+          notifiInit = notifiProvider.listNotifiP;
+          var result =
+              await getApi(userProvider.jwtP, "/user/" + data["sourceUserId"]);
+          print("kết quả result là");
+          print(result);
+          if (result != "not jwt" && result != "error") {
+            userProvider.listFriendsP[data["sourceUserId"]] = UserModel(
+                friend: [],
+                hadMessageList: [],
+                coverImg: [],
+                friendConfirm: [],
+                friendRequest: [],
+                avatarImg: result["avatarImg"],
+                id: data["sourceUserId"],
+                realName: result["realName"]);
+            notifiInit.insert(
+                0,
+                NotifiModel(
+                  type: data["type"],
+                  createdAt: data["createdAt"],
+                  isSeen: false,
+                  content: data["content"] == null ? "" : data["content"],
+                  sourceRealnameUser: result["realName"],
+                  sourceUserPathImg: result["avatarImg"]
+                      [result["avatarImg"].length - 1],
+                  sourceIdUser: data["sourceUserId"],
+                  targetIdUser: data["targetUserId"],
+                ));
+
+            notifiProvider.userNotifi(notifiInit);
+            if (mounted) {
+              setState(() {
+                _numberNotifications = _numberNotifications + 1;
+              });
+            }
+          }
+        }
+        if (data["type"] == "addFr") {
+          List<NotifiModel> notifiInit = [];
+          userProvider.userP.friendConfirm.add(data["sourceUserId"]);
+          notifiInit = notifiProvider.listNotifiP;
+          var result =
+              await getApi(userProvider.jwtP, "/user/" + data["sourceUserId"]);
+          print("kết quả result là");
+          print(result);
+          if (result != "error" && result != "not jwt") {
+            notifiInit.insert(
+                0,
+                NotifiModel(
+                  type: data["type"],
+                  createdAt: data["createdAt"],
+                  isSeen: false,
+                  content: data["content"] == null ? "" : data["content"],
+                  sourceRealnameUser: result["realName"],
+                  sourceUserPathImg: result["avatarImg"]
+                      [result["avatarImg"].length - 1],
+                  sourceIdUser: data["sourceUserId"],
+                  targetIdUser: data["targetUserId"],
+                ));
+
+            notifiProvider.userNotifi(notifiInit);
+            if (mounted) {
+              setState(() {
+                _numberNotifications = _numberNotifications + 1;
+              });
+            }
+          }
+        }
+      });
     });
   }
 
@@ -165,11 +286,11 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
+    connect(widget.UserId);
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final prefs = await SharedPreferences.getInstance();
       String jwt = await (prefs.getString('jwt') ?? "");
-      connect(jwt, userProvider.userP.id);
     });
   }
 
@@ -246,5 +367,26 @@ class _MainScreenState extends State<MainScreen> {
           iconSize: 26,
           elevation: 5),
     );
+  }
+}
+
+Future<dynamic> getApi(String jwt, String pathApi) async {
+  print("--------get Api---------" + pathApi);
+  print(jwt);
+  var res = await http.get(
+    Uri.parse(SERVER_IP + pathApi),
+    headers: {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+      'cookie': "jwt=" + jwt,
+    },
+  );
+  if (res.statusCode == 200 || res.statusCode == 201) {
+    var data = json.decode(res.body);
+    print("result " + pathApi);
+    print(data);
+    return data;
+  } else {
+    return "error";
   }
 }

@@ -6,6 +6,7 @@ import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/feed_provider.dart';
+import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/ui.dart';
 import 'package:app1/widgets/app_button.dart';
@@ -36,7 +37,7 @@ class _FriendProfileState extends State<FriendProfile> {
   List<FeedBaseModel> listFeedsInit = [];
   Map<String, UserModel> frOfFr = {};
   String isFr = "Kết bạn";
-
+  bool isTontai = true;
   @override
   void initState() {
     super.initState();
@@ -64,6 +65,11 @@ class _FriendProfileState extends State<FriendProfile> {
           //   }
           // }
           // feedProvider.listFeedsFrP= listFeedsInit;
+          setState(() {});
+        }
+      } else {
+        isTontai = false;
+        if (mounted) {
           setState(() {});
         }
       }
@@ -133,6 +139,8 @@ class _FriendProfileState extends State<FriendProfile> {
 //------------------get infor cua ownFr------------
   Future<UserModel> getInforFr(String jwt, String id) async {
     var data = await getApi(jwt, "/user/" + id);
+    print("kết quả của get info Fr");
+    print(data);
     if (data != "not jwt" && data != "error") {
       if (data["userName"] != null) {
         UserModel user = UserModel(
@@ -177,7 +185,10 @@ class _FriendProfileState extends State<FriendProfile> {
     Future<String> addFr(String isFrTextModal, String jwt, String id) async {
       if (isFrTextModal == "Hủy kết bạn") {
         print("huy ket bạn");
-        var result = await getApi(jwt, "/user/removeFriend/" + id);
+        var result = await PostApi(
+            jwt,
+            {"createdAt": DateTime.now().toString()},
+            "/user/removeFriend/" + id);
         if (result != "not jwt" &&
             result != "error" &&
             result != "not friend") {
@@ -190,7 +201,8 @@ class _FriendProfileState extends State<FriendProfile> {
       }
       if (isFrTextModal == "Gửi yêu cầu kết bạn") {
         print("ket bạn");
-        var result = await getApi(jwt, "/user/addfr/" + id);
+        var result = await PostApi(
+            jwt, {"createdAt": DateTime.now().toString()}, "/user/addfr/" + id);
         if (result != "not jwt" &&
             result != "error" &&
             result != "had friendConfirm" &&
@@ -204,7 +216,10 @@ class _FriendProfileState extends State<FriendProfile> {
       }
       if (isFrTextModal == "Đồng ý kết bạn") {
         print("ket bạn");
-        var result = await getApi(jwt, "/user/addfrConfirm/" + id);
+        var result = await PostApi(
+            jwt,
+            {"createdAt": DateTime.now().toString()},
+            "/user/addfrConfirm/" + id);
         if (result != "not jwt" &&
             result != "error" &&
             result != "had not request" &&
@@ -227,7 +242,10 @@ class _FriendProfileState extends State<FriendProfile> {
       }
       if (isFrTextModal == "Hủy lời mời") {
         print("hủy ket bạn");
-        var result = await getApi(jwt, "/user/removeFrRequest/" + id);
+        var result = await PostApi(
+            jwt,
+            {"createdAt": DateTime.now().toString()},
+            "/user/removeFrRequest/" + id);
         if (result != "not jwt" &&
             result != "error" &&
             result != "had not confirm" &&
@@ -243,7 +261,10 @@ class _FriendProfileState extends State<FriendProfile> {
 
       if (isFrTextModal == "Xóa lời mời") {
         print("ket bạn");
-        var result = await getApi(jwt, "/user/removeFrConfirm/" + id);
+        var result = await PostApi(
+            jwt,
+            {"createdAt": DateTime.now().toString()},
+            "/user/removeFrConfirm/" + id);
         if (result != "not jwt" &&
             result != "error" &&
             result != "had not confirm" &&
@@ -260,7 +281,7 @@ class _FriendProfileState extends State<FriendProfile> {
       return "error";
     }
 
-    Widget modalChild(String? textIsFr) {
+    Widget modalChild(String isFr, String? textIsFr) {
       String text = "";
       if (isFr == "Bạn bè") {
         text = "Hủy kết bạn";
@@ -331,238 +352,266 @@ class _FriendProfileState extends State<FriendProfile> {
       return list;
     }
 
-    if (userProvider.userP.friend != null &&
-        userProvider.userP.friend.contains(widget.frId)) {
-      isFr = "Bạn bè";
-    }
+    getIsFr(userProvider) {
+      if (userProvider.userP.friend != null &&
+          userProvider.userP.friend.contains(widget.frId)) {
+        return "Bạn bè";
+      }
 
-    if (userProvider.userP.friendConfirm != null &&
-        userProvider.userP.friendConfirm.contains(widget.frId)) {
-      isFr = "Chấp nhận lời mời";
-    }
-    if (userProvider.userP.friendRequest != null &&
-        userProvider.userP.friendRequest.contains(widget.frId)) {
-      isFr = "Đã gửi lời mời";
+      if (userProvider.userP.friendConfirm != null &&
+          userProvider.userP.friendConfirm.contains(widget.frId)) {
+        return "Chấp nhận lời mời";
+      }
+      if (userProvider.userP.friendRequest != null &&
+          userProvider.userP.friendRequest.contains(widget.frId)) {
+        return "Đã gửi lời mời";
+      }
+      return "Kết bạn";
     }
 
     return Scaffold(
-      body: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: ListView.builder(
-              shrinkWrap: true,
-              controller: _scrollController,
-              itemCount: listFeedsInit.length + 3,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Container(
-                    height: size.height / 3,
-                    child: Stack(
-                      children: [
-                        Container(
-                          height: size.height / 9 * 2,
-                          width: size.width,
-                          clipBehavior: Clip.hardEdge,
-                          decoration: BoxDecoration(
-                            color: Colors.red,
-                            borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(20.0),
-                                topLeft: Radius.circular(20)),
-                          ),
-                          child: userProvider.inforFrP.coverImg != null &&
-                                  userProvider.inforFrP.coverImg.length > 0
-                              ? CachedNetworkImage(
-                                  imageUrl: SERVER_IP +
-                                      "/upload/" +
-                                      userProvider.inforFrP.coverImg[
-                                          userProvider
-                                                  .inforFrP.coverImg.length -
-                                              1],
-                                  fit: BoxFit.fitWidth,
-                                  placeholder: (context, url) =>
-                                      CircularProgressIndicator(),
-                                  errorWidget: (context, url, error) =>
-                                      Icon(Icons.error),
-                                )
-                              : Image.asset(
-                                  "assets/images/nature.jpg",
-                                  fit: BoxFit.cover,
-                                ),
-                        ),
-                        Positioned(
-                            left: ((size.width - 16) - (size.height - 16) / 6) /
-                                    2 -
-                                4,
-                            right: null,
-                            top: size.height / 36 * 5,
-                            child: CircleAvatar(
-                              radius: 78,
-                              backgroundImage:
-                                  AssetImage('assets/images/load.gif'),
-                              child: CircleAvatar(
-                                radius: 75,
-                                backgroundImage: userProvider
-                                                .inforFrP.avatarImg !=
-                                            null &&
-                                        userProvider.inforFrP.avatarImg.length >
-                                            0
-                                    ? NetworkImage(SERVER_IP +
+        body: Padding(
+            padding: const EdgeInsets.all(4.0),
+            child: ListView.builder(
+                shrinkWrap: true,
+                controller: _scrollController,
+                itemCount: listFeedsInit.length + 3,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Container(
+                      height: size.height / 3,
+                      child: Stack(
+                        children: [
+                          Container(
+                            height: size.height / 9 * 2,
+                            width: size.width,
+                            clipBehavior: Clip.hardEdge,
+                            decoration: BoxDecoration(
+                              color: Colors.red,
+                              borderRadius: BorderRadius.only(
+                                  topRight: Radius.circular(20.0),
+                                  topLeft: Radius.circular(20)),
+                            ),
+                            child: userProvider.inforFrP.coverImg != null &&
+                                    userProvider.inforFrP.coverImg.length > 0
+                                ? CachedNetworkImage(
+                                    imageUrl: SERVER_IP +
                                         "/upload/" +
-                                        userProvider.inforFrP.avatarImg[
+                                        userProvider.inforFrP.coverImg[
                                             userProvider
-                                                    .inforFrP.avatarImg.length -
-                                                1])
-                                    : NetworkImage(
-                                        SERVER_IP + "/upload/avatarNull.jpg"),
-                                backgroundColor: Colors.transparent,
-                              ),
-                            )),
-                        //------camera bia--------------------------
-                      ],
-                    ),
-                  );
-                }
-                if (index == 1) {
-                  return Padding(
-                    padding: const EdgeInsets.only(top: 32.0),
-                    child: Center(
-                      child: Text(inforFr.userName, style: AppStyles.h2),
-                    ),
-                  );
-                }
-                if (index == 2) {
-                  return Column(
-                    children: [
-                      Row(
-                        children: [
-                          Icon(Icons.lock_clock),
-                          Text("   Bắt đầu từ 9/2021", style: AppStyles.h4),
+                                                    .inforFrP.coverImg.length -
+                                                1],
+                                    fit: BoxFit.fitWidth,
+                                    placeholder: (context, url) =>
+                                        CircularProgressIndicator(),
+                                    errorWidget: (context, url, error) =>
+                                        Icon(Icons.error),
+                                  )
+                                : Image.asset(
+                                    "assets/images/nature.jpg",
+                                    fit: BoxFit.cover,
+                                  ),
+                          ),
+                          Positioned(
+                              left:
+                                  ((size.width - 16) - (size.height - 16) / 6) /
+                                          2 -
+                                      4,
+                              right: null,
+                              top: size.height / 36 * 5,
+                              child: CircleAvatar(
+                                radius: 78,
+                                backgroundImage:
+                                    AssetImage('assets/images/load.gif'),
+                                child: CircleAvatar(
+                                  radius: 75,
+                                  backgroundImage: userProvider
+                                                  .inforFrP.avatarImg !=
+                                              null &&
+                                          userProvider
+                                                  .inforFrP.avatarImg.length >
+                                              0
+                                      ? NetworkImage(SERVER_IP +
+                                          "/upload/" +
+                                          userProvider.inforFrP.avatarImg[
+                                              userProvider.inforFrP.avatarImg
+                                                      .length -
+                                                  1])
+                                      : NetworkImage(
+                                          SERVER_IP + "/upload/avatarNull.jpg"),
+                                  backgroundColor: Colors.transparent,
+                                ),
+                              )),
+                          //------camera bia--------------------------
                         ],
                       ),
-                      Row(
+                    );
+                  }
+                  if (isTontai) {
+                    if (index == 1) {
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 32.0),
+                        child: Center(
+                          child: Text(inforFr.userName, style: AppStyles.h2),
+                        ),
+                      );
+                    }
+                    if (index == 2) {
+                      return Column(
                         children: [
-                          Icon(Icons.badge),
-                          Text("   Học tại đh Công Nghệ", style: AppStyles.h4),
-                        ],
-                      ),
-                      TextButton.icon(
-                          onPressed: () {},
-                          icon: Icon(Icons.wysiwyg),
-                          label: Text("   Xem chi tiết")),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          AppBTnStyle(
-                              label: "Nhắn tin",
-                              onTap: inforFr.id == ""
-                                  ? null
-                                  : () {
-                                      print("nhắn tin");
-                                      ChatModel chatModel = ChatModel(
-                                        id: widget.frId,
-                                        realName: inforFr.realName,
-                                        avatar: inforFr.avatarImg[
-                                            inforFr.avatarImg.length - 1],
-                                      );
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (builder) =>
-                                                  IndividualChat(
-                                                    chatModel: chatModel,
-                                                    sourceChat: ChatModel(
-                                                        id: userProvider
-                                                            .userP.id,
-                                                        avatar: userProvider
-                                                                .userP
-                                                                .avatarImg[
-                                                            userProvider
+                          Row(
+                            children: [
+                              Icon(Icons.lock_clock),
+                              Text("   Bắt đầu từ 9/2021", style: AppStyles.h4),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.badge),
+                              Text("   Học tại đh Công Nghệ",
+                                  style: AppStyles.h4),
+                            ],
+                          ),
+                          TextButton.icon(
+                              onPressed: () {},
+                              icon: Icon(Icons.wysiwyg),
+                              label: Text("   Xem chi tiết")),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              AppBTnStyle(
+                                  label: "Nhắn tin",
+                                  onTap: inforFr.id == ""
+                                      ? null
+                                      : () {
+                                          print("nhắn tin");
+                                          ChatModel chatModel = ChatModel(
+                                            id: widget.frId,
+                                            realName: inforFr.realName,
+                                            avatar: inforFr.avatarImg[
+                                                inforFr.avatarImg.length - 1],
+                                          );
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (builder) =>
+                                                      IndividualChat(
+                                                        chatModel: chatModel,
+                                                        sourceChat: ChatModel(
+                                                            id: userProvider
+                                                                .userP.id,
+                                                            avatar: userProvider
                                                                     .userP
-                                                                    .avatarImg
-                                                                    .length -
-                                                                1]),
-                                                  )));
-                                    }),
-                          AppBTnStyle(
-                              label: isFr,
-                              onTap: () async {
-                                print("--- ấn vào nút bạn bè------------");
-                                await showModalBottomSheet<String>(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return Container(
-                                      height: 200,
-                                      child: Center(
-                                        child: Column(
-                                          // crossAxisAlignment:
-                                          //     CrossAxisAlignment.center,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: <Widget>[
-                                            SizedBox(),
-                                            modalChild(""),
-                                            isFr == "Chấp nhận lời mời"
-                                                ? modalChild("Xóa lời mời")
-                                                : Container(),
-                                            SizedBox(),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                );
+                                                                    .avatarImg[
+                                                                userProvider
+                                                                        .userP
+                                                                        .avatarImg
+                                                                        .length -
+                                                                    1]),
+                                                      )));
+                                        }),
+                              Consumer<UserProvider>(
+                                  builder: (context, userProvider, child) {
+                                return AppBTnStyle(
+                                    label: getIsFr(userProvider),
+                                    onTap: () async {
+                                      print(
+                                          "--- ấn vào nút bạn bè------------");
+                                      await showModalBottomSheet<String>(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return Container(
+                                            height: 200,
+                                            child: Center(
+                                              child: Column(
+                                                // crossAxisAlignment:
+                                                //     CrossAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: <Widget>[
+                                                  SizedBox(),
+                                                  modalChild(
+                                                      getIsFr(userProvider),
+                                                      ""),
+                                                  isFr == "Chấp nhận lời mời"
+                                                      ? modalChild(
+                                                          getIsFr(userProvider),
+                                                          "Xóa lời mời")
+                                                      : Container(),
+                                                  SizedBox(),
+                                                ],
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                      );
+                                    });
                               }),
+                            ],
+                          ),
+                          Divider(height: 60, color: Colors.black),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(children: [
+                                Text("Bạn bè", style: AppStyles.h4),
+                                Text(frOfFr.length.toString(),
+                                    style: AppStyles.h4)
+                              ]),
+                              Icon(Icons.search)
+                            ],
+                          ),
+                          userProvider.inforFrP.friend.length > 0
+                              ? Material(
+                                  child: GridView.count(
+                                      crossAxisCount: 3,
+                                      crossAxisSpacing: 4,
+                                      mainAxisSpacing: 4,
+                                      childAspectRatio: 4 / 5,
+                                      physics:
+                                          NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+                                      shrinkWrap:
+                                          true, // You won't see infinite size error
+                                      children: frGirdView(
+                                          frOfFr,
+                                          userProvider.inforFrP.friend != null
+                                              ? userProvider.inforFrP.friend
+                                              : [])),
+                                )
+                              : Container(),
+                          userProvider.inforFrP.friend.length > 0
+                              ? AppBTnStyle(
+                                  label: "Xem tất cả bạn bè",
+                                  onTap: () {
+                                    print(isFr);
+                                    print(userProvider.userP.friend);
+                                  })
+                              : Container(),
+                          Divider(
+                            height: 60,
+                            color: Colors.black,
+                          ),
                         ],
-                      ),
-                      Divider(height: 60, color: Colors.black),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(children: [
-                            Text("Bạn bè", style: AppStyles.h4),
-                            Text(frOfFr.length.toString(), style: AppStyles.h4)
-                          ]),
-                          Icon(Icons.search)
-                        ],
-                      ),
-                      Material(
-                        child: GridView.count(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 4,
-                            mainAxisSpacing: 4,
-                            childAspectRatio: 4 / 5,
-                            physics:
-                                NeverScrollableScrollPhysics(), // to disable GridView's scrolling
-                            shrinkWrap:
-                                true, // You won't see infinite size error
-                            children: frGirdView(
-                                frOfFr,
-                                userProvider.inforFrP.friend != null
-                                    ? userProvider.inforFrP.friend
-                                    : [])),
-                      ),
-                      AppBTnStyle(
-                          label: "Xem tất cả bạn bè",
-                          onTap: () {
-                            print(isFr);
-                            print(userProvider.userP.friend);
-                          }),
-                      Divider(
-                        height: 60,
-                        color: Colors.black,
-                      ),
-                    ],
-                  );
-                }
-                if (listFeedsInit.length > 0) {
-                  return CardFeedStyle(
-                      feed: listFeedsInit[index - 3],
-                      ownFeedUser: inforFr,
-                      userOwnUse: inforFr);
-                } else {
-                  return Text("chưa có bài viết nào");
-                }
-              })),
-    );
+                      );
+                    }
+                    if (listFeedsInit.length > 0) {
+                      return CardFeedStyle(
+                          feed: listFeedsInit[index - 3],
+                          ownFeedUser: inforFr,
+                          userOwnUse: inforFr);
+                    } else {
+                      return Text("chưa có bài viết nào");
+                    }
+                  } else {
+                    if (index == 2) {
+                      return Expanded(
+                          child:
+                              Center(child: Text("tài khoản không tồn tại")));
+                    }
+                    return Container();
+                  }
+                })));
   }
 }
 
@@ -583,6 +632,27 @@ Future<dynamic> getApi(String jwt, String pathApi) async {
     print(data);
     return data;
   } else {
+    return "error";
+  }
+}
+
+Future PostApi(String jwt, data, String pathApi) async {
+  http.Response response;
+  print("----post---------" + pathApi);
+  response = await http.post(Uri.parse(SERVER_IP + pathApi),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt
+      },
+      body: jsonEncode(data));
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("-----kêt quả post--------");
+    print(json.decode(response.body).toString());
+    return json.decode(response.body);
+  } else {
+    print("---------------post lỗi---------");
     return "error";
   }
 }

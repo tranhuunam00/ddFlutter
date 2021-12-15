@@ -147,24 +147,38 @@ class _IndividualChatState extends State<IndividualChat> {
           "time": DateTime.now().toString(),
           "path": path,
         });
-        listMsg.add(messageModel);
-        Map<String, List<MessageModel>> newMsg = messageProvider.listMessageP;
-        newMsg[sourceId + "/" + targetId] = listMsg;
-        userProvider.listHadChatP[targetId] = UserModel(
-            avatarImg: [widget.chatModel!.avatar],
-            hadMessageList: [],
-            friendConfirm: [],
-            friendRequest: [],
-            friend: [],
-            coverImg: [],
-            realName: widget.chatModel!.realName,
-            id: widget.chatModel!.id);
-        print("list cả người mới");
-        print(sourceId);
-        print(targetId);
-        print(newMsg[targetId + "/" + sourceId]);
-        print(userProvider.userP.hadMessageList);
-        messageProvider.userMessage(newMsg);
+        var msg = await PostApi(
+            userProvider.jwtP,
+            {
+              "message": message,
+              "sourceId": sourceId,
+              "targetId": targetId,
+              "time": DateTime.now().toString(),
+              "path": path,
+            },
+            "/message");
+        print("post tin nhắn hú");
+        print(msg);
+        if (msg == "done") {
+          listMsg.add(messageModel);
+          Map<String, List<MessageModel>> newMsg = messageProvider.listMessageP;
+          newMsg[sourceId + "/" + targetId] = listMsg;
+          userProvider.listHadChatP[targetId] = UserModel(
+              avatarImg: [widget.chatModel!.avatar],
+              hadMessageList: [],
+              friendConfirm: [],
+              friendRequest: [],
+              friend: [],
+              coverImg: [],
+              realName: widget.chatModel!.realName,
+              id: widget.chatModel!.id);
+          print("list cả người mới");
+          print(sourceId);
+          print(targetId);
+          print(newMsg[targetId + "/" + sourceId]);
+          print(userProvider.userP.hadMessageList);
+          messageProvider.userMessage(newMsg);
+        }
       }
     } else {
       socket.emit("message", {
@@ -174,6 +188,18 @@ class _IndividualChatState extends State<IndividualChat> {
         "time": DateTime.now().toString(),
         "path": path,
       });
+      var msg = await PostApi(
+          userProvider.jwtP,
+          {
+            "message": message,
+            "sourceId": sourceId,
+            "targetId": targetId,
+            "time": DateTime.now().toString(),
+            "path": path,
+          },
+          "/message");
+      print("post tin nhắn hú");
+      print(msg);
 
       setMessage(message, path, widget.chatModel!.id.toString(),
           widget.sourceChat!.id.toString());

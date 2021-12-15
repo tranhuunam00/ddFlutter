@@ -69,69 +69,73 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
               .listHadChatP[userProvider.userP.hadMessageList[i]]!.realName));
     }
     hadMessageInit.sort((a, b) => b.time.compareTo(a.time));
-    return Scaffold(
-        appBar: AppBar(),
-        body: Stack(children: [
-          ListView.builder(
-              itemCount: hadMessageInit.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return Container(height: hadMessageInit.length > 0 ? 90 : 10);
-                }
-                return InkWell(
-                    onTap: () {
-                      print("--- chon avatar----");
-                      print(hadMessageInit[index - 1].id);
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (builder) => IndividualChat(
-                                    chatModel: hadMessageInit[index - 1],
-                                    sourceChat: ChatModel(
-                                        id: userProvider.userP.id,
-                                        avatar: userProvider.userP.avatarImg[
-                                            userProvider
-                                                    .userP.avatarImg.length -
-                                                1]),
-                                  )));
-                    },
-                    child: ContactCard(
-                      contact: hadMessageInit[index - 1],
-                    ));
-              }),
-          //----------------------list avatar head -----------------
-          userProvider.userP.friend.length > 0
-              ? Column(
-                  children: [
-                    Container(
-                        height: 80,
-                        width: MediaQuery.of(context).size.width,
-                        color: Colors.white,
-                        child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: userProvider.userP.friend.length,
-                            itemBuilder: (context, index) {
-                              if (true)
-                                return InkWell(
-                                    onTap: () {
-                                      print("--- chon avatar----");
-                                      print(userProvider.userP.friend[index]);
-                                    },
-                                    child: AvatarCard(
-                                        contact: chatFriend[
-                                            userProvider.userP.friend[index]]));
-                              else
-                                return Container();
-                            })),
-                    Divider(
-                      thickness: 1,
-                    )
-                  ],
-                )
-              : Container(
-                  height: 0,
-                ),
-        ]));
+    return Consumer<MessageProvider>(
+        builder: (context, messageProvider, child) {
+      return Scaffold(
+          appBar: AppBar(),
+          body: Stack(children: [
+            ListView.builder(
+                itemCount: hadMessageInit.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Container(
+                        height: hadMessageInit.length > 0 ? 90 : 10);
+                  }
+                  return InkWell(
+                      onTap: () {
+                        print("--- chon avatar----");
+                        print(hadMessageInit[index - 1].id);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (builder) => IndividualChat(
+                                      chatModel: hadMessageInit[index - 1],
+                                      sourceChat: ChatModel(
+                                          id: userProvider.userP.id,
+                                          avatar: userProvider.userP.avatarImg[
+                                              userProvider
+                                                      .userP.avatarImg.length -
+                                                  1]),
+                                    )));
+                      },
+                      child: ContactCard(
+                        contact: hadMessageInit[index - 1],
+                      ));
+                }),
+            //----------------------list avatar head -----------------
+            userProvider.userP.friend.length > 0
+                ? Column(
+                    children: [
+                      Container(
+                          height: 80,
+                          width: MediaQuery.of(context).size.width,
+                          color: Colors.white,
+                          child: ListView.builder(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: userProvider.userP.friend.length,
+                              itemBuilder: (context, index) {
+                                if (true)
+                                  return InkWell(
+                                      onTap: () {
+                                        print("--- chon avatar----");
+                                        print(userProvider.userP.friend[index]);
+                                      },
+                                      child: AvatarCard(
+                                          contact: chatFriend[userProvider
+                                              .userP.friend[index]]));
+                                else
+                                  return Container();
+                              })),
+                      Divider(
+                        thickness: 1,
+                      )
+                    ],
+                  )
+                : Container(
+                    height: 0,
+                  ),
+          ]));
+    });
   }
 }
 

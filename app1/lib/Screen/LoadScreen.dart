@@ -4,8 +4,10 @@ import 'package:app1/Screen/SettingUser.dart';
 import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/friendUser.dart';
+import 'package:app1/model/notifi_modal.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/message_provider.dart';
+import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -26,6 +28,7 @@ class LoadScreen extends StatefulWidget {
 
 class _LoadScreenState extends State<LoadScreen> {
   int _counter = 0;
+  bool isBtnLoad = false;
   bool isLoading = true;
   String jwt = "";
   UserModel userInit = UserModel(
@@ -38,7 +41,7 @@ class _LoadScreenState extends State<LoadScreen> {
   Map<String, List<MessageModel>> listMsgInit = {};
   Map<String, UserModel> listFrInit = {};
   Map<String, UserModel> listHadChat = {};
-
+  List<NotifiModel> notifiInit = [];
   @override
   void initState() {
     super.initState();
@@ -57,16 +60,36 @@ class _LoadScreenState extends State<LoadScreen> {
       print(userInit);
       if (userInit.userName != "") {
         var result = await Future.wait([
-          getFriendUser(
-              jwt, "/user/allAvatarFr/" + userInit.id, userInit.friend),
-          getFriendUser(jwt, "/user/allInforHadChat", userInit.hadMessageList)
+          getApi(jwt, "/user/allAvatarFr/" + userInit.id),
+          getApi(jwt, "/user/allInforHadChat"),
+          getApi(
+              jwt,
+              "/notification/findLimit?limit=50&offset=0&targetUserId=" +
+                  userInit.id)
         ]);
+
         listMsgInit = await getAllMsgFr(jwt, 20, 0, "/message/allMsgFR",
             userInit.id, userInit.hadMessageList);
-        listFrInit = result[0];
-        listHadChat = result[1];
+        listFrInit = getFriendUser(result[0], userInit.friend);
+        listHadChat = getFriendUser(result[1], userInit.hadMessageList);
+        var notifiInitNotAvatar = getNotiifiUserInitNotAvatar(result[2], jwt);
+        var userListResultApi = await Future.wait([
+          PostApi(jwt, {"listUser": notifiInitNotAvatar[1]}, "/user/listUser")
+        ]);
+        print("lấy user notifiInit");
+        print(userListResultApi[0]);
+        notifiInit = getNotiifiUserAll(userListResultApi[0],
+            notifiInitNotAvatar[0], notifiInitNotAvatar[1]);
+        isLoading = false;
         setState(() {
           jwt = (prefs.getString('jwt') ?? "");
+        });
+      }
+    }
+    {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
         });
       }
     }
@@ -75,10 +98,12 @@ class _LoadScreenState extends State<LoadScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
+
     final messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
 
-    Future.delayed(const Duration(milliseconds: 4000), () {
+    Future.delayed(const Duration(milliseconds: 5000), () {
       setState(() {
         isLoading = false;
       });
@@ -120,6 +145,7 @@ class _LoadScreenState extends State<LoadScreen> {
                                 messageProvider.userMessage(listMsgInit);
                                 userProvider.userFriends(listFrInit);
                                 userProvider.userHadChats(listHadChat);
+                                notifiProvider.userNotifi(notifiInit);
                               }
                               print(userProvider.userP.userName);
                               print("realName");
@@ -133,11 +159,12 @@ class _LoadScreenState extends State<LoadScreen> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (builder) =>
-                                            userProvider.userP.userName != "" ||
-                                                    userInit.userName != ""
-                                                ? MainScreen()
-                                                : LoginScreen())).then(
+                                        builder: (builder) => userProvider
+                                                        .userP.userName !=
+                                                    "" ||
+                                                userInit.userName != ""
+                                            ? MainScreen(UserId: userInit.id)
+                                            : LoginScreen())).then(
                                     (value) => setState(() {
                                           isLoading = true;
                                         }));
@@ -214,7 +241,7 @@ Future<Map<String, List<MessageModel>>> getAllMsgFr(String jwt, int limit,
   print("ket qua la :");
   print(result);
 
-  if (result != "error" && result != "not listFrjwt") {
+  if (result != "error" && result != "not jwt") {
     for (var i = 0; i < hadMessageList.length; i++) {
       List msg = result[sourceUserId + "/" + hadMessageList[i]];
       List<MessageModel> output = [];
@@ -225,7 +252,6 @@ Future<Map<String, List<MessageModel>>> getAllMsgFr(String jwt, int limit,
             message: msg[j]["message"],
             targetId: msg[j]["targetId"],
             sourceId: msg[j]["sourceId"]);
-
         output.add(a);
       }
       output.sort((a, b) => a.time.compareTo(b.time));
@@ -237,12 +263,11 @@ Future<Map<String, List<MessageModel>>> getAllMsgFr(String jwt, int limit,
 }
 
 //----------------------lay thoong tin cua toan bo ban be---------------
-Future<Map<String, UserModel>> getFriendUser(
-    String jwt, String path, List listFr) async {
+getFriendUser(result, List listFr) {
   Map<String, UserModel> chatFriend = {};
 
   print("------chạy get avatar---------");
-  var result = await getApi(jwt, path);
+
   print("ket qua la :");
   print(result);
   if (result != "error" && result != "not jwt") {
@@ -259,6 +284,58 @@ Future<Map<String, UserModel>> getFriendUser(
     }
   }
   return chatFriend;
+}
+
+///lấy  các thông báo của user-------------
+getNotiifiUserInitNotAvatar(result, String jwt) {
+  List<NotifiModel> notifiInit = [];
+  List<String> idSources = [];
+  print("------chạy get notifi Init---------");
+  print("ket qua la :");
+  print(result);
+  if (result != "error" && result != "not jwt") {
+    for (int i = 0; i < result.length; i++) {
+      NotifiModel not = NotifiModel(
+        type: result[i]["type"],
+        sourceIdUser: result[i]["sourceUserId"],
+        targetIdUser: result[i]["targetUserId"],
+        content: result[i]["content"],
+        isSeen: result[i]["isSeen"],
+        createdAt: result[i]["createdAt"],
+      );
+      if (idSources.indexOf(result[i]["sourceUserId"]) < 0) {
+        idSources.add(result[i]["sourceUserId"]);
+      }
+      notifiInit.add(not);
+    }
+  }
+  return [notifiInit, idSources];
+}
+
+getNotiifiUserAll(result, List<NotifiModel> notifiInit, List idSources) {
+  Map<String, UserModel> notifiUser = {};
+
+  if (result != "error" && result != "not jwt") {
+    for (var i = 0; i < idSources.length; i++) {
+      notifiUser[idSources[i]] = UserModel(
+          friend: [],
+          friendConfirm: [],
+          friendRequest: [],
+          coverImg: [],
+          hadMessageList: [],
+          id: result[i]["_id"],
+          avatarImg: result[i]["avatarImg"],
+          realName: result[i]["realName"]);
+    }
+  }
+  for (int i = 0; i < notifiInit.length; i++) {
+    notifiInit[i].sourceRealnameUser =
+        notifiUser[notifiInit[i].sourceIdUser]!.realName;
+    notifiInit[i].sourceUserPathImg =
+        notifiUser[notifiInit[i].sourceIdUser]!.avatarImg[
+            notifiUser[notifiInit[i].sourceIdUser]!.avatarImg.length - 1];
+  }
+  return notifiInit;
 }
 
 Future<dynamic> getApi(String jwt, String pathApi) async {
