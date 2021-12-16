@@ -597,9 +597,9 @@ class _FriendProfileState extends State<FriendProfile> {
                     }
                     if (listFeedsInit.length > 0) {
                       return CardFeedStyle(
-                          feed: listFeedsInit[index - 3],
-                          ownFeedUser: inforFr,
-                          userOwnUse: inforFr);
+                        feed: listFeedsInit[index - 3],
+                        ownFeedUser: inforFr,
+                      );
                     } else {
                       return Text("chưa có bài viết nào");
                     }

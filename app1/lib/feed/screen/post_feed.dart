@@ -82,36 +82,6 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
     }
   }
 
-  //gửi hình ảnh................................
-  void onImageSend(String path, String jwt) async {
-    isVisible = true;
-    print("image.............: ${path}");
-    var request = http.MultipartRequest(
-        "POST", Uri.parse(SERVER_IP + "/file/img/upload"));
-    request.files.add(await http.MultipartFile.fromPath("img", path));
-    request.headers.addAll(
-        {"Content-type": "multipart/form-data", "cookie": "jwt=" + jwt});
-
-    http.StreamedResponse response = await request.send();
-
-    var httpResponse = await http.Response.fromStream(response);
-    print(httpResponse.statusCode);
-    if (httpResponse.statusCode == 201 || httpResponse.statusCode == 200) {
-      var data = json.decode(httpResponse.body).toString();
-      print(" ");
-      print(data);
-      photopath = path;
-      for (var i = 0; i < popTime; i++) {
-        if (mounted) Navigator.pop(context);
-      }
-
-      if (mounted)
-        setState(() {
-          popTime = 0;
-        });
-    }
-  }
-
   _onBackspacePressed() {
     if (mounted) {
       _controller
@@ -191,41 +161,49 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                             ),
                           ),
                           onTap: () async {
+                            List<String> listPathSv = [];
                             print(listFileImage);
-                            // print(_controller.text);
-                            // FeedBaseModel feed = new FeedBaseModel(
-                            //     like: [],
-                            //     rule: [],
-                            //     comment: [],
-                            //     pathImg: [],
-                            //     createdAt: DateTime.now().toString(),
-                            //     sourceUserId: userProvider.userP.id,
-                            //     message: _controller.text,
-                            //     sourceUserName: userProvider.userP.userName);
-                            // print('ND : ' + _controller.text);
-                            // String newIdFeed = await PostFeedFunction(feed);
-                            // if (newIdFeed == "not jwt") {
-                            //   print(newIdFeed);
-                            // } else {
-                            //   if (newIdFeed != "error") {
-                            //     FeedBaseModel a = new FeedBaseModel(
-                            //         like: [],
-                            //         rule: [],
-                            //         comment: [],
-                            //         pathImg: [],
-                            //         feedId: newIdFeed,
-                            //         createdAt: DateTime.now().toString(),
-                            //         sourceUserId: userProvider.userP.id,
-                            //         message: _controller.text,
-                            //         sourceUserName:
-                            //             userProvider.userP.userName);
-                            //     List<FeedBaseModel> b = feedProvider.listFeedsP;
-                            //     b.insert(0, a);
-                            //     print("đã tạo mới bài viết rồi!");
-                            //     feedProvider.userFeed(b);
-                            //     Navigator.pop(context);
-                            //   }
-                            // }
+                            if (listFileImage != null) {
+                              if (listFileImage!.length > 0) {
+                                listPathSv = await onImageSend(
+                                    listFileImage!, userProvider.jwtP);
+                              }
+                            }
+
+                            print(_controller.text);
+                            FeedBaseModel feed = new FeedBaseModel(
+                                like: [],
+                                rule: [],
+                                comment: [],
+                                pathImg: listPathSv,
+                                createdAt: DateTime.now().toString(),
+                                sourceUserId: userProvider.userP.id,
+                                message: _controller.text,
+                                sourceUserName: userProvider.userP.userName);
+                            print('ND : ' + _controller.text);
+                            String newIdFeed = await PostFeedFunction(feed);
+                            if (newIdFeed == "not jwt") {
+                              print(newIdFeed);
+                            } else {
+                              if (newIdFeed != "error") {
+                                FeedBaseModel a = new FeedBaseModel(
+                                    like: [],
+                                    rule: [],
+                                    comment: [],
+                                    pathImg: listPathSv,
+                                    feedId: newIdFeed,
+                                    createdAt: DateTime.now().toString(),
+                                    sourceUserId: userProvider.userP.id,
+                                    message: _controller.text,
+                                    sourceUserName:
+                                        userProvider.userP.userName);
+                                List<FeedBaseModel> b = feedProvider.listFeedsP;
+                                b.insert(0, a);
+                                print("đã tạo mới bài viết rồi!");
+                                feedProvider.userFeed(b);
+                                Navigator.pop(context);
+                              }
+                            }
                           },
                         )
                       : InkWell(
@@ -784,11 +762,13 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                       print("chuyen sang ảnh................................");
                       final List<XFile>? selectedFile =
                           await _picker.pickMultiImage();
-                      if (selectedFile!.isNotEmpty) {
-                        listFileImage!.addAll(selectedFile);
-                        dem = listFileImage!.length;
-                        print("Số ảnh chọn là " + dem.toString());
-                        setState(() {});
+                      if (selectedFile != null) {
+                        if (selectedFile.isNotEmpty) {
+                          listFileImage!.addAll(selectedFile);
+                          dem = listFileImage!.length;
+                          print("Số ảnh chọn là " + dem.toString());
+                          setState(() {});
+                        }
                       }
                     },
                   ),
@@ -873,5 +853,58 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
         ],
       ),
     );
+  }
+}
+
+Future<List<String>> onImageSend(List<XFile> file, String jwt) async {
+  List<String> result = [];
+  var request = http.MultipartRequest(
+    "POST",
+    Uri.parse(SERVER_IP + "/file/uploadFiles"),
+  );
+  request.fields["eventChangeImgUser"] = "feed";
+
+  request.headers
+      .addAll({"Content-type": "multipart/form-data", "cookie": "jwt=" + jwt});
+
+  for (int i = 0; i < file.length; i++) {
+    request.files.add(await http.MultipartFile.fromPath("img", file[i].path));
+  }
+
+  http.StreamedResponse response = await request.send();
+  var httpResponse = await http.Response.fromStream(response);
+  if (httpResponse.statusCode == 200 || httpResponse.statusCode == 201) {
+    var data = json.decode(httpResponse.body);
+    print(data.length);
+    if (data != "not jwt" && data != "error") {
+      for (int i = 0; i < data.length; i++) {
+        String pathAll = data[i].toString();
+        String path = pathAll.substring(10);
+        print(path);
+        result.add(path);
+      }
+    }
+  }
+  return result;
+}
+
+Future PostApi(String jwt, data, String pathApi) async {
+  http.Response response;
+  print("----post---------" + pathApi);
+  response = await http.post(Uri.parse(SERVER_IP + pathApi),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt
+      },
+      body: jsonEncode(data));
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("-----kêt quả post--------");
+    print(json.decode(response.body).toString());
+    return json.decode(response.body);
+  } else {
+    print("---------------post lỗi---------");
+    return "error";
   }
 }

@@ -201,38 +201,36 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? Padding(
                         padding: const EdgeInsets.only(left: 16.0),
                         child: CardFeedStyle(
-                            feed: listFeedAll[index - 2],
-                            ownFeedUser: listUsers[
-                                        listFeedAll[index - 2].sourceUserId] !=
-                                    null
-                                ? listUsers[
-                                    listFeedAll[index - 2].sourceUserId]!
-                                : UserModel(
-                                    friend: [],
-                                    hadMessageList: [],
-                                    coverImg: [],
-                                    friendConfirm: [],
-                                    friendRequest: [],
-                                    avatarImg: []),
-                            userOwnUse: userProvider.userP),
+                          feed: listFeedAll[index - 2],
+                          ownFeedUser: listUsers[
+                                      listFeedAll[index - 2].sourceUserId] !=
+                                  null
+                              ? listUsers[listFeedAll[index - 2].sourceUserId]!
+                              : UserModel(
+                                  friend: [],
+                                  hadMessageList: [],
+                                  coverImg: [],
+                                  friendConfirm: [],
+                                  friendRequest: [],
+                                  avatarImg: []),
+                        ),
                       )
                     : Padding(
                         padding: const EdgeInsets.only(right: 16.0),
                         child: CardFeedStyle(
-                            feed: listFeedAll[index - 2],
-                            ownFeedUser: listUsers[
-                                        listFeedAll[index - 2].sourceUserId] !=
-                                    null
-                                ? listUsers[
-                                    listFeedAll[index - 2].sourceUserId]!
-                                : UserModel(
-                                    friend: [],
-                                    hadMessageList: [],
-                                    coverImg: [],
-                                    friendConfirm: [],
-                                    friendRequest: [],
-                                    avatarImg: []),
-                            userOwnUse: userProvider.userP),
+                          feed: listFeedAll[index - 2],
+                          ownFeedUser: listUsers[
+                                      listFeedAll[index - 2].sourceUserId] !=
+                                  null
+                              ? listUsers[listFeedAll[index - 2].sourceUserId]!
+                              : UserModel(
+                                  friend: [],
+                                  hadMessageList: [],
+                                  coverImg: [],
+                                  friendConfirm: [],
+                                  friendRequest: [],
+                                  avatarImg: []),
+                        ),
                       );
               } else {
                 return Container(

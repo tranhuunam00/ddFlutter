@@ -6,28 +6,17 @@ import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import "../ui.dart";
 import 'package:http/http.dart' as http;
 
 class CardFeedStyle extends StatefulWidget {
-  final List<String> imagesList = [
-    "assets/images/nature1.jpg",
-    "assets/images/nature2.jpg",
-    "assets/images/nature2.jpg",
-    "assets/images/nature2.jpg",
-    "assets/images/nature2.jpg",
-    "assets/images/nature2.jpg",
-  ];
   final FeedBaseModel feed;
-  CardFeedStyle(
-      {Key? key,
-      required this.feed,
-      required this.userOwnUse,
-      required this.ownFeedUser})
+  CardFeedStyle({Key? key, required this.feed, required this.ownFeedUser})
       : super(key: key);
-  final UserModel userOwnUse;
+
   final UserModel ownFeedUser;
   @override
   _CardFeedStyleState createState() => _CardFeedStyleState();
@@ -43,12 +32,16 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
   void initState() {
     super.initState();
     feedApi = widget.feed;
-    for (int i = 0; i < feedApi.like.length; i++) {
-      if (feedApi.like[i] == widget.userOwnUse.id) {
-        print("------đã like-------");
-        isLike = true;
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+      for (int i = 0; i < feedApi.like.length; i++) {
+        if (feedApi.like[i] == userProvider.userP.id) {
+          print("------đã like-------");
+          isLike = true;
+        }
       }
-    }
+    });
   }
 
   @override
@@ -62,8 +55,12 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
           return Container(
               width: size.width - 40,
               height: size.height - 300,
-              child: Image.asset("assets/images/nature1.jpg",
-                  fit: BoxFit.contain));
+              child: CachedNetworkImage(
+                imageUrl: SERVER_IP + "/upload/" + imagesList[0],
+                fit: BoxFit.fitWidth,
+                placeholder: (context, url) => CircularProgressIndicator(),
+                errorWidget: (context, url, error) => Icon(Icons.error),
+              ));
           break;
         case 2:
           return Row(
@@ -73,17 +70,22 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                   color: Colors.black,
                   width: (size.width - 50) / 2,
                   height: (size.width - 50) / 2 * 5 / 3,
-                  child: Image.asset("assets/images/nature5.jpg",
-
-                      // color: Color.fromRGBO(255, 255, 255, 0.7),
-                      colorBlendMode: BlendMode.modulate,
-                      fit: BoxFit.contain)),
+                  child: CachedNetworkImage(
+                    imageUrl: SERVER_IP + "/upload/" + imagesList[0],
+                    fit: BoxFit.fitWidth,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  )),
               Container(
                   color: Colors.black,
                   height: (size.width - 50) / 2 * 5 / 3,
                   width: (size.width - 50) / 2,
-                  child: Image.asset("assets/images/nature2.jpg",
-                      fit: BoxFit.fitHeight)),
+                  child: CachedNetworkImage(
+                    imageUrl: SERVER_IP + "/upload/" + imagesList[1],
+                    fit: BoxFit.fitWidth,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  )),
             ],
           );
           break;
@@ -95,23 +97,12 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                   color: Colors.black38,
                   width: (size.width - 50) / 2,
                   height: size.width,
-                  child: Image.network(
-                      'https://image.winudf.com/v2/image/Y29tLmRldi5jdWlhcHAubmF0dXJlX3NjcmVlbnNob3RzXzFfYTM0ZjAyMTI/screen-1.jpg?fakeurl=1&type=.jpg',
-                      fit: BoxFit.fitHeight, loadingBuilder:
-                          (BuildContext context, Widget child,
-                              ImageChunkEvent? loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    }
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                            : null,
-                      ),
-                    );
-                  })),
+                  child: CachedNetworkImage(
+                    imageUrl: SERVER_IP + "/upload/" + imagesList[0],
+                    fit: BoxFit.fitWidth,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  )),
               Container(
                 width: (size.width - 50) / 2,
                 height: size.width,
@@ -123,14 +114,26 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                         color: Colors.black38,
                         height: (size.width - 10) / 2,
                         width: (size.width - 50) / 2,
-                        child: Image.asset("assets/images/nature1.jpg",
-                            fit: BoxFit.fitWidth)),
+                        child: CachedNetworkImage(
+                          imageUrl: SERVER_IP + "/upload/" + imagesList[1],
+                          fit: BoxFit.fitWidth,
+                          placeholder: (context, url) =>
+                              CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                        )),
                     Container(
                         color: Colors.black38,
                         height: (size.width - 10) / 2,
                         width: (size.width - 50) / 2,
-                        child: Image.asset("assets/images/nature2.jpg",
-                            fit: BoxFit.contain)),
+                        child: CachedNetworkImage(
+                          imageUrl: SERVER_IP + "/upload/" + imagesList[2],
+                          fit: BoxFit.fitWidth,
+                          placeholder: (context, url) =>
+                              CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                        )),
                   ],
                 ),
               )
@@ -145,23 +148,12 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                   color: Colors.black38,
                   width: (size.width - 50) / 2,
                   height: size.width,
-                  child: Image.network(
-                      'https://image.winudf.com/v2/image/Y29tLmRldi5jdWlhcHAubmF0dXJlX3NjcmVlbnNob3RzXzFfYTM0ZjAyMTI/screen-1.jpg?fakeurl=1&type=.jpg',
-                      fit: BoxFit.fitHeight, loadingBuilder:
-                          (BuildContext context, Widget child,
-                              ImageChunkEvent? loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    }
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                            : null,
-                      ),
-                    );
-                  })),
+                  child: CachedNetworkImage(
+                    imageUrl: SERVER_IP + "/upload/" + imagesList[0],
+                    fit: BoxFit.fitWidth,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  )),
               Container(
                 width: (size.width - 50) / 2,
                 height: size.width,
@@ -173,20 +165,38 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                         color: Colors.black38,
                         height: (size.width - 10) / 3,
                         width: (size.width - 50) / 2,
-                        child: Image.asset("assets/images/nature1.jpg",
-                            fit: BoxFit.fitWidth)),
+                        child: CachedNetworkImage(
+                          imageUrl: SERVER_IP + "/upload/" + imagesList[1],
+                          fit: BoxFit.fitWidth,
+                          placeholder: (context, url) =>
+                              CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                        )),
                     Container(
                         color: Colors.black38,
                         height: (size.width - 10) / 3,
                         width: (size.width - 50) / 2,
-                        child: Image.asset("assets/images/nature6.jpg",
-                            fit: BoxFit.fitWidth)),
+                        child: CachedNetworkImage(
+                          imageUrl: SERVER_IP + "/upload/" + imagesList[2],
+                          fit: BoxFit.fitWidth,
+                          placeholder: (context, url) =>
+                              CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                        )),
                     Container(
                         color: Colors.black38,
                         height: (size.width - 10) / 3,
                         width: (size.width - 50) / 2,
-                        child: Image.asset("assets/images/nature2.jpg",
-                            fit: BoxFit.fitWidth)),
+                        child: CachedNetworkImage(
+                          imageUrl: SERVER_IP + "/upload/" + imagesList[3],
+                          fit: BoxFit.fitWidth,
+                          placeholder: (context, url) =>
+                              CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                        )),
                   ],
                 ),
               )
@@ -201,23 +211,12 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                   color: Colors.black38,
                   width: (size.width - 42) / 2,
                   height: size.width,
-                  child: Image.network(
-                      'https://image.winudf.com/v2/image/Y29tLmRldi5jdWlhcHAubmF0dXJlX3NjcmVlbnNob3RzXzFfYTM0ZjAyMTI/screen-1.jpg?fakeurl=1&type=.jpg',
-                      fit: BoxFit.fitHeight, loadingBuilder:
-                          (BuildContext context, Widget child,
-                              ImageChunkEvent? loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    }
-                    return Center(
-                      child: CircularProgressIndicator(
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                            : null,
-                      ),
-                    );
-                  })),
+                  child: CachedNetworkImage(
+                    imageUrl: SERVER_IP + "/upload/" + imagesList[0],
+                    fit: BoxFit.fitWidth,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  )),
               Container(
                 width: (size.width - 50) / 2,
                 height: size.width,
@@ -229,21 +228,39 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                         color: Colors.black38,
                         height: (size.width - 10) / 3,
                         width: (size.width - 50) / 2,
-                        child: Image.asset("assets/images/nature1.jpg",
-                            fit: BoxFit.fitWidth)),
+                        child: CachedNetworkImage(
+                          imageUrl: SERVER_IP + "/upload/" + imagesList[1],
+                          fit: BoxFit.fitWidth,
+                          placeholder: (context, url) =>
+                              CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                        )),
                     Container(
                         color: Colors.black38,
                         height: (size.width - 10) / 3,
                         width: (size.width - 50) / 2,
-                        child: Image.asset("assets/images/nature6.jpg",
-                            fit: BoxFit.fitWidth)),
+                        child: CachedNetworkImage(
+                          imageUrl: SERVER_IP + "/upload/" + imagesList[2],
+                          fit: BoxFit.fitWidth,
+                          placeholder: (context, url) =>
+                              CircularProgressIndicator(),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                        )),
                     Stack(children: [
                       Container(
                           color: Colors.black38,
                           height: (size.width - 10) / 3,
                           width: (size.width - 50) / 2,
-                          child: Image.asset("assets/images/nature2.jpg",
-                              fit: BoxFit.fitWidth)),
+                          child: CachedNetworkImage(
+                            imageUrl: SERVER_IP + "/upload/" + imagesList[3],
+                            fit: BoxFit.fitWidth,
+                            placeholder: (context, url) =>
+                                CircularProgressIndicator(),
+                            errorWidget: (context, url, error) =>
+                                Icon(Icons.error),
+                          )),
                       Container(
                         color: Colors.black45,
                         height: (size.width - 10) / 3,
@@ -254,7 +271,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                           children: [
                             Center(
                                 child: Text(
-                              "+3",
+                              " + " + (imagesList.length - 4).toString(),
                               style: TextStyle(
                                   fontSize: 32, fontWeight: FontWeight.bold),
                             )),
@@ -297,17 +314,27 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                 padding: const EdgeInsets.all(8.0),
                 child: Row(mainAxisSize: MainAxisSize.max, children: [
                   CircleAvatar(
-                    radius: 24,
+                    backgroundColor: Colors.red,
+                    radius: 23,
+                    backgroundImage: AssetImage('assets/images/load.gif'),
+                    child: CircleAvatar(
+                      radius: 23,
+                      backgroundImage: NetworkImage(SERVER_IP +
+                          "/upload/" +
+                          widget.ownFeedUser.avatarImg[
+                              widget.ownFeedUser.avatarImg.length - 1]),
+                      backgroundColor: Colors.transparent,
+                    ),
                   ),
                   Container(
                       width: size.width - 180,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          new Text(widget.ownFeedUser.id,
+                          new Text(widget.ownFeedUser.realName,
                               style: AppStyles.h3
                                   .copyWith(fontWeight: FontWeight.bold)),
-                          new Text("    23/09"),
+                          new Text(widget.feed.createdAt),
                         ],
                       )),
                 ]),
@@ -328,9 +355,9 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                   ),
                 ),
               ),
-              widget.imagesList.length == 0
+              widget.feed.pathImg.length > 0
                   ? Center(
-                      child: FeedImagesContainer(widget.imagesList),
+                      child: FeedImagesContainer(widget.feed.pathImg),
                     )
                   : Container(),
               Row(
@@ -358,7 +385,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                       onPressed: () async {
                         print(feedApi.like.length);
                         print("tên người đang dùng là : " +
-                            widget.userOwnUse.userName);
+                            userProvider.userP.userName);
                         print(widget.feed.feedId);
                         if (isLike == false) {
                           List result = await Future.wait([
@@ -374,7 +401,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                             setState(() {
                               isLike = !isLike;
                               feedApi.like = result[0].like;
-                              feedApi.like.add(widget.userOwnUse.id);
+                              feedApi.like.add(userProvider.userP.id);
                             });
                           }
                         } else {
@@ -394,7 +421,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                             setState(() {
                               isLike = !isLike;
                               feedApi.like = result[0].like;
-                              feedApi.like.remove(widget.userOwnUse.id);
+                              feedApi.like.remove(userProvider.userP.id);
                             });
                           }
                         }

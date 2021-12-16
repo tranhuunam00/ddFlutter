@@ -475,9 +475,9 @@ class _ProfileState extends State<Profile> {
                 }
 
                 return CardFeedStyle(
-                    feed: feedProvider.listFeedsP[index - 4],
-                    ownFeedUser: userProvider.userP,
-                    userOwnUse: userProvider.userP);
+                  feed: feedProvider.listFeedsP[index - 4],
+                  ownFeedUser: userProvider.userP,
+                );
               })),
     );
   }
