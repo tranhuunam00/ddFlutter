@@ -6,6 +6,9 @@ class CameraPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return CameraScreen();
+    return CameraScreen(
+      targetId: "camera",
+      event: "",
+    );
   }
 }

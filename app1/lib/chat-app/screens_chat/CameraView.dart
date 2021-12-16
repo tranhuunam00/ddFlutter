@@ -15,12 +15,15 @@ class CameraViewPage extends StatelessWidget {
       this.path,
       this.onImageSend,
       this.file,
+      required this.targetId,
       this.feedId,
       this.event})
       : super(key: key);
   final String? path;
   final XFile? file;
   final String? feedId;
+
+  final String targetId;
   final String? event;
   final Function? onImageSend;
   static TextEditingController _controller = TextEditingController();
@@ -80,7 +83,12 @@ class CameraViewPage extends StatelessWidget {
                                 }
                                 if (event == "message") {
                                   print("chạy hàm gửi");
-                                  onImageSend!(path, userProvider.jwtP);
+                                  onImageSend!(
+                                      path,
+                                      userProvider.jwtP,
+                                      userProvider.userP.id,
+                                      targetId,
+                                      DateTime.now().toString());
                                 }
                                 if (event == "comment") {
                                   onImageSend!(path, userProvider.jwtP, feedId);

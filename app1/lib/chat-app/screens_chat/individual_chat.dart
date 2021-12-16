@@ -234,7 +234,8 @@ class _IndividualChatState extends State<IndividualChat> {
   }
 
   //gửi hình ảnh................................
-  void onImageSend(String path, String jwt) async {
+  void onImageSend(String path, String jwt, String sourceId, String targetId,
+      String time) async {
     print("image.............${path}");
 
     var request = http.MultipartRequest(
@@ -242,9 +243,14 @@ class _IndividualChatState extends State<IndividualChat> {
       Uri.parse(SERVER_IP + "/file/img/upload"),
     );
     request.fields["eventChangeImgUser"] = "message";
+    request.fields["sourceId"] = sourceId;
+    request.fields["targetId"] = targetId;
+    request.fields["time"] = time;
+
     request.headers.addAll(
         {"Content-type": "multipart/form-data", "cookie": "jwt=" + jwt});
     request.files.add(await http.MultipartFile.fromPath("img", path));
+    request.fields["eventChangeImgUser"] = "message";
 
     http.StreamedResponse response = await request.send();
     var httpResponse = await http.Response.fromStream(response);
@@ -524,6 +530,11 @@ class _IndividualChatState extends State<IndividualChat> {
                                                                 builder:
                                                                     (builder) =>
                                                                         CameraScreen(
+                                                                          targetId: widget
+                                                                              .chatModel!
+                                                                              .id,
+                                                                          event:
+                                                                              "message",
                                                                           onImageSend:
                                                                               onImageSend,
                                                                         )));
@@ -677,6 +688,8 @@ class _IndividualChatState extends State<IndividualChat> {
                           context,
                           MaterialPageRoute(
                               builder: (builder) => CameraScreen(
+                                    event: "message",
+                                    targetId: widget.chatModel!.id,
                                     onImageSend: onImageSend,
                                   )));
                     },
@@ -703,6 +716,7 @@ class _IndividualChatState extends State<IndividualChat> {
                               MaterialPageRoute(
                                   builder: (builder) => CameraViewPage(
                                         path: file.path,
+                                        targetId: widget.chatModel!.id,
                                         event: "message",
                                         onImageSend: onImageSend,
                                       )))

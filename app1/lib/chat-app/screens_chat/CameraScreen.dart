@@ -11,8 +11,12 @@ import 'package:path_provider/path_provider.dart';
 List<CameraDescription>? cameras;
 
 class CameraScreen extends StatefulWidget {
-  const CameraScreen({Key? key, this.onImageSend}) : super(key: key);
+  const CameraScreen(
+      {Key? key, this.onImageSend, required this.event, required this.targetId})
+      : super(key: key);
   final Function? onImageSend;
+  final String event;
+  final String targetId;
   @override
   _CameraScreenState createState() => _CameraScreenState();
 }
@@ -22,6 +26,7 @@ class _CameraScreenState extends State<CameraScreen> {
   Future<void>? cameraValue;
   late String videoPath = "";
   late bool isRecord = false;
+
   late bool isFLash = false;
   late bool isCameraFront = true;
   double transform = pi;
@@ -182,6 +187,8 @@ class _CameraScreenState extends State<CameraScreen> {
         MaterialPageRoute(
             builder: (builder) => CameraViewPage(
                   path: path,
+                  event: widget.event,
+                  targetId: widget.targetId,
                   onImageSend: widget.onImageSend!,
                 )));
   }

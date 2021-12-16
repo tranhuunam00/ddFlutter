@@ -1,4 +1,3 @@
-//
 import 'dart:convert';
 import 'dart:io';
 
@@ -10,6 +9,7 @@ import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/chat-app/screens_chat/CameraScreen.dart';
 import 'package:app1/chat-app/screens_chat/CameraView.dart';
+import 'package:app1/chat-app/screens_chat/VideoView.dart';
 import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
@@ -25,6 +25,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
+import 'package:video_player/video_player.dart';
 
 class PostFeedScreen extends StatefulWidget {
   const PostFeedScreen({Key? key}) : super(key: key);
@@ -36,10 +37,17 @@ class PostFeedScreen extends StatefulWidget {
 class _PostFeedScreenState extends State<PostFeedScreen> {
   final TextEditingController _controller = TextEditingController();
   bool isEmojiShowing = false;
+  bool isVisible = false;
+  String photopath = "";
   FocusNode focusNode = FocusNode();
   late Socket socket;
   final ImagePicker _picker = ImagePicker();
+  //late final fileImage;
+
+  List<XFile>? listFileImage = [];
+  late VideoPlayerController _videoPlayerController;
   bool isSendBtn = false;
+  int dem = 0;
   List<MessageModel> messages = [];
   ScrollController _scrollController = ScrollController();
 
@@ -60,6 +68,8 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
     });
   }
 
+  late Future<void> _initializeVideoPlayerFuture;
+
   _onEmojiSelected(Emoji emoji) {
     // setState(() {
     //   _controller.text = _controller.text + emoji.emoji;
@@ -74,19 +84,32 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
 
   //gửi hình ảnh................................
   void onImageSend(String path, String jwt) async {
-    print("image.............${path}");
-
+    isVisible = true;
+    print("image.............: ${path}");
     var request = http.MultipartRequest(
-      "POST",
-      Uri.parse(SERVER_IP + "/file/img/upload"),
-    );
-    request.fields["eventChangeImgUser"] = "message";
+        "POST", Uri.parse(SERVER_IP + "/file/img/upload"));
+    request.files.add(await http.MultipartFile.fromPath("img", path));
     request.headers.addAll(
         {"Content-type": "multipart/form-data", "cookie": "jwt=" + jwt});
-    request.files.add(await http.MultipartFile.fromPath("img", path));
 
     http.StreamedResponse response = await request.send();
+
     var httpResponse = await http.Response.fromStream(response);
+    print(httpResponse.statusCode);
+    if (httpResponse.statusCode == 201 || httpResponse.statusCode == 200) {
+      var data = json.decode(httpResponse.body).toString();
+      print(" ");
+      print(data);
+      photopath = path;
+      for (var i = 0; i < popTime; i++) {
+        if (mounted) Navigator.pop(context);
+      }
+
+      if (mounted)
+        setState(() {
+          popTime = 0;
+        });
+    }
   }
 
   _onBackspacePressed() {
@@ -133,6 +156,8 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(60),
               child: AppBar(
+                backgroundColor: Colors.pinkAccent,
+                title: Text("Tạo bài viêt"),
                 leadingWidth: 60,
                 titleSpacing: 0,
                 leading: Padding(
@@ -149,14 +174,75 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                       child: Icon(Icons.arrow_back, size: 24)),
                 ),
                 actions: [
-                  IconButton(
-                    icon: Icon(Icons.videocam),
-                    onPressed: () {},
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.call),
-                    onPressed: () {},
-                  ),
+                  // nút đăng  hiển thị ở trên appbar ............................
+                  (_controller.text.length > 0 == true ||
+                          isVisible) // kiểm tra có chữ hoặc có ảnh chưa để có thể ấn nút đăng
+                      ? InkWell(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 20.0, right: 5, left: 5),
+                            child: Text(
+                              "ĐĂNG",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black87),
+                            ),
+                          ),
+                          onTap: () async {
+                            print(listFileImage);
+                            // print(_controller.text);
+                            // FeedBaseModel feed = new FeedBaseModel(
+                            //     like: [],
+                            //     rule: [],
+                            //     comment: [],
+                            //     pathImg: [],
+                            //     createdAt: DateTime.now().toString(),
+                            //     sourceUserId: userProvider.userP.id,
+                            //     message: _controller.text,
+                            //     sourceUserName: userProvider.userP.userName);
+                            // print('ND : ' + _controller.text);
+                            // String newIdFeed = await PostFeedFunction(feed);
+                            // if (newIdFeed == "not jwt") {
+                            //   print(newIdFeed);
+                            // } else {
+                            //   if (newIdFeed != "error") {
+                            //     FeedBaseModel a = new FeedBaseModel(
+                            //         like: [],
+                            //         rule: [],
+                            //         comment: [],
+                            //         pathImg: [],
+                            //         feedId: newIdFeed,
+                            //         createdAt: DateTime.now().toString(),
+                            //         sourceUserId: userProvider.userP.id,
+                            //         message: _controller.text,
+                            //         sourceUserName:
+                            //             userProvider.userP.userName);
+                            //     List<FeedBaseModel> b = feedProvider.listFeedsP;
+                            //     b.insert(0, a);
+                            //     print("đã tạo mới bài viết rồi!");
+                            //     feedProvider.userFeed(b);
+                            //     Navigator.pop(context);
+                            //   }
+                            // }
+                          },
+                        )
+                      : InkWell(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                top: 20.0, right: 5, left: 5),
+                            child: Text(
+                              "ĐĂNG",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w800,
+                                  color: Colors.black12),
+                            ),
+                          ),
+                          onTap: null,
+                        ),
                   PopupMenuButton<String>(onSelected: (value) {
                     print(value);
                   }, itemBuilder: (BuildContext context) {
@@ -178,217 +264,459 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                 ],
               ),
             ),
-            body: Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              child: WillPopScope(
-                child: Column(
-                  children: [
-                    //tin nhắn..............................................
-                    //put text............................................
-                    // và hiện thị ảnh
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Container(
-                            height: 100,
-                            child: Row(
-                              children: [
-                                Container(
-                                    width: MediaQuery.of(context).size.width,
-                                    child: Card(
-                                        margin: const EdgeInsets.only(
-                                            left: 2, right: 2, bottom: 8),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(25)),
-                                        //input text...........................................
-                                        child: TextFormField(
-                                          maxLines: 5,
-                                          focusNode: focusNode,
-                                          controller: _controller,
-                                          onChanged: (value) {
-                                            if (value.length > 0) {
-                                              if (mounted)
-                                                setState(() {
-                                                  isSendBtn = true;
-                                                });
-                                            } else {
-                                              if (mounted)
-                                                setState(() {
-                                                  isSendBtn = false;
-                                                });
-                                            }
-                                          },
-                                          textAlignVertical:
-                                              TextAlignVertical.center,
-                                          keyboardType: TextInputType.multiline,
-                                          minLines: 1,
-                                          decoration: InputDecoration(
-                                            hintText: "Nhập ... ",
-                                            border: InputBorder.none,
-                                            prefixIcon: IconButton(
-                                              icon: Icon(Icons.emoji_emotions),
-                                              onPressed: () {
-                                                if (mounted)
-                                                  setState(() {
-                                                    focusNode.unfocus();
-                                                    focusNode.canRequestFocus =
-                                                        false;
-                                                    isEmojiShowing =
-                                                        !isEmojiShowing;
-                                                  });
-                                              },
-                                            ),
-                                            suffixIcon: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  IconButton(
-                                                    icon:
-                                                        Icon(Icons.camera_alt),
-                                                    onPressed: () {
-                                                      if (mounted)
-                                                        setState(() {
-                                                          popTime = 2;
-                                                        });
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (builder) =>
-                                                                  CameraScreen(
-                                                                    onImageSend:
-                                                                        onImageSend,
-                                                                  )));
-                                                    },
-                                                  ),
-                                                  IconButton(
-                                                    icon:
-                                                        Icon(Icons.attach_file),
-                                                    onPressed: () {
-                                                      showModalBottomSheet(
-                                                          backgroundColor:
-                                                              Colors
-                                                                  .transparent,
-                                                          context: context,
-                                                          builder: (builder) =>
-                                                              bottomSheet());
-                                                    },
-                                                  ),
-                                                ]),
-                                            contentPadding: EdgeInsets.all(5),
-                                          ),
-                                        ))),
-                              ],
-                            ),
-                          ),
-                          //emoji................................................
-                          Offstage(
-                            offstage: !isEmojiShowing,
-                            child: SizedBox(
-                              height: 250,
-                              child: EmojiPicker(
-                                  onEmojiSelected:
-                                      (Category category, Emoji emoji) {
-                                    _onEmojiSelected(emoji);
-                                  },
-                                  onBackspacePressed: _onBackspacePressed,
-                                  config: Config(
-                                      columns: 7,
-                                      emojiSizeMax:
-                                          24 * (Platform.isIOS ? 1.30 : 1.0),
-                                      verticalSpacing: 0,
-                                      horizontalSpacing: 0,
-                                      initCategory: Category.RECENT,
-                                      bgColor: const Color(0xFFF2F2F2),
-                                      indicatorColor: Colors.blue,
-                                      iconColor: Colors.grey,
-                                      iconColorSelected: Colors.blue,
-                                      progressIndicatorColor: Colors.blue,
-                                      backspaceColor: Colors.blue,
-                                      showRecentsTab: true,
-                                      recentsLimit: 28,
-                                      noRecentsText: 'No Recents',
-                                      noRecentsStyle: const TextStyle(
-                                          fontSize: 20, color: Colors.black26),
-                                      tabIndicatorAnimDuration:
-                                          kTabScrollDuration,
-                                      categoryIcons: const CategoryIcons(),
-                                      buttonMode: ButtonMode.MATERIAL)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    ////////////////////đây là cái viết như kiểu thêm ảnh /........................
-                    //thêm các thứ
-                    Container(
-                      width: size.width,
-                      height: size.height / 2,
-                      color: Colors.green,
-                      child: InkWell(
+            body: SingleChildScrollView(
+              //reverse: true,
+              child: Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                child: WillPopScope(
+                  child: Column(
+                    children: [
+                      //Avatar.............................................
+                      Container(
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "ĐĂNG",
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.black87),
+                          padding: const EdgeInsets.only(top: 15),
+                          child: Row(
+                            // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: <Widget>[
+                              Row(
+                                children: [
+                                  Padding(
+                                    padding:
+                                        const EdgeInsets.fromLTRB(8, 2, 8, 8),
+                                    child: CircleAvatar(
+                                      child: Text("BP"),
+                                      backgroundColor: Colors.brown.shade50,
+                                      // backgroundImage: ImageProvider,
+                                    ),
+                                    // child: Container(
+                                    //   width: 48,
+                                    //   height: 48,
+                                    //     child: Image.asset('assets/images/nature1.jpg',),
+                                    // ),
+                                  ), // Ảnh người cmt
+
+                                  Column(
+                                    //mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Tên cá nhân
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 2),
+                                        child: Text(
+                                          'Bảo Phạm',
+                                          style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w800,
+                                              color: Colors.black54),
+                                        ),
+                                      ),
+
+                                      //cột chọn chế độ
+                                      Container(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(3.0),
+                                          child: Row(
+                                            children: [
+                                              // ví dụ sẵn chọn chế độ một mình
+                                              Row(
+                                                children: [
+                                                  Icon(Icons.lock,
+                                                      size: 20,
+                                                      color: Colors
+                                                          .black87), // icon ổ khóa
+                                                  Text(
+                                                    "Chỉ mình tôi",
+                                                    style: TextStyle(
+                                                        fontSize: 14,
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color: Colors.black54),
+                                                  ),
+                                                ],
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xff7c94b6),
+                                          borderRadius:
+                                              BorderRadius.circular(5),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ],
                           ),
                         ),
-                        onTap: () async {
-                          print(_controller.text);
-                          FeedBaseModel feed = new FeedBaseModel(
-                              like: [],
-                              rule: [],
-                              comment: [],
-                              pathImg: [],
-                              createdAt: DateTime.now().toString(),
-                              sourceUserId: userProvider.userP.id,
-                              message: _controller.text,
-                              sourceUserName: userProvider.userP.userName);
-                          print('ND : ' + _controller.text);
-                          String newIdFeed = await PostFeedFunction(feed);
-                          if (newIdFeed == "not jwt") {
-                            print(newIdFeed);
-                          } else {
-                            if (newIdFeed != "error") {
-                              FeedBaseModel a = new FeedBaseModel(
-                                  like: [],
-                                  rule: [],
-                                  comment: [],
-                                  pathImg: [],
-                                  feedId: newIdFeed,
-                                  createdAt: DateTime.now().toString(),
-                                  sourceUserId: userProvider.userP.id,
-                                  message: _controller.text,
-                                  sourceUserName: userProvider.userP.userName);
-                              List<FeedBaseModel> b = feedProvider.listFeedsP;
-                              b.insert(0, a);
-                              print("đã tạo mới bài viết rồi!");
-                              feedProvider.userFeed(b);
-                              Navigator.pop(context);
-                            }
-                          }
-                        },
                       ),
-                    ),
-                  ],
-                ),
-                //ấn quay lại thì kiểm tra xem có bật emoji k?
-                onWillPop: () {
-                  if (isEmojiShowing) {
-                    if (mounted)
-                      setState(() {
-                        isEmojiShowing = false;
-                      });
-                  } else {
-                    if (mounted) {
-                      Navigator.pop(context);
+
+                      //put text............................................
+                      //Khung status
+                      Padding(
+                        padding: const EdgeInsets.only(
+                            left: 8.0, top: 8, right: 8, bottom: 8),
+                        child: Container(
+                          color: Colors.black12,
+                          child: Column(
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: TextField(
+                                  controller: _controller,
+                                  keyboardType: TextInputType.multiline,
+                                  maxLines: 8,
+                                  decoration: InputDecoration.collapsed(
+                                    hintText: "Bạn đang nghĩ gì?",
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // góc test hiển thị ảnh ...............
+                      if (listFileImage!.length == 0)
+                        SizedBox()
+                      else
+                        Expanded(
+                          child: GridView.builder(
+                              itemCount: listFileImage!.length,
+                              itemBuilder: (listViewContext, index) => Padding(
+                                    padding: const EdgeInsets.all(2),
+                                    child: Container(
+                                      child: Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          Image.file(
+                                            File(listFileImage![index].path),
+                                            fit: BoxFit.cover,
+                                          ),
+
+                                          Positioned(
+                                            right: 0,
+                                            top: 0,
+                                            child: Container(
+                                              color: Color.fromRGBO(
+                                                  255, 255, 255, 0.4),
+                                              child: IconButton(
+                                                onPressed: () async {
+                                                  listFileImage!
+                                                      .removeAt(index);
+                                                  setState(() {});
+                                                },
+                                                icon: Icon(Icons.delete),
+                                              ),
+                                            ),
+                                          ) //position
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 4)),
+                        ),
+
+                      //các tiện ích
+                      Expanded(
+                        child: ListView(
+                          children: [
+                            // Thêm ảnh
+                            FlatButton(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 4, bottom: 4),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.green,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10),
+                                      child: Text(
+                                        "Ảnh/Video",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black54),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              onPressed: () {
+                                showModalBottomSheet(
+                                    backgroundColor: Colors.transparent,
+                                    context: context,
+                                    builder: (builder) => bottomSheet());
+                              },
+                            ),
+
+                            // Gắn thẻ
+                            FlatButton(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 4, bottom: 4),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.person_add_alt_1_outlined,
+                                      color: Colors.pink,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10),
+                                      child: Text(
+                                        "Gắn thẻ bạn bè",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black54),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              onPressed: () {
+                                // Navigator.pushReplacement(context,
+                                //     MaterialPageRoute(builder: (builder) => ListFriend()));
+                              },
+                            ),
+
+                            // Thêm vị trí
+                            FlatButton(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 4, bottom: 4),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.location_pin,
+                                      color: Colors.redAccent,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10),
+                                      child: Text(
+                                        "Thêm vị trí",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black54),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              onPressed: () {},
+                            ),
+
+                            //Tài liệu, file
+                            FlatButton(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 4, bottom: 4),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.insert_drive_file,
+                                      color: Colors.blue,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10),
+                                      child: Text(
+                                        "Tài liệu",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black54),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              onPressed: () {},
+                            ),
+
+                            //Cảm xúc
+                            FlatButton(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 4, bottom: 4),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.emoji_emotions,
+                                      color: Colors.yellow,
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 10),
+                                      child: Text(
+                                        "Cảm xúc/Hoạt động",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color: Colors.black54),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              onPressed: () {},
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Nút đăng ở dưới cùng có hoặc không ...................................
+                      // Container(
+                      //   width: size.width,
+                      //   height: 40,
+                      //   color: Colors.green,
+                      //   child: InkWell(
+                      //     child: Padding(
+                      //       padding: const EdgeInsets.all(8.0),
+                      //       child: Text(
+                      //         "ĐĂNG",
+                      //         textAlign: TextAlign.center,
+                      //         style: TextStyle(
+                      //             fontSize: 18,
+                      //             fontWeight: FontWeight.w800,
+                      //             color: Colors.black87),
+                      //       ),
+                      //     ),
+                      //     onTap: () async {
+                      //       print(_controller.text);
+                      //       FeedBaseModel feed = new FeedBaseModel(
+                      //           like: [],
+                      //           rule: [],
+                      //           comment: [],
+                      //           pathImg: [],
+                      //           createdAt: DateTime.now().toString(),
+                      //           sourceUserId: userProvider.userP.id,
+                      //           message: _controller.text,
+                      //           sourceUserName: userProvider.userP.userName);
+                      //       print('ND : ' + _controller.text);
+                      //       String newIdFeed = await PostFeedFunction(feed);
+                      //       if (newIdFeed == "not jwt") {
+                      //         print(newIdFeed);
+                      //       } else {
+                      //         if (newIdFeed != "error") {
+                      //           FeedBaseModel a = new FeedBaseModel(
+                      //               like: [],
+                      //               rule: [],
+                      //               comment: [],
+                      //               pathImg: [],
+                      //               feedId: newIdFeed,
+                      //               createdAt: DateTime.now().toString(),
+                      //               sourceUserId: userProvider.userP.id,
+                      //               message: _controller.text,
+                      //               sourceUserName: userProvider.userP.userName);
+                      //           List<FeedBaseModel> b = feedProvider.listFeedsP;
+                      //           b.insert(0, a);
+                      //           print("đã tạo mới bài viết rồi!");
+                      //           feedProvider.userFeed(b);
+                      //           Navigator.pop(context);
+                      //         }
+                      //       }
+                      //     },
+                      //   ),
+                      // ),
+                      // (_controller.text.length > 0 == true)
+                      //     ? Container(
+                      //   width: size.width,
+                      //   height: 40,
+                      //   color: Colors.green,
+                      //   child: InkWell(
+                      //     child: Padding(
+                      //       padding: const EdgeInsets.all(8.0),
+                      //       child: Text(
+                      //         "ĐĂNG",
+                      //         textAlign: TextAlign.center,
+                      //         style: TextStyle(
+                      //             fontSize: 18,
+                      //             fontWeight: FontWeight.w800,
+                      //             color: Colors.black87),
+                      //       ),
+                      //     ),
+                      //     onTap: () async {
+                      //       print(_controller.text);
+                      //       FeedBaseModel feed = new FeedBaseModel(
+                      //           like: [],
+                      //           rule: [],
+                      //           comment: [],
+                      //           pathImg: [],
+                      //           createdAt: DateTime.now().toString(),
+                      //           sourceUserId: userProvider.userP.id,
+                      //           message: _controller.text,
+                      //           sourceUserName: userProvider.userP.userName);
+                      //       print('ND : ' + _controller.text);
+                      //       String newIdFeed = await PostFeedFunction(feed);
+                      //       if (newIdFeed == "not jwt") {
+                      //         print(newIdFeed);
+                      //       } else {
+                      //         if (newIdFeed != "error") {
+                      //           FeedBaseModel a = new FeedBaseModel(
+                      //               like: [],
+                      //               rule: [],
+                      //               comment: [],
+                      //               pathImg: [],
+                      //               feedId: newIdFeed,
+                      //               createdAt: DateTime.now().toString(),
+                      //               sourceUserId: userProvider.userP.id,
+                      //               message: _controller.text,
+                      //               sourceUserName: userProvider.userP.userName);
+                      //           List<FeedBaseModel> b = feedProvider.listFeedsP;
+                      //           b.insert(0, a);
+                      //           print("đã tạo mới bài viết rồi!");
+                      //           feedProvider.userFeed(b);
+                      //           Navigator.pop(context);
+                      //         }
+                      //       }
+                      //     },
+                      //   ),
+                      // )
+                      //     :Container(
+                      //   width: size.width,
+                      //   height: 40,
+                      //   color: Colors.greenAccent,
+                      //   child: InkWell(
+                      //     child: Padding(
+                      //       padding: const EdgeInsets.all(8.0),
+                      //       child: Text(
+                      //         "ĐĂNG",
+                      //         textAlign: TextAlign.center,
+                      //         style: TextStyle(
+                      //             fontSize: 18,
+                      //             fontWeight: FontWeight.w800,
+                      //             color: Colors.black87),
+                      //       ),
+                      //     ),
+                      //     onTap: null
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                  //ấn quay lại thì kiểm tra xem có bật emoji k?
+                  onWillPop: () {
+                    if (isEmojiShowing) {
+                      if (mounted)
+                        setState(() {
+                          isEmojiShowing = false;
+                        });
+                    } else {
+                      if (mounted) {
+                        Navigator.pop(context);
+                      }
                     }
-                  }
-                  return Future.value(false);
-                },
+                    return Future.value(false);
+                  },
+                ),
               ),
             )),
       ]),
@@ -421,17 +749,22 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                     Icons.camera_alt,
                     Colors.pink,
                     "Camera",
-                    () {
+                    () async {
                       if (mounted)
                         setState(() {
                           popTime = 3;
                         });
-                      Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (builder) => CameraScreen(
-                                    onImageSend: onImageSend,
-                                  )));
+                      print("chup ảnh................................");
+                      dem = 0;
+
+                      final XFile? file =
+                          await _picker.pickImage(source: ImageSource.camera);
+                      if (file != null && dem <= 20) {
+                        listFileImage!.add(file);
+                        dem = dem + 1;
+                        print("Đã chụp ảnh");
+                        setState(() {});
+                      }
                     },
                   ),
                   SizedBox(
@@ -446,20 +779,17 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                         setState(() {
                           popTime = 2;
                         });
-                      print(
-                          "chuyen sang camera................................");
-                      final XFile? file =
-                          await _picker.pickImage(source: ImageSource.gallery);
-                      file != null
-                          ? Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (builder) => CameraViewPage(
-                                        path: file.path,
-                                        event: "message",
-                                        onImageSend: onImageSend,
-                                      )))
-                          : print("chọn file");
+                      isVisible = true;
+
+                      print("chuyen sang ảnh................................");
+                      final List<XFile>? selectedFile =
+                          await _picker.pickMultiImage();
+                      if (selectedFile!.isNotEmpty) {
+                        listFileImage!.addAll(selectedFile);
+                        dem = listFileImage!.length;
+                        print("Số ảnh chọn là " + dem.toString());
+                        setState(() {});
+                      }
                     },
                   ),
                 ]),
@@ -470,10 +800,31 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                 child:
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   iconcreation(
-                    Icons.headset,
+                    Icons.ondemand_video,
                     Colors.orange,
-                    "Audio",
-                    () {},
+                    "Video",
+                    () async {
+                      if (mounted)
+                        setState(() {
+                          popTime = 4;
+                        });
+                      print("Video................................");
+                      final XFile? file =
+                          await _picker.pickVideo(source: ImageSource.gallery);
+                      //video = File(file.path);
+                      //_videoPlayerController = VideoPlayerController.file(file.path);
+                      if (file != null) {
+                        listFileImage!.add(file);
+                        print("1 video vừa được chọn ");
+                        print(file.path);
+                        setState(() {
+                          _videoPlayerController =
+                              VideoPlayerController.file(File(file.path));
+                          _initializeVideoPlayerFuture =
+                              _videoPlayerController.initialize();
+                        });
+                      }
+                    },
                   ),
                   SizedBox(
                     width: 40,
@@ -523,7 +874,4 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
       ),
     );
   }
-
-// _scrollController.dispose();
-
 }

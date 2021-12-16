@@ -568,6 +568,10 @@ class _CommentScreenState extends State<CommentScreen> {
                                                           MaterialPageRoute(
                                                               builder: (builder) =>
                                                                   CameraScreen(
+                                                                    targetId:
+                                                                        "",
+                                                                    event:
+                                                                        "comment",
                                                                     onImageSend:
                                                                         onImageSend,
                                                                   )));
@@ -717,6 +721,8 @@ class _CommentScreenState extends State<CommentScreen> {
                           context,
                           MaterialPageRoute(
                               builder: (builder) => CameraScreen(
+                                    targetId: "",
+                                    event: "comment",
                                     onImageSend: onImageSend,
                                   )));
                     },
@@ -742,6 +748,7 @@ class _CommentScreenState extends State<CommentScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (builder) => CameraViewPage(
+                                        targetId: "",
                                         path: file.path,
                                         event: "comment",
                                         feedId: widget.feed.feedId,

@@ -181,6 +181,7 @@ class _ProfileState extends State<Profile> {
                                               builder: (builder) =>
                                                   CameraViewPage(
                                                     path: file.path,
+                                                    targetId: "",
                                                     event: "cover",
                                                     onImageSend: onImageSend,
                                                   )))
@@ -218,6 +219,7 @@ class _ProfileState extends State<Profile> {
                                               builder: (builder) =>
                                                   CameraViewPage(
                                                     path: file.path,
+                                                    targetId: "",
                                                     event: "avatar",
                                                     onImageSend: onImageSend,
                                                   )))
