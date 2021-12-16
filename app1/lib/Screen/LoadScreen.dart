@@ -159,12 +159,13 @@ class _LoadScreenState extends State<LoadScreen> {
                                 Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                        builder: (builder) => userProvider
-                                                        .userP.userName !=
-                                                    "" ||
-                                                userInit.userName != ""
-                                            ? MainScreen(UserId: userInit.id)
-                                            : LoginScreen())).then(
+                                        builder: (builder) =>
+                                            userProvider.userP.userName != "" ||
+                                                    userInit.userName != ""
+                                                ? MainScreen(
+                                                    UserId:
+                                                        userProvider.userP.id)
+                                                : LoginScreen())).then(
                                     (value) => setState(() {
                                           isLoading = true;
                                         }));

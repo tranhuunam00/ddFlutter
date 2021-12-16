@@ -55,7 +55,7 @@ class _MainScreenState extends State<MainScreen> {
       socket.on("test", (feed) {
         if (mounted) {
           print("---chạy setstate- số thông báo--");
-          setListFeedP(feed);
+          // setListFeedP(feed);
           _numberNotifications = _numberNotifications + 1;
 
           print(feed);
@@ -284,14 +284,15 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   @override
+  void dispose() {
+    super.dispose();
+    socket.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
     connect(widget.UserId);
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final prefs = await SharedPreferences.getInstance();
-      String jwt = await (prefs.getString('jwt') ?? "");
-    });
   }
 
   @override
