@@ -8,6 +8,7 @@ import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/test_emoji.dart';
+import 'package:app1/widgets/search.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import "package:app1/ui.dart";
@@ -28,7 +29,8 @@ final UserModel userMain = UserModel(
     coverImg: [],
     avatarImg: [],
     hadMessageList: []);
-const SERVER_IP = 'http://def5-113-184-15-220.ngrok.io';
+const SERVER_IP =
+    'http://b32d-2401-d800-f220-d2bd-7ce0-679e-4461-c4df.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,7 +66,7 @@ class MyApp extends StatelessWidget {
             title: "app1",
             // home: ChatLoginScreen()
             home: LoadScreen()
-            // home: Test123()
+            //  home: Search()
             // home: Test()
             // home: Test()
 

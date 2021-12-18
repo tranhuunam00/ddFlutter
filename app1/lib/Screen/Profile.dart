@@ -12,6 +12,7 @@ import 'package:app1/model/friendUser.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:app1/Screen/All_Fr_Screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -333,6 +334,12 @@ class _ProfileState extends State<Profile> {
                         AppBTnStyle(
                             label: "Xem tất cả bạn bè",
                             onTap: () {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (builder) => AllFriendScreen(
+                                          tag: true,
+                                          user: userProvider.userP)));
                               print(userProvider.listFriendsP);
                               print("----xem tất cả bạn bè-----------");
                             }),

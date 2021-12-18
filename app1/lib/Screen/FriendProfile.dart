@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app1/Screen/All_Fr_Screen.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/screens_chat/individual_chat.dart';
 import 'package:app1/feed/model/feed_model.dart';
@@ -586,6 +587,12 @@ class _FriendProfileState extends State<FriendProfile> {
                                   onTap: () {
                                     print(isFr);
                                     print(userProvider.userP.friend);
+                                    Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                            builder: (builder) =>
+                                                AllFriendScreen(
+                                                    tag: true, user: inforFr)));
                                   })
                               : Container(),
                           Divider(
