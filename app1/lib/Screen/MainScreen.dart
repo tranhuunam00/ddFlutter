@@ -52,13 +52,15 @@ class _MainScreenState extends State<MainScreen> {
           Provider.of<MessageProvider>(context, listen: false);
       final notifiProvider =
           Provider.of<NotifiProvider>(context, listen: false);
-      socket.on("test", (feed) {
+      socket.on("newFeed", (feed) {
         if (mounted) {
           print("---chạy setstate- số thông báo--");
-          // setListFeedP(feed);
+
           _numberNotifications = _numberNotifications + 1;
 
           print(feed);
+          print(feed["feedId"]);
+          setListFeedP(feed);
         }
       });
       socket.on("message", (msg) async {
@@ -202,6 +204,7 @@ class _MainScreenState extends State<MainScreen> {
 
   setListMessageP(msg) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     final messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
     if (messageProvider
@@ -242,9 +245,11 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  setListFeedP(feed) {
+  setListFeedP(feed) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final feedProvider = Provider.of<FeedProvider>(context, listen: false);
+    final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
+
     List<FeedBaseModel> newFeeds = [];
     if (feed["sourceUserId"] == userProvider.userP.id) {
       newFeeds = feedProvider.listFeedsP;
@@ -277,7 +282,22 @@ class _MainScreenState extends State<MainScreen> {
       newFeeds = feedProvider.listFeedsFrP;
       newFeeds.add(newFeed);
       feedProvider.userFrFeed(newFeeds);
+
+      NotifiModel not = NotifiModel(
+          type: "newFeed",
+          sourceIdUser: feed["sourceUserId"].toString(),
+          targetIdUser: "",
+          createdAt: feed["createdAt"],
+          content: "",
+          isSeen: false,
+          sourceRealnameUser: feed["sourceRealnameUser"],
+          sourceUserPathImg: feed["sourceUserPathImg"]
+              [feed["sourceUserPathImg"].length - 1]);
+      List<NotifiModel> notifiInit = notifiProvider.listNotifiP;
+      notifiInit.insert(0, not);
+      notifiProvider.userNotifi(notifiInit);
     }
+
     if (mounted) {
       setState(() {});
     }

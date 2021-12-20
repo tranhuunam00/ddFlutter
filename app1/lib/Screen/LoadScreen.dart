@@ -2,10 +2,12 @@ import 'dart:convert';
 
 import 'package:app1/Screen/SettingUser.dart';
 import 'package:app1/chat-app/model/message_model.dart';
+import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/friendUser.dart';
 import 'package:app1/model/notifi_modal.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
@@ -42,6 +44,9 @@ class _LoadScreenState extends State<LoadScreen> {
   Map<String, UserModel> listFrInit = {};
   Map<String, UserModel> listHadChat = {};
   List<NotifiModel> notifiInit = [];
+  List<FeedBaseModel> listFeedsInit = [];
+  List<FeedBaseModel> newListFeedOwnInit = [];
+  List<FeedBaseModel> newListFeedFrInit = [];
   @override
   void initState() {
     super.initState();
@@ -65,13 +70,16 @@ class _LoadScreenState extends State<LoadScreen> {
           getApi(
               jwt,
               "/notification/findLimit?limit=50&offset=0&targetUserId=" +
-                  userInit.id)
+                  userInit.id),
+          getApi(jwt, "/notification/findLimitNotTargetId?limit=50&offset=0"),
+          getFeedInit(userInit.id, jwt, userInit.friend),
         ]);
 
-        listMsgInit = await getAllMsgFr(jwt, 20, 0, "/message/allMsgFR",
+        listMsgInit = await getAllMsgFr(jwt, 10, 0, "/message/allMsgFR",
             userInit.id, userInit.hadMessageList);
         listFrInit = getFriendUser(result[0], userInit.friend);
         listHadChat = getFriendUser(result[1], userInit.hadMessageList);
+
         var notifiInitNotAvatar = getNotiifiUserInitNotAvatar(result[2], jwt);
         var userListResultApi = await Future.wait([
           PostApi(jwt, {"listUser": notifiInitNotAvatar[1]}, "/user/listUser")
@@ -80,8 +88,41 @@ class _LoadScreenState extends State<LoadScreen> {
         print(userListResultApi[0]);
         notifiInit = getNotiifiUserAll(userListResultApi[0],
             notifiInitNotAvatar[0], notifiInitNotAvatar[1]);
-        isLoading = false;
+        print("kết quả 3 là ");
+        print(result[3]);
+        if (result[3].length > 0) {
+          for (int i = 0; i < result[3].length; i++) {
+            if (result[3][i].length > 0) {
+              for (int j = 0; j < result[3][i].length; j++) {
+                notifiInit.add(NotifiModel(
+                    type: "newFeed",
+                    content: result[3][i][j]["content"],
+                    sourceRealnameUser:
+                        listFrInit[result[3][i][j]["sourceUserId"]]!.realName,
+                    createdAt: result[3][i][j]["createdAt"],
+                    sourceUserPathImg:
+                        listFrInit[result[3][i][j]["sourceUserId"]]!.avatarImg[
+                            listFrInit[result[3][i][j]["sourceUserId"]]!
+                                    .avatarImg
+                                    .length -
+                                1],
+                    sourceIdUser: result[3][i][j]["sourceUserId"]));
+              }
+            }
+          }
+        }
+        listFeedsInit = result[4];
+        for (int i = 0; i < listFeedsInit.length; i++) {
+          if (listFeedsInit[i].sourceUserId == userInit.id) {
+            newListFeedOwnInit.add(listFeedsInit[i]);
+          } else {
+            newListFeedFrInit.add(listFeedsInit[i]);
+          }
+        }
+        notifiInit.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
         setState(() {
+          isLoading = false;
           jwt = (prefs.getString('jwt') ?? "");
         });
       }
@@ -99,7 +140,7 @@ class _LoadScreenState extends State<LoadScreen> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
-
+    final feedProvider = Provider.of<FeedProvider>(context, listen: false);
     final messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
 
@@ -146,6 +187,9 @@ class _LoadScreenState extends State<LoadScreen> {
                                 userProvider.userFriends(listFrInit);
                                 userProvider.userHadChats(listHadChat);
                                 notifiProvider.userNotifi(notifiInit);
+
+                                feedProvider.userFeed(newListFeedOwnInit);
+                                feedProvider.userFrFeed(newListFeedFrInit);
                               }
                               print(userProvider.userP.userName);
                               print("realName");
@@ -357,5 +401,79 @@ Future<dynamic> getApi(String jwt, String pathApi) async {
     return data;
   } else {
     return "error";
+  }
+}
+
+Future fetchApiFeedInit(
+    String sourceId, String jwt, String limit, String offset) async {
+  try {
+    http.Response response;
+    List<FeedBaseModel> data1 = [];
+    //tim tin nhan cua nguoi gui cho ban
+    String query =
+        '?limit=' + limit + '&offset=' + offset + '&sourceId=' + sourceId;
+    String path = SERVER_IP + '/feed/limitFeedOwn' + query;
+    print(query);
+    print(path);
+    response = await http.get(
+      Uri.parse(path),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt,
+      },
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return json.decode(response.body);
+    } else {
+      return [];
+    }
+  } catch (e) {
+    return [];
+  }
+}
+
+//lay tin nhan ban dau................
+Future getFeedInit(sourceId, jwt, List listFr) async {
+  List<FeedBaseModel> listFeedsInit = [];
+  List<Future> fetchAllFeedFr = [];
+  for (var i = 0; i < listFr.length; i++) {
+    fetchAllFeedFr.add(
+      fetchApiFeedInit(listFr[i], jwt, 3.toString(), 0.toString()),
+    );
+  }
+  List data = await Future.wait([
+    fetchApiFeedInit(sourceId, jwt, 50.toString(), 0.toString()),
+    ...fetchAllFeedFr
+    //  fetchData(targetId, sourceId)
+  ]);
+  if (data[0] == "not jwt" || data[0] == "error") {
+    return listFeedsInit;
+  } else {
+    print("data 0");
+    print(data[0]);
+    for (int k = 0; k <= listFr.length; k++) {
+      if (data[k].length > 0) {
+        for (int i = 0; i < data[k].length; i++) {
+          if (data[k] != []) {
+            FeedBaseModel a = FeedBaseModel(
+              pathImg: data[k][i]["pathImg"],
+              rule: data[k][i]["rule"],
+              comment: data[k][i]["comment"],
+              feedId: data[k][i]["_id"].toString(),
+              message: data[k][i]["messages"],
+              like: data[k][i]["like"],
+              sourceUserId: data[k][i]["sourceUserId"].toString(),
+              createdAt: data[k][i]["createdAt"],
+              sourceUserName: data[k][i]["sourceUserName"].toString(),
+            );
+            listFeedsInit.add(a);
+          }
+        }
+      }
+    }
+
+    listFeedsInit.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return listFeedsInit;
   }
 }

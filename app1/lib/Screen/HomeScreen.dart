@@ -22,112 +22,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<FeedBaseModel> listFeeds = [];
   Map<String, UserModel> listUsers = {};
-  Future fetchApiFeedInit(
-      String sourceId, String jwt, String limit, String offset) async {
-    try {
-      http.Response response;
-      List<FeedBaseModel> data1 = [];
-      //tim tin nhan cua nguoi gui cho ban
-      String query =
-          '?limit=' + limit + '&offset=' + offset + '&sourceId=' + sourceId;
-      String path = SERVER_IP + '/feed/limitFeedOwn' + query;
-      print(query);
-      print(path);
-      response = await http.get(
-        Uri.parse(path),
-        headers: {
-          'Content-type': 'application/json',
-          'Accept': 'application/json',
-          'cookie': "jwt=" + jwt,
-        },
-      );
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return json.decode(response.body);
-      } else {
-        return [];
-      }
-    } catch (e) {
-      return [];
-    }
-  }
-
-  //lay tin nhan ban dau................
-  getFeedInit(sourceId, jwt, List listFr) async {
-    List<FeedBaseModel> listFeedsInit = [];
-    List<Future> fetchAllFeedFr = [];
-    for (var i = 0; i < listFr.length; i++) {
-      fetchAllFeedFr.add(
-        fetchApiFeedInit(listFr[i], jwt, 20.toString(), 0.toString()),
-      );
-    }
-    List data = await Future.wait([
-      fetchApiFeedInit(sourceId, jwt, 3.toString(), 0.toString()),
-      ...fetchAllFeedFr
-      //  fetchData(targetId, sourceId)
-    ]);
-    if (data[0] == "not jwt" || data[0] == "error") {
-      return listFeedsInit;
-    } else {
-      print("data 0");
-      print(data[0]);
-      for (int k = 0; k <= listFr.length; k++) {
-        if (data[k].length > 0) {
-          for (int i = 0; i < data[k].length; i++) {
-            if (data[k] != []) {
-              FeedBaseModel a = FeedBaseModel(
-                pathImg: data[k][i]["pathImg"],
-                rule: data[k][i]["rule"],
-                comment: data[k][i]["comment"],
-                feedId: data[k][i]["_id"].toString(),
-                message: data[k][i]["messages"],
-                like: data[k][i]["like"],
-                sourceUserId: data[k][i]["sourceUserId"].toString(),
-                createdAt: data[k][i]["createdAt"],
-                sourceUserName: data[k][i]["sourceUserName"].toString(),
-              );
-              listFeedsInit.add(a);
-            }
-          }
-        }
-      }
-
-      listFeedsInit.sort((a, b) => b.createdAt.compareTo(a.createdAt));
-      return listFeedsInit;
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      final feedProvider = Provider.of<FeedProvider>(context, listen: false);
-
-      List<FeedBaseModel> listFeedsInit = await getFeedInit(
-          userProvider.userP.id, userProvider.jwtP, userProvider.userP.friend);
-      List<FeedBaseModel> newListFeedOwnInit = [];
-      List<FeedBaseModel> newListFeedFrInit = [];
-
-      for (int i = 0; i < listFeedsInit.length; i++) {
-        if (listFeedsInit[i].sourceUserId == userProvider.userP.id) {
-          newListFeedOwnInit.add(listFeedsInit[i]);
-        } else {
-          newListFeedFrInit.add(listFeedsInit[i]);
-        }
-      }
-      feedProvider.userFeed(newListFeedOwnInit);
-      feedProvider.userFrFeed(newListFeedFrInit);
-
-      if (mounted) {
-        setState(() {});
-      }
-    });
-    // if (widget.newFeed!.sourceUserName != "") {
-    //   widget.listFeeds.add(widget.newFeed!);
-    //   if (mounted) {
-    //     setState(() {});
-    //   }
-    // }
   }
 
   @override
@@ -201,19 +99,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     ? Padding(
                         padding: const EdgeInsets.only(left: 16.0),
                         child: CardFeedStyle(
-                          feed: listFeedAll[index - 2],
-                          ownFeedUser: listUsers[
-                                      listFeedAll[index - 2].sourceUserId] !=
-                                  null
-                              ? listUsers[listFeedAll[index - 2].sourceUserId]!
-                              : UserModel(
-                                  friend: [],
-                                  hadMessageList: [],
-                                  coverImg: [],
-                                  friendConfirm: [],
-                                  friendRequest: [],
-                                  avatarImg: []),
-                        ),
+                            feed: listFeedAll[index - 2],
+                            ownFeedUser: listUsers[
+                                        listFeedAll[index - 2].sourceUserId] !=
+                                    null
+                                ? listUsers[
+                                    listFeedAll[index - 2].sourceUserId]!
+                                : userProvider.userP),
                       )
                     : Padding(
                         padding: const EdgeInsets.only(right: 16.0),

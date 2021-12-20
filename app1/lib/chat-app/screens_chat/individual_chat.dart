@@ -66,6 +66,60 @@ class _IndividualChatState extends State<IndividualChat> {
       _scrollController.animateTo(_scrollController.position.maxScrollExtent,
           duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     });
+    _scrollController = ScrollController()
+      ..addListener(() async {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        List<MessageModel> newListMsg = [];
+        if (_scrollController.offset == 0) {
+          int numberSource = 0;
+          int numberTarget = 0;
+          var maxTime;
+          List<MessageModel> newListMsg = [];
+          // print("bằng");
+          // var result = await getApi(userProvider.jwtP, )
+          for (int i = 0; i < messages.length; i++) {
+            if (messages[i].sourceId == userProvider.userP.id) {
+              numberSource++;
+            } else {
+              numberTarget++;
+            }
+          }
+          print(numberSource);
+          print(numberTarget);
+          print(messages.length);
+
+          var result = await Future.wait([
+            getApi(
+                userProvider.jwtP,
+                "/message/msgLimit?limit=10&offsetUser=" +
+                    numberSource.toString() +
+                    "&offsetTarget=" +
+                    numberTarget.toString() +
+                    "&targetId=" +
+                    widget.chatModel!.id),
+          ]);
+          if (result[0] != "not jwt" && result[0] != "error") {
+            List msg =
+                result[0][userProvider.userP.id + "/" + widget.chatModel!.id];
+            for (int i = 0; i < msg.length; i++) {
+              newListMsg.add(MessageModel(
+                path: msg[i]["path"],
+                time: msg[i]["time"],
+                sourceId: msg[i]["sourceId"],
+                targetId: msg[i]["targetId"],
+                message: msg[i]["message"],
+              ));
+            }
+            messages.addAll(newListMsg);
+            messages.sort((a, b) => a.time.compareTo(b.time));
+            if (mounted) {
+              setState(() {});
+            }
+          }
+        }
+
+        print("offset = ${_scrollController.offset}");
+      });
   }
 
   @override
@@ -312,10 +366,7 @@ class _IndividualChatState extends State<IndividualChat> {
     return Consumer<MessageProvider>(
         builder: (context, messageProvider, child) {
       print("---render individual--------");
-      WidgetsBinding.instance!.addPostFrameCallback((_) {
-        _scrollController.animateTo(_scrollController.position.maxScrollExtent,
-            duration: Duration(milliseconds: 100), curve: Curves.bounceIn);
-      });
+
       if (messageProvider.listMessageP[
               widget.sourceChat!.id + "/" + widget.chatModel!.id] !=
           null) {
@@ -857,7 +908,8 @@ Future<dynamic> getApi(String jwt, String pathApi) async {
 
 //         messages.add(a);
 //       }
-//       messages.sort((a, b) => a.time.compareTo(b.time));
+//
+// ;
 //       print("get init message done .....................");
 //       if (mounted) setState(() {});
 //     }
