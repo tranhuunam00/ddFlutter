@@ -32,23 +32,18 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
   void initState() {
     super.initState();
     feedApi = widget.feed;
-    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-
-      for (int i = 0; i < feedApi.like.length; i++) {
-        if (feedApi.like[i] == userProvider.userP.id) {
-          print("------đã like-------");
-          isLike = true;
-        }
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     Size size = MediaQuery.of(context).size;
-
+    for (int i = 0; i < feedApi.like.length; i++) {
+      if (feedApi.like[i] == userProvider.userP.id) {
+        print("------đã like-------");
+        isLike = true;
+      }
+    }
     Widget FeedImagesContainer(imagesList) {
       switch (imagesList.length) {
         case 1:
@@ -334,7 +329,12 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                           new Text(widget.ownFeedUser.realName,
                               style: AppStyles.h3
                                   .copyWith(fontWeight: FontWeight.bold)),
-                          new Text(widget.feed.createdAt),
+                          Row(
+                            children: [
+                              Text(widget.feed.createdAt.substring(0, 10)),
+                              Text(feedApi.rule[0])
+                            ],
+                          ),
                         ],
                       )),
                 ]),

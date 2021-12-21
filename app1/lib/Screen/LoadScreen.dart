@@ -119,7 +119,6 @@ class _LoadScreenState extends State<LoadScreen> {
             newListFeedFrInit.add(listFeedsInit[i]);
           }
         }
-        notifiInit.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
         setState(() {
           isLoading = false;

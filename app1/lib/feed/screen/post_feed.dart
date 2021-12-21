@@ -58,6 +58,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
   ScrollController _scrollController = ScrollController();
   bool tag = false;
   int popTime = 0;
+  String rule = "every";
   //.......................................................
   @override
   void initState() {
@@ -180,7 +181,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                             print(_controller.text);
                             FeedBaseModel feed = new FeedBaseModel(
                                 like: [],
-                                rule: [],
+                                rule: [rule],
                                 comment: [],
                                 pathImg: listPathSv,
                                 createdAt: DateTime.now().toString(),
@@ -195,7 +196,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                               if (newIdFeed != "error") {
                                 FeedBaseModel a = new FeedBaseModel(
                                     like: [],
-                                    rule: [],
+                                    rule: [rule],
                                     comment: [],
                                     pathImg: listPathSv,
                                     feedId: newIdFeed,
@@ -212,7 +213,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                               }
                             }
                             setState(() {
-                              for (var i = 0; i <= listIdTag.length; i++) {
+                              for (var i = 0; i < listIdTag.length; i++) {
                                 print("Người thứ " + i.toString());
                                 print(listRealNameTag[i]);
                               }
@@ -397,21 +398,71 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                           child: Row(
                                             children: [
                                               // ví dụ sẵn chọn chế độ một mình
-                                              Row(
-                                                children: [
-                                                  Icon(Icons.lock,
-                                                      size: 20,
-                                                      color: Colors
-                                                          .black87), // icon ổ khóa
-                                                  Text(
-                                                    "Chỉ mình tôi",
-                                                    style: TextStyle(
-                                                        fontSize: 14,
-                                                        fontWeight:
-                                                            FontWeight.w500,
-                                                        color: Colors.black54),
-                                                  ),
-                                                ],
+                                              InkWell(
+                                                onTap: () async {
+                                                  await showModalBottomSheet<
+                                                          String>(
+                                                      context: context,
+                                                      builder: (BuildContext
+                                                          context) {
+                                                        return Container(
+                                                            height: 300,
+                                                            child: Column(
+                                                                children: [
+                                                                  Expanded(
+                                                                      child: Container(
+                                                                          child:
+                                                                              Text(""))),
+                                                                  Expanded(
+                                                                      child: InkWell(
+                                                                          onTap: () async {
+                                                                            print(rule);
+                                                                            print("Tất cả mọi người");
+                                                                            setState(() {});
+
+                                                                            Navigator.pop(context,
+                                                                                rule = "every");
+                                                                          },
+                                                                          child: Text("Tất cả mọi người", textAlign: TextAlign.center))),
+                                                                  Expanded(
+                                                                      child: InkWell(
+                                                                          onTap: () async {
+                                                                            print("Bạn bè");
+                                                                            setState(() {});
+                                                                            Navigator.pop(context,
+                                                                                rule = "friend");
+                                                                          },
+                                                                          child: Text("Bạn bè", textAlign: TextAlign.center))),
+                                                                  Expanded(
+                                                                      child: InkWell(
+                                                                          onTap: () async {
+                                                                            print("Chỉ mình tôi");
+                                                                            setState(() {});
+
+                                                                            Navigator.pop(context,
+                                                                                rule = "only me");
+                                                                          },
+                                                                          child: Text("Chỉ mình tôi", textAlign: TextAlign.center))),
+                                                                ]));
+                                                      });
+                                                },
+                                                child: Row(
+                                                  children: [
+                                                    Icon(Icons.lock,
+                                                        size: 20,
+                                                        color: Colors
+                                                            .black87), // icon ổ khóa
+                                                    Text(
+                                                      rule,
+                                                      style: TextStyle(
+                                                          fontSize: 14,
+                                                          fontWeight:
+                                                              FontWeight.w500,
+                                                          color:
+                                                              Colors.black54),
+                                                    ),
+                                                  ],
+                                                ),
                                               )
                                             ],
                                           ),
@@ -858,7 +909,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
 
                       final XFile? file =
                           await _picker.pickImage(source: ImageSource.camera);
-                      if (file != null && dem <= 20) {
+                      if (file != null && dem < 20) {
                         listFileImage!.add(file);
                         dem = dem + 1;
                         print("Đã chụp ảnh");

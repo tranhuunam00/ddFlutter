@@ -66,29 +66,21 @@ class _HomeScreenState extends State<HomeScreen> {
     listUsers = userProvider.listFriendsP;
     listUsers[userProvider.userP.id] = userProvider.userP;
     return Consumer<FeedProvider>(builder: (context, feedProvider, child) {
-      if (listFeedAll.length == 0) {
-        listFeedAll = [];
-        if (feedProvider.listFeedsFrP.length > 0) {
-          listFeedAll.addAll(feedProvider.listFeedsFrP);
-        }
-        if (feedProvider.listFeedsP.length > 0 &&
-            feedProvider.listFeedsP.length < 3) {
-          for (int i = 0; i < feedProvider.listFeedsP.length; i++) {
-            if (listFeedAll.indexOf(feedProvider.listFeedsP[i]) == -1) {
-              listFeedAll.add(feedProvider.listFeedsP[i]);
-            }
-          }
-        }
-        if (feedProvider.listFeedsP.length >= 3) {
-          listFeedAll
-              .add(feedProvider.listFeedsP[feedProvider.listFeedsP.length - 1]);
+      listFeedAll = [];
+      if (feedProvider.listFeedsFrP.length > 0) {
+        listFeedAll.addAll(feedProvider.listFeedsFrP);
+      }
+      if (feedProvider.listFeedsP.length > 0 &&
+          feedProvider.listFeedsP.length < 3) {
+        listFeedAll.addAll(feedProvider.listFeedsP);
+      }
 
-          listFeedAll
-              .add(feedProvider.listFeedsP[feedProvider.listFeedsP.length - 2]);
+      if (feedProvider.listFeedsP.length >= 3) {
+        listFeedAll.add(feedProvider.listFeedsP[0]);
 
-          listFeedAll
-              .add(feedProvider.listFeedsP[feedProvider.listFeedsP.length - 3]);
-        }
+        listFeedAll.add(feedProvider.listFeedsP[1]);
+
+        listFeedAll.add(feedProvider.listFeedsP[2]);
       }
 
       listFeedAll.sort((a, b) => a.createdAt.compareTo(b.createdAt));
