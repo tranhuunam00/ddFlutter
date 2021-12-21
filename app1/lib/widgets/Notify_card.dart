@@ -53,6 +53,38 @@ class Notify_Card extends StatelessWidget {
                     ),
                   ),
                 ),
+                trailing: SizedBox(
+                    height: 50,
+                    width: 50,
+                    child: InkWell(
+                      onTap: () async {
+                        print("xóa");
+                        await showModalBottomSheet<String>(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return Container(
+                                  height: 200,
+                                  child: Center(
+                                      child: SizedBox(
+                                          height: 100,
+                                          width: 100,
+                                          child: InkWell(
+                                              onTap: () {
+                                                print("xóa");
+                                              },
+                                              child: Text("xóa",
+                                                  textAlign:
+                                                      TextAlign.center)))));
+                            });
+                      },
+                      child: Text(
+                        "...",
+                        style: TextStyle(
+                          fontSize: 20,
+                        ),
+                        textAlign: TextAlign.right,
+                      ),
+                    )),
                 title: Text(
                   realNameSource + " đã " + type + " cho bạn",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),

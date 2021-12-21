@@ -65,6 +65,13 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
           id: userProvider.userP.hadMessageList[i],
           currentMessage: a.message,
           time: a.time,
+          avatar: userProvider
+              .listHadChatP[userProvider.userP.hadMessageList[i]]!
+              .avatarImg[userProvider
+                  .listHadChatP[userProvider.userP.hadMessageList[i]]!
+                  .avatarImg
+                  .length -
+              1],
           realName: userProvider
               .listHadChatP[userProvider.userP.hadMessageList[i]]!.realName));
     }
@@ -83,7 +90,7 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
                   }
                   return InkWell(
                       onTap: () {
-                        print("--- chon avatar----");
+                        print("--- chon avatar1----");
                         print(hadMessageInit[index - 1].id);
                         Navigator.push(
                             context,
@@ -119,6 +126,39 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
                                       onTap: () {
                                         print("--- chon avatar----");
                                         print(userProvider.userP.friend[index]);
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (builder) =>
+                                                    IndividualChat(
+                                                      chatModel: ChatModel(
+                                                        id: userProvider.userP
+                                                            .friend[index],
+                                                        avatar: chatFriend[
+                                                                userProvider
+                                                                        .userP
+                                                                        .friend[
+                                                                    index]]!
+                                                            .avatar,
+                                                        realName: chatFriend[
+                                                                userProvider
+                                                                        .userP
+                                                                        .friend[
+                                                                    index]]!
+                                                            .realName,
+                                                      ),
+                                                      sourceChat: ChatModel(
+                                                          id: userProvider
+                                                              .userP.id,
+                                                          avatar: userProvider
+                                                                  .userP
+                                                                  .avatarImg[
+                                                              userProvider
+                                                                      .userP
+                                                                      .avatarImg
+                                                                      .length -
+                                                                  1]),
+                                                    )));
                                       },
                                       child: AvatarCard(
                                           contact: chatFriend[userProvider

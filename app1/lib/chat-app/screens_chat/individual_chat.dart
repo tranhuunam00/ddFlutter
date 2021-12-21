@@ -42,7 +42,7 @@ class _IndividualChatState extends State<IndividualChat> {
   bool isSendBtn = false;
   List<MessageModel> messages = [];
   ScrollController _scrollController = ScrollController();
-
+  bool _IsLoading = false;
   int popTime = 0;
   //.......................................................
   @override
@@ -71,6 +71,7 @@ class _IndividualChatState extends State<IndividualChat> {
         final userProvider = Provider.of<UserProvider>(context, listen: false);
         List<MessageModel> newListMsg = [];
         if (_scrollController.offset == 0) {
+          _IsLoading = true;
           int numberSource = 0;
           int numberTarget = 0;
           var maxTime;
@@ -98,6 +99,7 @@ class _IndividualChatState extends State<IndividualChat> {
                     "&targetId=" +
                     widget.chatModel!.id),
           ]);
+
           if (result[0] != "not jwt" && result[0] != "error") {
             List msg =
                 result[0][userProvider.userP.id + "/" + widget.chatModel!.id];
@@ -113,6 +115,8 @@ class _IndividualChatState extends State<IndividualChat> {
             messages.addAll(newListMsg);
             messages.sort((a, b) => a.time.compareTo(b.time));
             if (mounted) {
+              _IsLoading:
+              false;
               setState(() {});
             }
           }

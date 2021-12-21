@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/chat-app/screens_chat/CameraScreen.dart';
 import 'package:app1/chat-app/screens_chat/CameraView.dart';
+import 'package:app1/feed/screen/post_feed.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
@@ -25,10 +26,16 @@ import '../../ui.dart';
 
 class AllFriendScreen extends StatefulWidget {
   //final AllFriendScreen ? chatModel;
-  const AllFriendScreen({Key? key, required this.user, required this.tag})
-      : super(key: key);
+  const AllFriendScreen({
+    Key? key,
+    required this.user,
+    required this.tag,
+    this.onGetTag,
+  }) : super(key: key);
   final UserModel user;
   final bool tag;
+  final Function? onGetTag;
+
   @override
   _AllFriendScreen createState() => _AllFriendScreen();
 }
@@ -37,7 +44,12 @@ class _AllFriendScreen extends State<AllFriendScreen> {
   final TextEditingController _inputFriendController = TextEditingController();
   late bool checkTag;
   List<bool> valueList = [];
+  List<int> addressValueTag = [];
+  //final List<String> ListTargetId = [];
+  // final List<String> ListTargetName = [];
   List<MessageModel> messages = [];
+  List ListTargerId = [];
+  List ListTargetName = [];
   ScrollController _scrollController = ScrollController();
   bool checkinfo = true;
 
@@ -49,7 +61,6 @@ class _AllFriendScreen extends State<AllFriendScreen> {
   void initState() {
     super.initState();
     checkTag = false;
-
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
 
@@ -63,6 +74,20 @@ class _AllFriendScreen extends State<AllFriendScreen> {
           setState(() {});
         }
       }
+      // for (var i = 0; i < widget.ListTargerId.length;i++) {
+      //   print(widget.ListTargerId[i]);
+      //   var j =0;
+      //   while(j < allFr.length) {
+      //     if(widget.ListTargerId[i]==allFr[j].id) {
+      //       valueList[j]=true;
+      //       j=allFr.length;
+      //       print("Xem người đã được tag trước ");
+      //       print(allFr[j].realName);
+      //     }
+      //     else j=j+1;
+      //   }
+      //
+      // }
     });
   }
 
@@ -132,9 +157,13 @@ class _AllFriendScreen extends State<AllFriendScreen> {
                             ),
                           ),
                           onTap: () async {
-                            // xử lí call khi ấn gắn thẻ
-                          },
-                        )
+                            print(ListTargetName);
+                            print(ListTargerId);
+                            if (widget.tag && widget.onGetTag != null) {
+                              widget.onGetTag!(ListTargerId, ListTargetName);
+                              Navigator.pop(context);
+                            }
+                          })
                       : GestureDetector(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
@@ -221,7 +250,7 @@ class _AllFriendScreen extends State<AllFriendScreen> {
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: CircleAvatar(
-        child: Text(index.toString()),
+        child: Text(addressValueTag[index].toString()),
         backgroundColor: Colors.brown.shade50,
       ),
     );
@@ -251,27 +280,43 @@ class _AllFriendScreen extends State<AllFriendScreen> {
               ),
             ],
           ),
-          Checkbox(
-            value: valueList[index],
-            onChanged: (value) {
-              print("Vừa thay đổi người tag");
-              setState(() {
-                valueList[index] = value as bool;
-                if (valueList[index])
-                  dem = dem + 1;
-                else
-                  dem = dem - 1;
-                print(valueList[index]);
-                for (var i = 0; i < allFr.length; i++) {
-                  if (valueList[i]) {
-                    checkTag = true;
-                  }
-                  ;
-                  if (dem < 1) checkTag = false;
-                }
-              });
-            },
-          ),
+          widget.tag
+              ? Checkbox(
+                  value: valueList[index],
+                  onChanged: (value) {
+                    print("Vừa thay đổi người tag");
+                    print(allFr[index].realName);
+                    setState(() {
+                      valueList[index] = value as bool;
+                      if (valueList[index]) {
+                        dem = dem + 1;
+                        addressValueTag.add(index);
+                        ListTargerId.add(allFr[index].id);
+                        ListTargetName.add(allFr[index].realName);
+                        for (var i = 0; i < ListTargetName.length; i++) {
+                          print(ListTargetName[i]);
+                        }
+                        print(index);
+                      } else {
+                        dem = dem - 1;
+                        print(index);
+                        addressValueTag.remove(index);
+                        ListTargerId.remove(allFr[index].id);
+                        ListTargetName.remove(allFr[index].realName);
+                      }
+                      ;
+                      print(valueList[index]);
+                      for (var i = 0; i < allFr.length; i++) {
+                        if (valueList[i]) {
+                          checkTag = true;
+                        }
+                        ;
+                        if (dem < 1) checkTag = false;
+                      }
+                    });
+                  },
+                )
+              : Container(),
         ],
       ), // khung của mỗi người cmt
     );
@@ -298,6 +343,7 @@ Future<List<UserModel>> getAllFrApi(
       UserModel u = UserModel(
           friend: result[i]["friend"],
           hadMessageList: result[i]["hadMessageList"],
+          id: result[i]["_id"],
           coverImg: result[i]["coverImg"],
           realName: result[i]["realName"],
           friendConfirm: result[i]["friendConfirm"],

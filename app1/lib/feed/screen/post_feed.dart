@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:app1/Screen/All_Fr_Screen.dart';
+import 'package:app1/Screen/HomeScreen.dart';
 import 'package:app1/chat-app/customs/OwnFile_card.dart';
 import 'package:app1/chat-app/customs/OwnMessageCard.dart';
 import 'package:app1/chat-app/customs/ReplyFile_card.dart';
@@ -28,7 +30,9 @@ import 'package:socket_io_client/socket_io_client.dart';
 import 'package:video_player/video_player.dart';
 
 class PostFeedScreen extends StatefulWidget {
-  const PostFeedScreen({Key? key}) : super(key: key);
+  const PostFeedScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   _PostFeedScreenState createState() => _PostFeedScreenState();
@@ -38,19 +42,21 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
   final TextEditingController _controller = TextEditingController();
   bool isEmojiShowing = false;
   bool isVisible = false;
+  bool checkTag = true;
   String photopath = "";
   FocusNode focusNode = FocusNode();
   late Socket socket;
   final ImagePicker _picker = ImagePicker();
   //late final fileImage;
-
+  List listIdTag = [];
+  List listRealNameTag = [];
   List<XFile>? listFileImage = [];
   late VideoPlayerController _videoPlayerController;
   bool isSendBtn = false;
   int dem = 0;
   List<MessageModel> messages = [];
   ScrollController _scrollController = ScrollController();
-
+  bool tag = false;
   int popTime = 0;
   //.......................................................
   @override
@@ -134,6 +140,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                   padding: const EdgeInsets.only(left: 22, right: 12),
                   child: InkWell(
                       onTap: () async {
+                        print("oki");
                         focusNode.unfocus();
                         if (!focusNode.hasFocus) {
                           Navigator.of(context).pop(true);
@@ -204,6 +211,12 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                 Navigator.pop(context);
                               }
                             }
+                            setState(() {
+                              for (var i = 0; i <= listIdTag.length; i++) {
+                                print("Người thứ " + i.toString());
+                                print(listRealNameTag[i]);
+                              }
+                            });
                           },
                         )
                       : InkWell(
@@ -280,18 +293,103 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                         CrossAxisAlignment.start,
                                     children: [
                                       // Tên cá nhân
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 2),
-                                        child: Text(
-                                          'Bảo Phạm',
-                                          style: TextStyle(
-                                              fontSize: 18,
-                                              fontWeight: FontWeight.w800,
-                                              color: Colors.black54),
-                                        ),
-                                      ),
-
+                                      (tag)
+                                          ? Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              bottom: 2),
+                                                      child: Text(
+                                                        'Bảo Phạm',
+                                                        style: TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                            color:
+                                                                Colors.black87),
+                                                      ),
+                                                    ),
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                              8.0),
+                                                      child: Text(
+                                                        " cùng với - ",
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                            fontSize: 16,
+                                                            fontWeight:
+                                                                FontWeight.w400,
+                                                            color:
+                                                                Colors.black54),
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      listRealNameTag[0],
+                                                      textAlign:
+                                                          TextAlign.center,
+                                                      style: TextStyle(
+                                                          fontSize: 18,
+                                                          fontWeight:
+                                                              FontWeight.w800,
+                                                          color:
+                                                              Colors.black87),
+                                                    ),
+                                                  ],
+                                                ),
+                                                (listRealNameTag.length > 1)
+                                                    ? Text(
+                                                        listRealNameTag[1],
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                            color:
+                                                                Colors.black87),
+                                                      )
+                                                    : Container(),
+                                                (listRealNameTag.length > 2)
+                                                    ? Text(
+                                                        "và " +
+                                                            (listRealNameTag
+                                                                        .length -
+                                                                    2)
+                                                                .toString() +
+                                                            " người khác",
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: TextStyle(
+                                                            fontSize: 18,
+                                                            fontWeight:
+                                                                FontWeight.w800,
+                                                            color:
+                                                                Colors.black87),
+                                                      )
+                                                    : Container()
+                                              ],
+                                            )
+                                          : Container(
+                                              child: Padding(
+                                                padding: const EdgeInsets.only(
+                                                    bottom: 2),
+                                                child: Text(
+                                                  'Bảo Phạm',
+                                                  style: TextStyle(
+                                                      fontSize: 18,
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                      color: Colors.black54),
+                                                ),
+                                              ),
+                                            ),
                                       //cột chọn chế độ
                                       Container(
                                         child: Padding(
@@ -462,8 +560,29 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                 ),
                               ),
                               onPressed: () {
-                                // Navigator.pushReplacement(context,
-                                //     MaterialPageRoute(builder: (builder) => ListFriend()));
+                                print("heyy");
+
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) => AllFriendScreen(
+                                              tag: true,
+                                              user: userProvider.userP,
+                                              onGetTag: (List listId,
+                                                  List listRealName) {
+                                                listIdTag = listId;
+
+                                                listRealNameTag = listRealName;
+                                                if (listIdTag.length > 0) {
+                                                  tag = true;
+                                                }
+                                                setState(() {});
+                                                print("hihi");
+                                              },
+                                            )));
+
+                                print(userProvider.listFriendsP);
+                                print("----xem tất cả bạn bè-----------");
                               },
                             ),
 
@@ -518,7 +637,9 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                   ],
                                 ),
                               ),
-                              onPressed: () {},
+                              onPressed: () {
+                                print(listIdTag);
+                              },
                             ),
 
                             //Cảm xúc

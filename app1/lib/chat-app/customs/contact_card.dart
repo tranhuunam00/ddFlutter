@@ -4,16 +4,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class ContactCard extends StatelessWidget {
-  const ContactCard({Key? key, this.contact}) : super(key: key);
-  final ChatModel? contact;
+  const ContactCard({Key? key, required this.contact}) : super(key: key);
+  final ChatModel contact;
 
   @override
   Widget build(BuildContext context) {
     print("render...1.");
 
-    String pathImg;
+    String pathImg = contact.avatar;
     if (contact != null) {
-      if (contact!.avatar != "")
+      if (contact.avatar != "")
         pathImg = SERVER_IP + "/upload/" + contact!.avatar;
       else {
         pathImg = SERVER_IP + "/upload/" + "avatarNull.jpg";

@@ -338,7 +338,7 @@ class _ProfileState extends State<Profile> {
                                   context,
                                   MaterialPageRoute(
                                       builder: (builder) => AllFriendScreen(
-                                          tag: true,
+                                          tag: false,
                                           user: userProvider.userP)));
                               print(userProvider.listFriendsP);
                               print("----xem tất cả bạn bè-----------");

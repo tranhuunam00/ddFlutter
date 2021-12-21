@@ -13,6 +13,7 @@ class FeedProvider with ChangeNotifier {
 
   List<FeedBaseModel> listFeedsP = [];
   List<FeedBaseModel> listFeedsFrP = [];
+  List<FeedBaseModel> listFeedsVisionFrP = [];
 
   Future userFeed(List<FeedBaseModel> newFeeds) async {
     try {
@@ -25,6 +26,14 @@ class FeedProvider with ChangeNotifier {
   Future userFrFeed(List<FeedBaseModel> newFeeds) async {
     try {
       listFeedsFrP = newFeeds;
+      // myStream.setFeed(newFeeds);
+    } catch (e) {}
+    notifyListeners();
+  }
+
+  Future userFrVisionFeed(List<FeedBaseModel> newFeeds) async {
+    try {
+      listFeedsVisionFrP = newFeeds;
       // myStream.setFeed(newFeeds);
     } catch (e) {}
     notifyListeners();
