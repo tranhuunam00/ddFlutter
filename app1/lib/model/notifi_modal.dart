@@ -2,7 +2,7 @@ class NotifiModel {
   late bool isSeen;
   late String type;
   late String sourceIdUser;
-  late String targetIdUser;
+  late List targetIdUser;
   late String sourceUserPathImg;
   late String sourceRealnameUser;
   late String content;
@@ -12,7 +12,7 @@ class NotifiModel {
       this.sourceIdUser = "",
       this.sourceRealnameUser = "",
       this.sourceUserPathImg = "avatarNull.jpg",
-      this.targetIdUser = "",
+      required this.targetIdUser,
       this.createdAt = "",
       this.isSeen = false,
       this.content = ""});

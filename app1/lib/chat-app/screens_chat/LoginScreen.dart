@@ -37,47 +37,50 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
-    hadMessageInit = [];
 
-    /// chuyen doi listFr thanh chat Model
-    for (var i = 0; i < userProvider.userP.friend.length; i++) {
-      if (userProvider.listFriendsP.length > 0) {
-        chatFriend[userProvider.userP.friend[i]] = ChatModel(
-            id: userProvider.userP.friend[i],
-            realName: userProvider
-                .listFriendsP[userProvider.userP.friend[i]]!.realName,
-            avatar: userProvider
-                .listFriendsP[userProvider.userP.friend[i]]!.avatarImg[0]);
-      }
-    }
-    //chuyen doi du lieu hadChatMsg thanh chatmodel
-    Map<String, List<MessageModel>> chatHad = messageProvider.listMessageP;
-
-    for (var i = 0; i < userProvider.userP.hadMessageList.length; i++) {
-      var a = chatHad[userProvider.userP.id +
-          "/" +
-          userProvider.userP.hadMessageList[i]]![chatHad[userProvider.userP.id +
-                  "/" +
-                  userProvider.userP.hadMessageList[i]]!
-              .length -
-          1];
-      hadMessageInit.add(ChatModel(
-          id: userProvider.userP.hadMessageList[i],
-          currentMessage: a.message,
-          time: a.time,
-          avatar: userProvider
-              .listHadChatP[userProvider.userP.hadMessageList[i]]!
-              .avatarImg[userProvider
-                  .listHadChatP[userProvider.userP.hadMessageList[i]]!
-                  .avatarImg
-                  .length -
-              1],
-          realName: userProvider
-              .listHadChatP[userProvider.userP.hadMessageList[i]]!.realName));
-    }
-    hadMessageInit.sort((a, b) => b.time.compareTo(a.time));
     return Consumer<MessageProvider>(
         builder: (context, messageProvider, child) {
+      hadMessageInit = [];
+
+      /// chuyen doi listFr thanh chat Model
+      for (var i = 0; i < userProvider.userP.friend.length; i++) {
+        if (userProvider.listFriendsP.length > 0) {
+          chatFriend[userProvider.userP.friend[i]] = ChatModel(
+              id: userProvider.userP.friend[i],
+              realName: userProvider
+                  .listFriendsP[userProvider.userP.friend[i]]!.realName,
+              avatar: userProvider
+                  .listFriendsP[userProvider.userP.friend[i]]!.avatarImg[0]);
+        }
+      }
+      //chuyen doi du lieu hadChatMsg thanh chatmodel
+      Map<String, List<MessageModel>> chatHad = messageProvider.listMessageP;
+
+      for (var i = 0; i < userProvider.userP.hadMessageList.length; i++) {
+        var a = chatHad[userProvider.userP.id +
+            "/" +
+            userProvider.userP.hadMessageList[i]]![chatHad[
+                    userProvider.userP.id +
+                        "/" +
+                        userProvider.userP.hadMessageList[i]]!
+                .length -
+            1];
+        hadMessageInit.add(ChatModel(
+            id: userProvider.userP.hadMessageList[i],
+            currentMessage: a.message,
+            time: a.time,
+            avatar: userProvider
+                .listHadChatP[userProvider.userP.hadMessageList[i]]!
+                .avatarImg[userProvider
+                    .listHadChatP[userProvider.userP.hadMessageList[i]]!
+                    .avatarImg
+                    .length -
+                1],
+            realName: userProvider
+                .listHadChatP[userProvider.userP.hadMessageList[i]]!.realName));
+      }
+      hadMessageInit.sort((a, b) => b.time.compareTo(a.time));
+
       return Scaffold(
           appBar: AppBar(),
           body: Stack(children: [

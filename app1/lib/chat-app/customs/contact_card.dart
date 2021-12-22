@@ -14,7 +14,7 @@ class ContactCard extends StatelessWidget {
     String pathImg = contact.avatar;
     if (contact != null) {
       if (contact.avatar != "")
-        pathImg = SERVER_IP + "/upload/" + contact!.avatar;
+        pathImg = SERVER_IP + "/upload/" + contact.avatar;
       else {
         pathImg = SERVER_IP + "/upload/" + "avatarNull.jpg";
       }
@@ -46,10 +46,9 @@ class ContactCard extends StatelessWidget {
           ]),
         ),
         title: Text(
-          contact != null ? contact!.realName : "userName",
+          contact != null ? contact.realName : "userName",
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
         ),
-        subtitle:
-            Text(contact!.currentMessage, style: TextStyle(fontSize: 13)));
+        subtitle: Text(contact.currentMessage, style: TextStyle(fontSize: 13)));
   }
 }

@@ -97,6 +97,7 @@ class _FriendProfileState extends State<FriendProfile> {
             message: data[i]["messages"],
             like: data[i]["like"],
             comment: data[i]["comment"],
+            tag: data[i]["tag"],
             pathImg: data[i]["pathImg"],
             rule: data[i]["rule"],
             sourceUserId: data[i]["sourceId"].toString(),

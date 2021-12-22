@@ -121,6 +121,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
             "pathImg": feed.pathImg,
             "messages": feed.message,
             "rule": feed.rule,
+            "tag": feed.tag,
             "createdAt": feed.createdAt,
           }));
       print(json.decode(response.body).toString());
@@ -169,6 +170,8 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                             ),
                           ),
                           onTap: () async {
+                            print("list tag là");
+                            print(listIdTag);
                             List<String> listPathSv = [];
                             print(listFileImage);
                             if (listFileImage != null) {
@@ -183,6 +186,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                 like: [],
                                 rule: [rule],
                                 comment: [],
+                                tag: listIdTag,
                                 pathImg: listPathSv,
                                 createdAt: DateTime.now().toString(),
                                 sourceUserId: userProvider.userP.id,
@@ -198,6 +202,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                     like: [],
                                     rule: [rule],
                                     comment: [],
+                                    tag: listIdTag,
                                     pathImg: listPathSv,
                                     feedId: newIdFeed,
                                     createdAt: DateTime.now().toString(),
@@ -277,9 +282,21 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                     padding:
                                         const EdgeInsets.fromLTRB(8, 2, 8, 8),
                                     child: CircleAvatar(
-                                      child: Text("BP"),
-                                      backgroundColor: Colors.brown.shade50,
-                                      // backgroundImage: ImageProvider,
+                                      backgroundColor: Colors.red,
+                                      radius: 23,
+                                      backgroundImage:
+                                          AssetImage('assets/images/load.gif'),
+                                      child: CircleAvatar(
+                                        radius: 23,
+                                        backgroundImage: NetworkImage(
+                                            SERVER_IP +
+                                                "/upload/" +
+                                                userProvider.userP.avatarImg[
+                                                    userProvider.userP.avatarImg
+                                                            .length -
+                                                        1]),
+                                        backgroundColor: Colors.transparent,
+                                      ),
                                     ),
                                     // child: Container(
                                     //   width: 48,
@@ -306,7 +323,8 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                                           const EdgeInsets.only(
                                                               bottom: 2),
                                                       child: Text(
-                                                        'Bảo Phạm',
+                                                        userProvider
+                                                            .userP.realName,
                                                         style: TextStyle(
                                                             fontSize: 18,
                                                             fontWeight:
@@ -324,7 +342,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                                         textAlign:
                                                             TextAlign.center,
                                                         style: TextStyle(
-                                                            fontSize: 16,
+                                                            fontSize: 12,
                                                             fontWeight:
                                                                 FontWeight.w400,
                                                             color:
@@ -336,7 +354,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                                       textAlign:
                                                           TextAlign.center,
                                                       style: TextStyle(
-                                                          fontSize: 18,
+                                                          fontSize: 16,
                                                           fontWeight:
                                                               FontWeight.w800,
                                                           color:
@@ -350,7 +368,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                                         textAlign:
                                                             TextAlign.center,
                                                         style: TextStyle(
-                                                            fontSize: 18,
+                                                            fontSize: 16,
                                                             fontWeight:
                                                                 FontWeight.w800,
                                                             color:
@@ -368,7 +386,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                                         textAlign:
                                                             TextAlign.center,
                                                         style: TextStyle(
-                                                            fontSize: 18,
+                                                            fontSize: 16,
                                                             fontWeight:
                                                                 FontWeight.w800,
                                                             color:
@@ -382,7 +400,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                                 padding: const EdgeInsets.only(
                                                     bottom: 2),
                                                 child: Text(
-                                                  'Bảo Phạm',
+                                                  userProvider.userP.realName,
                                                   style: TextStyle(
                                                       fontSize: 18,
                                                       fontWeight:

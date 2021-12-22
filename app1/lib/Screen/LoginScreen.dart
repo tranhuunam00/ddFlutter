@@ -251,18 +251,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                                 type: "newFeed",
                                                 content: result[3][i][j]
                                                     ["content"],
+                                                targetIdUser: result[3][i][j]
+                                                    ["targetUserId"],
                                                 sourceRealnameUser:
                                                     listFrInit[result[3][i][j]["sourceUserId"]]!
                                                         .realName,
                                                 createdAt: result[3][i][j]
                                                     ["createdAt"],
-                                                sourceUserPathImg:
+                                                sourceUserPathImg: listFrInit[result[3][i][j]["sourceUserId"]]!.avatarImg[
                                                     listFrInit[result[3][i][j]["sourceUserId"]]!
-                                                            .avatarImg[
-                                                        listFrInit[result[3][i][j]["sourceUserId"]]!
-                                                                .avatarImg
-                                                                .length -
-                                                            1],
+                                                            .avatarImg
+                                                            .length -
+                                                        1],
                                                 sourceIdUser: result[3][i][j]
                                                     ["sourceUserId"]));
                                           }
@@ -563,6 +563,7 @@ Future getFeedInit(sourceId, jwt, List listFr) async {
               comment: data[k][i]["comment"],
               feedId: data[k][i]["_id"].toString(),
               message: data[k][i]["messages"],
+              tag: data[k][i]["tag"],
               like: data[k][i]["like"],
               sourceUserId: data[k][i]["sourceUserId"].toString(),
               createdAt: data[k][i]["createdAt"],

@@ -63,6 +63,14 @@ class _MainScreenState extends State<MainScreen> {
           setListFeedP(feed);
         }
       });
+      socket.on("newTag", (feed) {
+        if (mounted) {
+          print("---chạy setstate- số thông báo--");
+
+          _numberNotifications = _numberNotifications + 1;
+          setNewTag(feed);
+        }
+      });
       socket.on("message", (msg) async {
         if (userProvider.userP.hadMessageList.indexOf(msg["sourceId"]) < 0) {
           userProvider.userP.hadMessageList.add(msg["sourceId"]);
@@ -258,6 +266,7 @@ class _MainScreenState extends State<MainScreen> {
           message: feed['messages'],
           comment: feed['comment'],
           rule: feed['rule'],
+          tag: feed["tag"],
           like: feed['like']);
       print(newFeed);
       // newFeeds.add(newFeed);
@@ -273,6 +282,7 @@ class _MainScreenState extends State<MainScreen> {
         comment: feed["comment"],
         feedId: feed["_id"].toString(),
         message: feed["messages"],
+        tag: feed["tag"],
         like: feed["like"],
         sourceUserId: feed["sourceUserId"].toString(),
         createdAt: feed["createdAt"],
@@ -286,7 +296,7 @@ class _MainScreenState extends State<MainScreen> {
       NotifiModel not = NotifiModel(
           type: "newFeed",
           sourceIdUser: feed["sourceUserId"].toString(),
-          targetIdUser: "",
+          targetIdUser: feed["tag"],
           createdAt: feed["createdAt"],
           content: "",
           isSeen: false,
@@ -301,6 +311,24 @@ class _MainScreenState extends State<MainScreen> {
     if (mounted) {
       setState(() {});
     }
+  }
+
+  setNewTag(feed) {
+    final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
+
+    NotifiModel not = NotifiModel(
+        type: "newTag",
+        sourceIdUser: feed["sourceUserId"].toString(),
+        targetIdUser: feed["tag"],
+        createdAt: feed["createdAt"],
+        content: "",
+        isSeen: false,
+        sourceRealnameUser: feed["sourceRealnameUser"],
+        sourceUserPathImg: feed["sourceUserPathImg"]
+            [feed["sourceUserPathImg"].length - 1]);
+    List<NotifiModel> notifiInit = notifiProvider.listNotifiP;
+    notifiInit.insert(0, not);
+    notifiProvider.userNotifi(notifiInit);
   }
 
   @override

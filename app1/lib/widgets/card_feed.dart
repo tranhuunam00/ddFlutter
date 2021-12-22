@@ -26,7 +26,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
   final int totalLike = 0;
   final int totalComment = 0;
   FeedBaseModel feedApi =
-      new FeedBaseModel(like: [], rule: [], comment: [], pathImg: []);
+      new FeedBaseModel(like: [], rule: [], comment: [], pathImg: [], tag: []);
   late bool isLike = false;
   @override
   void initState() {
@@ -500,17 +500,19 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
         print(json.decode(response.body));
         return json.decode(response.body);
       } else {
-        return FeedBaseModel(like: [], rule: [], comment: [], pathImg: []);
+        return FeedBaseModel(
+            like: [], rule: [], comment: [], pathImg: [], tag: []);
       }
     } catch (e) {
-      return FeedBaseModel(like: [], rule: [], comment: [], pathImg: []);
+      return FeedBaseModel(
+          like: [], rule: [], comment: [], tag: [], pathImg: []);
     }
   }
 
   //-----------------------like func------------
   getFeedApi(sourceId, jwt) async {
     FeedBaseModel feedApi =
-        FeedBaseModel(like: [], rule: [], comment: [], pathImg: []);
+        FeedBaseModel(like: [], tag: [], rule: [], comment: [], pathImg: []);
     var data = await fetchApiFindFeed(sourceId, jwt);
     if (data == "not jwt") {
       return feedApi;
@@ -523,6 +525,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
           like: data["like"],
           comment: data["comment"],
           pathImg: data["pathImg"],
+          tag: data["tag"],
           rule: data["rule"],
           message: data["messages"],
           createdAt: data["createdAt"],

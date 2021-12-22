@@ -96,6 +96,7 @@ class _LoadScreenState extends State<LoadScreen> {
               for (int j = 0; j < result[3][i].length; j++) {
                 notifiInit.add(NotifiModel(
                     type: "newFeed",
+                    targetIdUser: result[3][i][j]["targetUserId"],
                     content: result[3][i][j]["content"],
                     sourceRealnameUser:
                         listFrInit[result[3][i][j]["sourceUserId"]]!.realName,
@@ -461,6 +462,7 @@ Future getFeedInit(sourceId, jwt, List listFr) async {
               comment: data[k][i]["comment"],
               feedId: data[k][i]["_id"].toString(),
               message: data[k][i]["messages"],
+              tag: data[k][i]["tag"],
               like: data[k][i]["like"],
               sourceUserId: data[k][i]["sourceUserId"].toString(),
               createdAt: data[k][i]["createdAt"],

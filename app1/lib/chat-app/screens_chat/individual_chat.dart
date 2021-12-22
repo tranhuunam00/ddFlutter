@@ -179,45 +179,47 @@ class _IndividualChatState extends State<IndividualChat> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
+    String time = DateTime.now().toString();
     if (userProvider.userP.hadMessageList
             .indexOf(widget.chatModel!.id.toString()) <
         0) {
       print("---đây là lần đầu nhắn tin ---");
       print(userProvider.userP.hadMessageList);
-      var result = await PostApi(userProvider.jwtP,
-          {"frId": widget.chatModel!.id.toString()}, "/user/createHadMsg");
+      var result = await Future.wait([
+        PostApi(userProvider.jwtP, {"frId": widget.chatModel!.id.toString()},
+            "/user/createHadMsg"),
+        PostApi(
+            userProvider.jwtP,
+            {
+              "message": message,
+              "sourceId": sourceId,
+              "targetId": targetId,
+              "time": time,
+              "path": path,
+            },
+            "/message")
+      ]);
       print("kết quả new user chat là");
       print(result);
-      if (result == "done") {
+      if (result[0] == "done") {
         userProvider.userP.hadMessageList.add(widget.chatModel!.id.toString());
         MessageModel messageModel = MessageModel(
             message: message,
             path: path,
             targetId: targetId,
             sourceId: sourceId,
-            time: DateTime.now().toString());
+            time: time);
 
         List<MessageModel> listMsg = [];
         socket.emit("message", {
           "message": message,
           "sourceId": sourceId,
           "targetId": targetId,
-          "time": DateTime.now().toString(),
+          "time": time,
           "path": path,
         });
-        var msg = await PostApi(
-            userProvider.jwtP,
-            {
-              "message": message,
-              "sourceId": sourceId,
-              "targetId": targetId,
-              "time": DateTime.now().toString(),
-              "path": path,
-            },
-            "/message");
-        print("post tin nhắn hú");
-        print(msg);
-        if (msg == "done") {
+
+        if (result[1] == "done") {
           listMsg.add(messageModel);
           Map<String, List<MessageModel>> newMsg = messageProvider.listMessageP;
           newMsg[sourceId + "/" + targetId] = listMsg;
@@ -246,29 +248,38 @@ class _IndividualChatState extends State<IndividualChat> {
         "time": DateTime.now().toString(),
         "path": path,
       });
-      var msg = await PostApi(
-          userProvider.jwtP,
-          {
-            "message": message,
-            "sourceId": sourceId,
-            "targetId": targetId,
-            "time": DateTime.now().toString(),
-            "path": path,
-          },
-          "/message");
+      var msg = await Future.wait([
+        PostApi(
+            userProvider.jwtP,
+            {
+              "message": message,
+              "sourceId": sourceId,
+              "targetId": targetId,
+              "time": time,
+              "path": path,
+            },
+            "/message"),
+        PostApi(
+            userProvider.jwtP,
+            {
+              "idUser": sourceId,
+              "idFr": targetId,
+            },
+            "/user/addOneHadMsgList"),
+      ]);
       print("post tin nhắn hú");
       print(msg);
 
       setMessage(message, path, widget.chatModel!.id.toString(),
-          widget.sourceChat!.id.toString());
+          widget.sourceChat!.id.toString(), time);
     }
 
     // if (mounted) setState(() {});
   }
 
   //
-  void setMessage(
-      String message, String path, String targetId, String sourceId) {
+  void setMessage(String message, String path, String targetId, String sourceId,
+      String time) {
     final messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
     MessageModel messageModel = MessageModel(
@@ -276,7 +287,7 @@ class _IndividualChatState extends State<IndividualChat> {
         path: path,
         targetId: targetId,
         sourceId: sourceId,
-        time: DateTime.now().toString());
+        time: time);
 
     List<MessageModel> listMsg = [];
 
@@ -317,7 +328,7 @@ class _IndividualChatState extends State<IndividualChat> {
       var pathSV = data;
       if (data != "not jwt" && data != "error") {
         setMessage("", pathSV, widget.chatModel!.id.toString(),
-            widget.sourceChat!.id.toString());
+            widget.sourceChat!.id.toString(), time);
 
         socket.emit("message", {
           "message": "",
@@ -490,9 +501,7 @@ class _IndividualChatState extends State<IndividualChat> {
                                       message: messages[index].message,
                                     );
                                   } else {
-                                    return OwnMessageCard(
-                                        message: messages[index].message,
-                                        time: messages[index].time);
+                                    return OwnMessageCard(msg: messages[index]);
                                   }
                                 } else {
                                   if (messages[index].path.length > 0) {
@@ -502,8 +511,7 @@ class _IndividualChatState extends State<IndividualChat> {
                                     );
                                   } else {
                                     return ReplyMessageCard(
-                                        message: messages[index].message,
-                                        time: messages[index].time);
+                                        msg: messages[index]);
                                   }
                                 }
                               })),

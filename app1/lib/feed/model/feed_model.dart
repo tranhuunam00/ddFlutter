@@ -8,11 +8,13 @@ class FeedBaseModel {
   late String feedId;
   late List comment;
   late List like;
+  late List tag;
   FeedBaseModel(
       {required this.pathImg,
       this.message = "",
       this.sourceUserId = "",
       required this.comment,
+      required this.tag,
       required this.rule,
       required this.like,
       this.createdAt = "",
