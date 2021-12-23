@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 
 import 'package:app1/chat-app/customs/OwnFile_card.dart';
 import 'package:app1/chat-app/customs/OwnMessageCard.dart';
@@ -121,8 +122,6 @@ class _IndividualChatState extends State<IndividualChat> {
             }
           }
         }
-
-        print("offset = ${_scrollController.offset}");
       });
   }
 
@@ -377,7 +376,10 @@ class _IndividualChatState extends State<IndividualChat> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-
+    String choose = "";
+    if (choose == "deleteAll") {
+      print("deleteAll");
+    }
     return Consumer<MessageProvider>(
         builder: (context, messageProvider, child) {
       print("---render individual--------");
@@ -454,24 +456,66 @@ class _IndividualChatState extends State<IndividualChat> {
                       icon: Icon(Icons.call),
                       onPressed: () {},
                     ),
-                    PopupMenuButton<String>(onSelected: (value) {
-                      print(value);
-                    }, itemBuilder: (BuildContext context) {
-                      return [
-                        PopupMenuItem(
-                            child: Text("View Contact"), value: "View Contact"),
-                        PopupMenuItem(
-                            child: Text("Media,Link"), value: "Media,Link"),
-                        PopupMenuItem(
-                            child: Text("Whatsapp Wed"), value: "Whatsapp Wed"),
-                        PopupMenuItem(child: Text("Search"), value: "Search"),
-                        PopupMenuItem(
-                            child: Text("WallPaper"), value: "WallPaper"),
-                        PopupMenuItem(
-                            child: Text("Not notification"),
-                            value: "Not notification"),
-                      ];
-                    })
+                    PopupMenuButton<String>(
+                      onSelected: (value) async {
+                        if (value == "DeleteAll") {
+                          var result = await showOkCancelAlertDialog(
+                              context: context,
+                              onWillPop: () async {
+                                return true;
+                              },
+                              title: "Bạn có chắc chắn muốn xóa?");
+                          if (result == OkCancelResult.ok) {
+                            print("đã đồng ý");
+
+                            var res = await DeleteApi(userProvider.jwtP, {},
+                                "/message/" + widget.chatModel!.id);
+                            print("kết quả khi delete ");
+                            if (res != "error" && res != "not jwt") {
+                              messageProvider.listMessageP[
+                                  userProvider.userP.id +
+                                      "/" +
+                                      widget.chatModel!.id] = [];
+                              messageProvider.listMessageP.remove(
+                                  userProvider.userP.id +
+                                      "/" +
+                                      widget.chatModel!.id);
+
+                              userProvider.userP.hadMessageList
+                                  .remove(widget.chatModel!.id);
+                              userProvider.listHadChatP.remove(
+                                  userProvider.userP.id +
+                                      "/" +
+                                      widget.chatModel!.id);
+
+                              messageProvider
+                                  .userMessage(messageProvider.listMessageP);
+                              if (mounted) {
+                                setState(() {
+                                  messages = [];
+                                });
+                              }
+                            }
+                          } else {
+                            print("cancel");
+                          }
+                        }
+                      },
+                      itemBuilder: (BuildContext context) {
+                        return [
+                          PopupMenuItem(child: Text("Search"), value: "Search"),
+                          PopupMenuItem(
+                              child: Text("Xóa tất cả tin nhắn"),
+                              onTap: () async {
+                                print("ấn thử");
+                              },
+                              value: "DeleteAll"),
+                          PopupMenuItem(
+                              child: Text("Not notification"),
+                              value: "Not notification"),
+                        ];
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -943,6 +987,27 @@ Future PostApi(String jwt, data, String pathApi) async {
     return json.decode(response.body);
   } else {
     print("---------------post lỗi---------");
+    return "error";
+  }
+}
+
+Future DeleteApi(String jwt, data, String pathApi) async {
+  http.Response response;
+  print("----post---------" + pathApi);
+  response = await http.delete(Uri.parse(SERVER_IP + pathApi),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt
+      },
+      body: jsonEncode(data));
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("-----kêt quả delete--------");
+    print(json.decode(response.body).toString());
+    return json.decode(response.body);
+  } else {
+    print("---------------kết quả delete---------");
     return "error";
   }
 }

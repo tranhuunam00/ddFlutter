@@ -1,8 +1,12 @@
 import 'package:app1/Screen/FriendProfile.dart';
+import 'package:app1/chat-app/model/chat_modal.dart';
+import 'package:app1/chat-app/screens_chat/individual_chat.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class Notify_Card extends StatelessWidget {
   const Notify_Card(
@@ -24,6 +28,8 @@ class Notify_Card extends StatelessWidget {
   final bool isSeen;
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     return Column(
       children: [
         Container(
@@ -38,6 +44,24 @@ class Notify_Card extends StatelessWidget {
                     MaterialPageRoute(
                         builder: (builder) =>
                             FriendProfile(frId: idUserSource)));
+              }
+              if (type == "newMsg") {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (builder) => IndividualChat(
+                              sourceChat: ChatModel(
+                                id: userProvider.userP.id,
+                                avatar: userProvider.userP.avatarImg[
+                                    userProvider.userP.avatarImg.length - 1],
+                                realName: userProvider.userP.realName,
+                              ),
+                              chatModel: ChatModel(
+                                id: idUserSource,
+                                realName: realNameSource,
+                                avatar: pathImgSource,
+                              ),
+                            )));
               }
             },
             child: ListTile(

@@ -11,9 +11,15 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:app1/provider/message_provider.dart';
 
-class ReplyMessageCard extends StatelessWidget {
+class ReplyMessageCard extends StatefulWidget {
   const ReplyMessageCard({Key? key, required this.msg}) : super(key: key);
   final MessageModel msg;
+
+  @override
+  State<ReplyMessageCard> createState() => _ReplyMessageCardState();
+}
+
+class _ReplyMessageCardState extends State<ReplyMessageCard> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
@@ -41,40 +47,43 @@ class ReplyMessageCard extends StatelessWidget {
                                 title: "Bạn có chắc chắn muốn xóa?");
                             if (result == OkCancelResult.ok) {
                               print("đã đồng ý");
-                              print(msg.sourceId);
+                              print(widget.msg.sourceId);
 
                               var res = await DeleteApi(
                                   userProvider.jwtP,
                                   {
-                                    "time": msg.time,
-                                    "targetId": msg.targetId,
-                                    "sourceId": msg.sourceId,
+                                    "time": widget.msg.time,
+                                    "targetId": widget.msg.targetId,
+                                    "sourceId": widget.msg.sourceId,
                                     "path": "",
-                                    "message": msg.message,
+                                    "message": widget.msg.message,
                                   },
                                   "/message/individual");
-                              print("kết quả khi delete ");
+                              print("res là  ");
+                              print(res);
                               if (res != "error" && res != "not jwt") {
                                 messageProvider.listMessageP[
                                         userProvider.userP.id +
                                             "/" +
-                                            msg.sourceId]!
-                                    .remove(msg);
+                                            widget.msg.sourceId]!
+                                    .remove(widget.msg);
                                 if (res == "0") {
                                   userProvider.userP.hadMessageList
-                                      .remove(msg.sourceId);
+                                      .remove(widget.msg.sourceId);
                                   userProvider.listHadChatP.remove(
                                       userProvider.userP.id +
                                           "/" +
-                                          msg.sourceId);
+                                          widget.msg.sourceId);
                                   messageProvider.listMessageP.remove(
                                       userProvider.userP.id +
                                           "/" +
-                                          msg.sourceId);
+                                          widget.msg.sourceId);
                                 }
                                 messageProvider
                                     .userMessage(messageProvider.listMessageP);
-                                Navigator.pop(context);
+                                if (mounted) {
+                                  Navigator.pop(context);
+                                }
                               }
                             } else {
                               print("cancel");
@@ -101,7 +110,8 @@ class ReplyMessageCard extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.only(
                         left: 10, right: 60, top: 05, bottom: 20),
-                    child: Text(msg.message, style: TextStyle(fontSize: 16)),
+                    child: Text(widget.msg.message,
+                        style: TextStyle(fontSize: 16)),
                   ),
                   SizedBox(height: 5),
                   //ngày tháng,.....................................
@@ -110,7 +120,7 @@ class ReplyMessageCard extends StatelessWidget {
                     right: 10,
                     child: Row(
                       children: [
-                        Text(msg.time.substring(11, 17),
+                        Text(widget.msg.time.substring(11, 17),
                             style: TextStyle(
                               color: Colors.grey[600],
                               fontSize: 12,

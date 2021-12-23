@@ -212,6 +212,7 @@ class _MainScreenState extends State<MainScreen> {
 
   setListMessageP(msg) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
 
     final messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
@@ -242,10 +243,28 @@ class _MainScreenState extends State<MainScreen> {
           message: msg["message"],
           targetId: msg["targetId"],
           sourceId: msg["sourceId"]));
+      NotifiModel not = NotifiModel(
+        type: "newMsg",
+        sourceIdUser: msg["sourceId"],
+        targetIdUser: msg["targetId"],
+        content: msg["sourceId"],
+        createdAt: msg["time"],
+      );
+
       messageProvider
               .listMessageP[userProvider.userP.id + "/" + msg["sourceId"]] ==
           output;
       messagesI = messageProvider.listMessageP;
+      List<NotifiModel> notifiInit = notifiProvider.listNotifiP;
+      for (int i = 0; i < notifiInit.length; i++) {
+        if (notifiInit[i].type == "newMsg" &&
+            notifiInit[i].sourceIdUser == msg["sourceId"]) {
+          notifiInit.removeAt(i);
+          i--;
+        }
+      }
+      notifiInit.insert(0, not);
+      notifiProvider.userNotifi(notifiInit);
       messageProvider.userMessage(messagesI);
     }
     if (mounted) {
@@ -313,6 +332,7 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
+  //
   setNewTag(feed) {
     final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
 
@@ -330,6 +350,7 @@ class _MainScreenState extends State<MainScreen> {
     notifiInit.insert(0, not);
     notifiProvider.userNotifi(notifiInit);
   }
+  //
 
   @override
   void dispose() {
