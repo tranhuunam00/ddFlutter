@@ -564,6 +564,7 @@ Future getFeedInit(sourceId, jwt, List listFr) async {
               feedId: data[k][i]["_id"].toString(),
               message: data[k][i]["messages"],
               tag: data[k][i]["tag"],
+              pathVideo: data[k][i]["pathVideo"],
               like: data[k][i]["like"],
               sourceUserId: data[k][i]["sourceUserId"].toString(),
               createdAt: data[k][i]["createdAt"],

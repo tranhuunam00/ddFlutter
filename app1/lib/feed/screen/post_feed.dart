@@ -50,7 +50,8 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
   //late final fileImage;
   List listIdTag = [];
   List listRealNameTag = [];
-  List<XFile>? listFileImage = [];
+  List<XFile> listFileImage = [];
+  List<XFile> listFileVideo = [];
   late VideoPlayerController _videoPlayerController;
   bool isSendBtn = false;
   int dem = 0;
@@ -100,6 +101,13 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
 
   @override
   Widget build(BuildContext context) {
+    List<XFile> listFileAll = [];
+    if (listFileImage.length > 0) {
+      listFileAll = listFileImage;
+    } else {
+      listFileAll = listFileVideo;
+    }
+
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final feedProvider = Provider.of<FeedProvider>(context, listen: false);
     var urlPostFeed = Uri.parse(SERVER_IP + '/feed');
@@ -119,6 +127,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
             "sourceUserId": feed.sourceUserId,
             "sourceUserName": feed.sourceUserName,
             "pathImg": feed.pathImg,
+            "pathVideo": feed.pathVideo,
             "messages": feed.message,
             "rule": feed.rule,
             "tag": feed.tag,
@@ -155,7 +164,8 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                 actions: [
                   // nút đăng  hiển thị ở trên appbar ............................
                   (_controller.text.length > 0 == true ||
-                          isVisible) // kiểm tra có chữ hoặc có ảnh chưa để có thể ấn nút đăng
+                          dem >
+                              0) // kiểm tra có chữ hoặc có ảnh chưa để có thể ấn nút đăng
                       ? InkWell(
                           child: Padding(
                             padding: const EdgeInsets.only(
@@ -175,19 +185,27 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                             List<String> listPathSv = [];
                             print(listFileImage);
                             if (listFileImage != null) {
-                              if (listFileImage!.length > 0) {
+                              if (listFileImage.length > 0) {
                                 listPathSv = await onImageSend(
-                                    listFileImage!, userProvider.jwtP);
+                                    listFileImage, userProvider.jwtP);
                               }
                             }
-
+                            if (listFileVideo.length > 0) {
+                              listPathSv = await onImageSend(
+                                  listFileVideo, userProvider.jwtP);
+                            }
+                            print("listPathSv: ");
+                            print(listPathSv);
                             print(_controller.text);
                             FeedBaseModel feed = new FeedBaseModel(
                                 like: [],
                                 rule: [rule],
                                 comment: [],
+                                pathVideo:
+                                    listFileVideo.length > 0 ? listPathSv : [],
                                 tag: listIdTag,
-                                pathImg: listPathSv,
+                                pathImg:
+                                    listFileImage.length > 0 ? listPathSv : [],
                                 createdAt: DateTime.now().toString(),
                                 sourceUserId: userProvider.userP.id,
                                 message: _controller.text,
@@ -203,7 +221,12 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                     rule: [rule],
                                     comment: [],
                                     tag: listIdTag,
-                                    pathImg: listPathSv,
+                                    pathVideo: listFileVideo.length > 0
+                                        ? listPathSv
+                                        : [],
+                                    pathImg: listFileVideo.length == 0
+                                        ? listPathSv
+                                        : [],
                                     feedId: newIdFeed,
                                     createdAt: DateTime.now().toString(),
                                     sourceUserId: userProvider.userP.id,
@@ -526,41 +549,155 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                       ),
 
                       // góc test hiển thị ảnh ...............
-                      if (listFileImage!.length == 0)
+                      if (listFileImage.length == 0 &&
+                          listFileVideo.length == 0)
                         SizedBox()
                       else
                         Expanded(
+                          flex: 1,
                           child: GridView.builder(
-                              itemCount: listFileImage!.length,
+                              itemCount: listFileAll.length,
                               itemBuilder: (listViewContext, index) => Padding(
                                     padding: const EdgeInsets.all(2),
                                     child: Container(
-                                      child: Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          Image.file(
-                                            File(listFileImage![index].path),
-                                            fit: BoxFit.cover,
-                                          ),
+                                      child:
 
-                                          Positioned(
-                                            right: 0,
-                                            top: 0,
-                                            child: Container(
-                                              color: Color.fromRGBO(
-                                                  255, 255, 255, 0.4),
-                                              child: IconButton(
-                                                onPressed: () async {
-                                                  listFileImage!
-                                                      .removeAt(index);
-                                                  setState(() {});
-                                                },
-                                                icon: Icon(Icons.delete),
-                                              ),
-                                            ),
-                                          ) //position
-                                        ],
-                                      ),
+                                          /// Điều kiện hiển thị ảnh
+                                          (listFileAll[index].path.substring(
+                                                          listFileAll[index]
+                                                                  .path
+                                                                  .length -
+                                                              3,
+                                                          listFileAll[index]
+                                                              .path
+                                                              .length) ==
+                                                      "png" ||
+                                                  listFileAll[index]
+                                                          .path
+                                                          .substring(
+                                                              listFileAll[index]
+                                                                      .path
+                                                                      .length -
+                                                                  3,
+                                                              listFileAll[index]
+                                                                  .path
+                                                                  .length) ==
+                                                      "jpg" ||
+                                                  listFileAll[index]
+                                                          .path
+                                                          .substring(
+                                                              listFileAll[index]
+                                                                      .path
+                                                                      .length -
+                                                                  3,
+                                                              listFileAll[index]
+                                                                  .path
+                                                                  .length) ==
+                                                      "gif")
+                                              ? Stack(
+                                                  fit: StackFit.expand,
+                                                  children: [
+                                                    Image.file(
+                                                      File(listFileImage[index]
+                                                          .path),
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                    Positioned(
+                                                      right: 0,
+                                                      top: 0,
+                                                      child: Container(
+                                                        color: Color.fromRGBO(
+                                                            255, 255, 255, 0.4),
+                                                        child: IconButton(
+                                                          onPressed: () async {
+                                                            print(
+                                                                listFileVideo);
+                                                            if (listFileImage
+                                                                    .length >
+                                                                0) {
+                                                              listFileImage
+                                                                  .removeAt(
+                                                                      index);
+                                                            } else {
+                                                              listFileVideo
+                                                                  .removeAt(
+                                                                      index);
+                                                            }
+
+                                                            setState(() {
+                                                              dem--;
+                                                            });
+                                                          },
+                                                          icon: Icon(
+                                                              Icons.delete),
+                                                        ),
+                                                      ),
+                                                    ) //position
+                                                  ],
+                                                )
+
+                                              /// hiển thị video
+                                              : Container(
+                                                  child: Stack(
+                                                    fit: StackFit.expand,
+                                                    children: [
+                                                      VideoPlayer(
+                                                          _videoPlayerController),
+                                                      Positioned(
+                                                        top: 0,
+                                                        bottom: 0,
+                                                        left: 0,
+                                                        right: 0,
+                                                        child: Container(
+                                                          color: Color.fromRGBO(
+                                                              255,
+                                                              255,
+                                                              255,
+                                                              0.4),
+                                                          child: IconButton(
+                                                            onPressed:
+                                                                () async {},
+                                                            icon: Icon(Icons
+                                                                .play_circle_fill_outlined),
+                                                          ),
+                                                        ),
+                                                      ), //position hiển thi icon video
+                                                      Positioned(
+                                                        right: 0,
+                                                        top: 0,
+                                                        child: Container(
+                                                          color: Color.fromRGBO(
+                                                              255,
+                                                              255,
+                                                              255,
+                                                              0.4),
+                                                          child: IconButton(
+                                                            onPressed:
+                                                                () async {
+                                                              if (listFileImage
+                                                                      .length >
+                                                                  0) {
+                                                                listFileImage
+                                                                    .removeAt(
+                                                                        index);
+                                                              } else {
+                                                                listFileVideo
+                                                                    .removeAt(
+                                                                        index);
+                                                              }
+
+                                                              setState(() {
+                                                                dem--;
+                                                              });
+                                                            },
+                                                            icon: Icon(
+                                                                Icons.delete),
+                                                          ),
+                                                        ),
+                                                      ), //position nút xóa
+                                                    ],
+                                                  ),
+                                                ),
                                     ),
                                   ),
                               gridDelegate:
@@ -570,6 +707,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
 
                       //các tiện ích
                       Expanded(
+                        flex: 3,
                         child: ListView(
                           children: [
                             // Thêm ảnh
@@ -604,6 +742,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                               },
                             ),
 
+                            // Gắn thẻ
                             // Gắn thẻ
                             FlatButton(
                               child: Padding(
@@ -656,87 +795,6 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                             ),
 
                             // Thêm vị trí
-                            FlatButton(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 4, bottom: 4),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.location_pin,
-                                      color: Colors.redAccent,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 10),
-                                      child: Text(
-                                        "Thêm vị trí",
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black54),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              onPressed: () {},
-                            ),
-
-                            //Tài liệu, file
-                            FlatButton(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 4, bottom: 4),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.insert_drive_file,
-                                      color: Colors.blue,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 10),
-                                      child: Text(
-                                        "Tài liệu",
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black54),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              onPressed: () {
-                                print(listIdTag);
-                              },
-                            ),
-
-                            //Cảm xúc
-                            FlatButton(
-                              child: Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 4, bottom: 4),
-                                child: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.emoji_emotions,
-                                      color: Colors.yellow,
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(left: 10),
-                                      child: Text(
-                                        "Cảm xúc/Hoạt động",
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color: Colors.black54),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              onPressed: () {},
-                            ),
                           ],
                         ),
                       ),
@@ -904,12 +962,6 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                     left: 20, right: 20, top: 20, bottom: 10),
                 child:
                     Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                  iconcreation(
-                    Icons.insert_drive_file,
-                    Colors.indigo,
-                    "Document",
-                    () {},
-                  ),
                   SizedBox(
                     width: 40,
                   ),
@@ -917,23 +969,25 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                     Icons.camera_alt,
                     Colors.pink,
                     "Camera",
-                    () async {
-                      if (mounted)
-                        setState(() {
-                          popTime = 3;
-                        });
-                      print("chup ảnh................................");
-                      dem = 0;
+                    dem < 7
+                        ? () async {
+                            if (mounted)
+                              setState(() {
+                                popTime = 3;
+                              });
+                            print("chup ảnh................................");
+                            dem = 0;
 
-                      final XFile? file =
-                          await _picker.pickImage(source: ImageSource.camera);
-                      if (file != null && dem < 20) {
-                        listFileImage!.add(file);
-                        dem = dem + 1;
-                        print("Đã chụp ảnh");
-                        setState(() {});
-                      }
-                    },
+                            final XFile? file = await _picker.pickImage(
+                                source: ImageSource.camera);
+                            if (file != null && dem < 20) {
+                              listFileImage.add(file);
+                              dem = dem + 1;
+                              print("Đã chụp ảnh");
+                              setState(() {});
+                            }
+                          }
+                        : () {},
                   ),
                   SizedBox(
                     width: 40,
@@ -942,25 +996,28 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                     Icons.insert_photo,
                     Colors.purple,
                     "Gallary",
-                    () async {
-                      if (mounted)
-                        setState(() {
-                          popTime = 2;
-                        });
-                      isVisible = true;
+                    listFileVideo.length == 0 && dem < 7
+                        ? () async {
+                            if (mounted)
+                              setState(() {
+                                popTime = 2;
+                              });
+                            isVisible = true;
 
-                      print("chuyen sang ảnh................................");
-                      final List<XFile>? selectedFile =
-                          await _picker.pickMultiImage();
-                      if (selectedFile != null) {
-                        if (selectedFile.isNotEmpty) {
-                          listFileImage!.addAll(selectedFile);
-                          dem = listFileImage!.length;
-                          print("Số ảnh chọn là " + dem.toString());
-                          setState(() {});
-                        }
-                      }
-                    },
+                            print(
+                                "chuyen sang ảnh................................");
+                            final List<XFile>? selectedFile =
+                                await _picker.pickMultiImage();
+                            if (selectedFile != null) {
+                              if (selectedFile.isNotEmpty) {
+                                listFileImage.addAll(selectedFile);
+                                dem = listFileImage.length;
+                                print("Số ảnh chọn là " + dem.toString());
+                                setState(() {});
+                              }
+                            }
+                          }
+                        : () {},
                   ),
                 ]),
               ),
@@ -973,28 +1030,31 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                     Icons.ondemand_video,
                     Colors.orange,
                     "Video",
-                    () async {
-                      if (mounted)
-                        setState(() {
-                          popTime = 4;
-                        });
-                      print("Video................................");
-                      final XFile? file =
-                          await _picker.pickVideo(source: ImageSource.gallery);
-                      //video = File(file.path);
-                      //_videoPlayerController = VideoPlayerController.file(file.path);
-                      if (file != null) {
-                        listFileImage!.add(file);
-                        print("1 video vừa được chọn ");
-                        print(file.path);
-                        setState(() {
-                          _videoPlayerController =
-                              VideoPlayerController.file(File(file.path));
-                          _initializeVideoPlayerFuture =
-                              _videoPlayerController.initialize();
-                        });
-                      }
-                    },
+                    listFileImage.length == 0 && dem < 7
+                        ? () async {
+                            if (mounted)
+                              setState(() {
+                                popTime = 4;
+                              });
+                            print("Video................................");
+                            final XFile? file = await _picker.pickVideo(
+                                source: ImageSource.gallery);
+                            //video = File(file.path);
+                            //_videoPlayerController = VideoPlayerController.file(file.path);
+                            if (file != null) {
+                              listFileVideo.add(file);
+                              print("1 video vừa được chọn ");
+                              print(file.path);
+                              setState(() {
+                                dem = listFileVideo.length;
+                                _videoPlayerController =
+                                    VideoPlayerController.file(File(file.path));
+                                _initializeVideoPlayerFuture =
+                                    _videoPlayerController.initialize();
+                              });
+                            }
+                          }
+                        : () {},
                   ),
                   SizedBox(
                     width: 40,

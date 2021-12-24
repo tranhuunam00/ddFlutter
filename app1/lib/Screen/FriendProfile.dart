@@ -36,6 +36,7 @@ class _FriendProfileState extends State<FriendProfile> {
       avatarImg: [],
       hadMessageList: []);
   List<FeedBaseModel> listFeedsInit = [];
+  ScrollController _scrollController = new ScrollController();
   Map<String, UserModel> frOfFr = {};
   String isFr = "Kết bạn";
   bool isTontai = true;
@@ -45,9 +46,14 @@ class _FriendProfileState extends State<FriendProfile> {
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final feedProvider = Provider.of<FeedProvider>(context, listen: false);
-
-      listFeedsInit = await getFeedInit(userProvider.jwtP, widget.frId);
-      inforFr = await getInforFr(userProvider.jwtP, widget.frId);
+      String query = '?limit=15&offset=0&sourceId=' + widget.frId;
+      String path = '/feed/limitFeedOwn' + query;
+      var result = await Future.wait([
+        getApi(userProvider.jwtP, path),
+        getApi(userProvider.jwtP, "/user/" + widget.frId)
+      ]);
+      listFeedsInit = getFeedInit(result[0]);
+      inforFr = getInforFr(result[1]);
 
       if (inforFr.userName != "") {
         frOfFr = await getFriendUser(userProvider.jwtP,
@@ -75,16 +81,43 @@ class _FriendProfileState extends State<FriendProfile> {
         }
       }
     });
+    _scrollController = ScrollController()
+      ..addListener(() async {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+        if (_scrollController.offset ==
+            _scrollController.position.maxScrollExtent) {
+          print("cuối cùng");
+          print(listFeedsInit.length);
+          List<FeedBaseModel> listFeedsNew = [];
+          String query = '?limit=15&offset=' +
+              (listFeedsInit.length).toString() +
+              '&sourceId=' +
+              widget.frId;
+          String path = '/feed/limitFeedOwn' + query;
+          var result = await Future.wait([
+            getApi(userProvider.jwtP, path),
+          ]);
+          listFeedsNew = getFeedInit(result[0]);
+          listFeedsInit.addAll(listFeedsNew);
+          if (listFeedsNew.length > 0) {
+            if (mounted) {
+              setState(() {});
+            }
+          }
+
+          print("kết quả khi thêm là ");
+          print(listFeedsNew);
+        }
+        print("offset = ${_scrollController.offset}");
+      });
   }
 
 //------------------------get feed init--------------------
-  Future<List<FeedBaseModel>> getFeedInit(String jwt, String id) async {
+  getFeedInit(data) {
     print("------------------getFeedInit--------------");
     List<FeedBaseModel> listFeedsInit = [];
-    String query = '?limit=15&offset=0&sourceId=' + id;
-    String path = '/feed/limitFeedOwn' + query;
-    print("path");
-    var data = await getApi(jwt, path);
+
     print("data là");
     print(data);
     if (data == "not jwt" || data == "error") {
@@ -97,6 +130,7 @@ class _FriendProfileState extends State<FriendProfile> {
             message: data[i]["messages"],
             like: data[i]["like"],
             comment: data[i]["comment"],
+            pathVideo: data[i]["pathVideo"],
             tag: data[i]["tag"],
             pathImg: data[i]["pathImg"],
             rule: data[i]["rule"],
@@ -139,8 +173,7 @@ class _FriendProfileState extends State<FriendProfile> {
   }
 
 //------------------get infor cua ownFr------------
-  Future<UserModel> getInforFr(String jwt, String id) async {
-    var data = await getApi(jwt, "/user/" + id);
+  getInforFr(data) {
     print("kết quả của get info Fr");
     print(data);
     if (data != "not jwt" && data != "error") {
@@ -333,7 +366,7 @@ class _FriendProfileState extends State<FriendProfile> {
     }
 
     Size size = MediaQuery.of(context).size;
-    ScrollController _scrollController = new ScrollController();
+
     List<Widget> frGirdView(Map<String, UserModel> inforFr, List listFr) {
       List<Widget> list = [];
       if (listFr.length == 0 || listFr == null) {
@@ -609,7 +642,8 @@ class _FriendProfileState extends State<FriendProfile> {
                         ownFeedUser: inforFr,
                       );
                     } else {
-                      return Text("chưa có bài viết nào");
+                      return SizedBox(
+                          height: 300, child: Text("chưa có bài viết nào"));
                     }
                   } else {
                     if (index == 2) {

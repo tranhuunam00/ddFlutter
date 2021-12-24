@@ -45,6 +45,13 @@ class Notify_Card extends StatelessWidget {
                         builder: (builder) =>
                             FriendProfile(frId: idUserSource)));
               }
+              if (type == "confirmFr") {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (builder) =>
+                            FriendProfile(frId: idUserSource)));
+              }
               if (type == "newMsg") {
                 Navigator.push(
                     context,

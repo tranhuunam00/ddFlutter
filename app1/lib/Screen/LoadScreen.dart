@@ -459,6 +459,7 @@ Future getFeedInit(sourceId, jwt, List listFr) async {
             FeedBaseModel a = FeedBaseModel(
               pathImg: data[k][i]["pathImg"],
               rule: data[k][i]["rule"],
+              pathVideo: data[k][i]["pathVideo"],
               comment: data[k][i]["comment"],
               feedId: data[k][i]["_id"].toString(),
               message: data[k][i]["messages"],

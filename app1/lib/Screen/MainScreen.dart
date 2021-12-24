@@ -100,7 +100,33 @@ class _MainScreenState extends State<MainScreen> {
           });
         }
       });
-      socket.on("likeFeed", (msg) {});
+      socket.on("likeFeed", (msg) {
+        NotifiModel not = NotifiModel(
+            targetIdUser: [],
+            sourceIdUser: msg["idUserLiked"],
+            sourceRealnameUser: msg["realNameLiked"],
+            sourceUserPathImg: msg["avatarLiked"],
+            type: msg["type"],
+            isSeen: false,
+            createdAt: msg["createdAt"],
+            content: msg["feedId"]);
+        List<NotifiModel> notifiInit = notifiProvider.listNotifiP;
+        for (int i = 0; i < notifiInit.length; i++) {
+          if (notifiInit[i].sourceIdUser == not.sourceIdUser &&
+              notifiInit[i].content == not.content) {
+            notifiInit.removeAt(i);
+            i--;
+          }
+        }
+        notifiInit.insert(0, not);
+
+        notifiProvider.userNotifi(notifiInit);
+        if (mounted) {
+          setState(() {
+            _numberNotifications = _numberNotifications + 1;
+          });
+        }
+      });
       socket.on("handleFr", (data) async {
         print(data);
         print(data["type"]);
@@ -264,6 +290,7 @@ class _MainScreenState extends State<MainScreen> {
         }
       }
       notifiInit.insert(0, not);
+
       notifiProvider.userNotifi(notifiInit);
       messageProvider.userMessage(messagesI);
     }
@@ -281,7 +308,9 @@ class _MainScreenState extends State<MainScreen> {
     if (feed["sourceUserId"] == userProvider.userP.id) {
       newFeeds = feedProvider.listFeedsP;
       FeedBaseModel newFeed = FeedBaseModel(
+          feedId: feed["feedId"],
           pathImg: feed['pathImg'],
+          pathVideo: feed['pathVideo'],
           message: feed['messages'],
           comment: feed['comment'],
           rule: feed['rule'],
@@ -299,8 +328,9 @@ class _MainScreenState extends State<MainScreen> {
         pathImg: feed["pathImg"],
         rule: feed["rule"],
         comment: feed["comment"],
-        feedId: feed["_id"].toString(),
+        feedId: feed["feedId"].toString(),
         message: feed["messages"],
+        pathVideo: feed['pathVideo'],
         tag: feed["tag"],
         like: feed["like"],
         sourceUserId: feed["sourceUserId"].toString(),

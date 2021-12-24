@@ -1,5 +1,6 @@
 class FeedBaseModel {
   late List pathImg;
+  late List pathVideo;
   late String message;
   late String sourceUserId;
   late String createdAt;
@@ -11,6 +12,7 @@ class FeedBaseModel {
   late List tag;
   FeedBaseModel(
       {required this.pathImg,
+      required this.pathVideo,
       this.message = "",
       this.sourceUserId = "",
       required this.comment,

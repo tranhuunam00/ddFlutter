@@ -25,8 +25,8 @@ class CardFeedStyle extends StatefulWidget {
 class _CardFeedStyleState extends State<CardFeedStyle> {
   final int totalLike = 0;
   final int totalComment = 0;
-  FeedBaseModel feedApi =
-      new FeedBaseModel(like: [], rule: [], comment: [], pathImg: [], tag: []);
+  FeedBaseModel feedApi = new FeedBaseModel(
+      like: [], rule: [], comment: [], pathImg: [], tag: [], pathVideo: []);
   late bool isLike = false;
   @override
   void initState() {
@@ -394,7 +394,11 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                             //like bài viết
                             postApi(
                                 userProvider.jwtP,
-                                {"feedId": widget.feed.feedId, "event": "like"},
+                                {
+                                  "feedId": widget.feed.feedId,
+                                  "event": "like",
+                                  "createdAt": DateTime.now().toString()
+                                },
                                 "/feed/likeFeed")
                           ]);
                           if (mounted) {
@@ -413,7 +417,8 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                                 userProvider.jwtP,
                                 {
                                   "feedId": widget.feed.feedId,
-                                  "event": "dislike"
+                                  "event": "dislike",
+                                  "createdAt": DateTime.now().toString()
                                 },
                                 "/feed/likeFeed")
                           ]);
@@ -501,18 +506,23 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
         return json.decode(response.body);
       } else {
         return FeedBaseModel(
-            like: [], rule: [], comment: [], pathImg: [], tag: []);
+            like: [],
+            rule: [],
+            comment: [],
+            pathImg: [],
+            tag: [],
+            pathVideo: []);
       }
     } catch (e) {
       return FeedBaseModel(
-          like: [], rule: [], comment: [], tag: [], pathImg: []);
+          like: [], rule: [], comment: [], tag: [], pathImg: [], pathVideo: []);
     }
   }
 
   //-----------------------like func------------
   getFeedApi(sourceId, jwt) async {
-    FeedBaseModel feedApi =
-        FeedBaseModel(like: [], tag: [], rule: [], comment: [], pathImg: []);
+    FeedBaseModel feedApi = FeedBaseModel(
+        like: [], tag: [], rule: [], comment: [], pathImg: [], pathVideo: []);
     var data = await fetchApiFindFeed(sourceId, jwt);
     if (data == "not jwt") {
       return feedApi;
@@ -525,6 +535,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
           like: data["like"],
           comment: data["comment"],
           pathImg: data["pathImg"],
+          pathVideo: data["pathVideo"],
           tag: data["tag"],
           rule: data["rule"],
           message: data["messages"],
