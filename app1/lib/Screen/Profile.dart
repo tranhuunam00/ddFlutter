@@ -6,6 +6,7 @@ import 'package:app1/Screen/SettingUser.dart';
 import 'package:app1/Screen/test3.dart';
 import 'package:app1/auth_social/google_sign_in.dart';
 import 'package:app1/chat-app/screens_chat/CameraView.dart';
+import 'package:app1/feed/screen/post_feed.dart';
 import 'package:app1/main.dart';
 
 import 'package:app1/model/friendUser.dart';
@@ -358,25 +359,44 @@ class _ProfileState extends State<Profile> {
                             Icon(Icons.sort_sharp)
                           ],
                         ),
-                        Row(
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(top: 8, right: 8.0),
-                              child: CircleAvatar(
-                                radius: 24,
-                              ),
-                            ),
-                            SizedBox(
-                                width: size.width - 150,
-                                child: TextField(
-                                  keyboardType: TextInputType.multiline,
-                                  maxLines: null,
-                                  decoration: InputDecoration(
-                                    hintText: "Bạn đang nghĩ gì...",
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 12.0),
+                          child: Row(
+                            children: [
+                              Padding(
+                                padding:
+                                    const EdgeInsets.only(top: 8, right: 8.0),
+                                child: CircleAvatar(
+                                  backgroundColor: Colors.red,
+                                  radius: 23,
+                                  backgroundImage:
+                                      AssetImage('assets/images/load.gif'),
+                                  child: CircleAvatar(
+                                    radius: 23,
+                                    backgroundImage: NetworkImage(SERVER_IP +
+                                        "/upload/" +
+                                        userProvider.userP.avatarImg[
+                                            userProvider
+                                                    .userP.avatarImg.length -
+                                                1]),
+                                    backgroundColor: Colors.transparent,
                                   ),
-                                ))
-                          ],
+                                ),
+                              ),
+                              SizedBox(
+                                  width: size.width - 150,
+                                  child: InkWell(
+                                      child: Text("Bạn đang nghĩ gì"),
+                                      onTap: () {
+                                        Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (builder) =>
+                                                        PostFeedScreen()))
+                                            .then((value) => setState(() {}));
+                                      }))
+                            ],
+                          ),
                         ),
                         Divider(
                           height: 40,

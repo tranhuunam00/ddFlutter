@@ -51,32 +51,35 @@ class _CommentScreenState extends State<CommentScreen> {
   //.......................................................
   void connect() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-
     print("begin connect....................");
     socket = io(SERVER_IP, <String, dynamic>{
       "transports": ["websocket"],
       "autoConnect": false,
     });
     socket.connect();
-    print("comment/" + widget.feed.feedId);
+    print(socket.connected);
+    print(widget.feed.feedId);
     socket.emit("signin", userProvider.userP.id);
     socket.onConnect((data) {
-      socket.on("123", (feed) {
-        print("===========có comment========================");
-        if (mounted) {
-          print("---chạy setstate- số thông báo--");
-
-          print(feed);
-          print(feed["feedId"]);
-        }
+      socket.on(widget.feed.feedId.toString(), (feed) {
+        print("---chạy setstate- số thông báo--");
+        print(data);
+        print("n-------nhận 123----------------");
       });
     });
   }
 
   @override
+  void dispose() {
+    print("dispose      chạy");
+    super.dispose();
+    // socket.disconnect();
+    // _scrollController.dispose();
+  }
+
+  @override
   void initState() {
     super.initState();
-    connect();
 
     //tắt emoji khi nhập text
     focusNode.addListener(() {
@@ -168,6 +171,7 @@ class _CommentScreenState extends State<CommentScreen> {
         setState(() {});
       }
     });
+    connect();
   }
 
   ///////////--------------------------------gửi bfinh luân--------------
@@ -842,14 +846,6 @@ class _CommentScreenState extends State<CommentScreen> {
         ],
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    print("dispose      chạy");
-    super.dispose();
-    // socket.disconnect();
-    // _scrollController.dispose();
   }
 
   ///

@@ -126,7 +126,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text("Gốc gạo", style: AppStyles.h2),
+                      Text(" 407 Gamming",
+                          style: AppStyles.h2.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.orange)),
                       Icon(Icons.message_sharp)
                     ],
                   ),
@@ -159,6 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Text("Bạn đang nghĩ gì"),
                               onTap: () {
                                 print(listFeedAll.length);
+
                                 Navigator.push(
                                         context,
                                         MaterialPageRoute(

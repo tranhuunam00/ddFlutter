@@ -474,35 +474,41 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          new Text(widget.ownFeedUser.realName,
-                              style: AppStyles.h3
+                          new Text(" " + widget.ownFeedUser.realName,
+                              style: AppStyles.h4
                                   .copyWith(fontWeight: FontWeight.bold)),
                           Row(
                             children: [
-                              Text(widget.feed.createdAt.substring(0, 10)),
-                              Text(feedApi.rule[0])
+                              Text(
+                                widget.feed.createdAt.substring(0, 10),
+                                style: AppStyles.h5,
+                              ),
                             ],
                           ),
                         ],
                       )),
                 ]),
               ),
-              Padding(
-                padding: const EdgeInsets.only(left: 30, bottom: 8),
-                child: SizedBox(
-                  width: size.width - 150,
-                  child: Text(
-                    widget.feed.message,
-                    maxLines: 4,
-                    overflow: TextOverflow.fade,
-                    softWrap: false,
-                    style: TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20.0),
-                  ),
-                ),
-              ),
+              Divider(),
+              widget.feed.message != ""
+                  ? Padding(
+                      padding: const EdgeInsets.only(left: 30, bottom: 8),
+                      child: SizedBox(
+                        width: size.width - 150,
+                        child: Text(
+                          widget.feed.message,
+                          maxLines: 4,
+                          overflow: TextOverflow.fade,
+                          softWrap: false,
+                          style: TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20.0),
+                        ),
+                      ),
+                    )
+                  : Container(),
+              Divider(),
               widget.feed.pathImg.length > 0
                   ? Center(
                       child: FeedImagesContainer(widget.feed.pathImg),
@@ -519,10 +525,10 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                   feedApi.like.length > 0
                       ? Row(
                           children: [
-                            CircleAvatar(
-                              radius: 12,
-                            ),
-                            Text(feedApi.like.length.toString() + " like")
+                            Text(
+                              "   " + feedApi.like.length.toString() + " like",
+                              style: TextStyle(color: Colors.red),
+                            )
                           ],
                         )
                       : Container(),

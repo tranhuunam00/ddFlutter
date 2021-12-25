@@ -71,6 +71,7 @@ class _MainScreenState extends State<MainScreen> {
           setNewTag(feed);
         }
       });
+
       socket.on("message", (msg) async {
         if (userProvider.userP.hadMessageList.indexOf(msg["sourceId"]) < 0) {
           userProvider.userP.hadMessageList.add(msg["sourceId"]);
@@ -256,6 +257,27 @@ class _MainScreenState extends State<MainScreen> {
               targetId: msg["targetId"],
               sourceId: msg["sourceId"]));
       messagesI = messageProvider.listMessageP;
+      NotifiModel not = NotifiModel(
+        type: "newMsg",
+        sourceIdUser: msg["sourceId"],
+        targetIdUser: [msg["targetId"]],
+        content: msg["sourceId"],
+        createdAt: msg["time"],
+      );
+
+      List<NotifiModel> notifiInit = notifiProvider.listNotifiP;
+
+      for (int i = 0; i < notifiInit.length; i++) {
+        if (notifiInit[i].type == "newMsg" &&
+            notifiInit[i].sourceIdUser == msg["sourceId"]) {
+          notifiInit.removeAt(i);
+          i--;
+        }
+      }
+
+      notifiInit.insert(0, not);
+
+      notifiProvider.userNotifi(notifiInit);
       messageProvider.userMessage(messagesI);
     } else {
       Map<String, List<MessageModel>> messagesI = {};
@@ -269,19 +291,21 @@ class _MainScreenState extends State<MainScreen> {
           message: msg["message"],
           targetId: msg["targetId"],
           sourceId: msg["sourceId"]));
-      NotifiModel not = NotifiModel(
-        type: "newMsg",
-        sourceIdUser: msg["sourceId"],
-        targetIdUser: msg["targetId"],
-        content: msg["sourceId"],
-        createdAt: msg["time"],
-      );
 
       messageProvider
               .listMessageP[userProvider.userP.id + "/" + msg["sourceId"]] ==
           output;
       messagesI = messageProvider.listMessageP;
+      NotifiModel not = NotifiModel(
+        type: "newMsg",
+        sourceIdUser: msg["sourceId"],
+        targetIdUser: [msg["targetId"]],
+        content: msg["sourceId"],
+        createdAt: msg["time"],
+      );
+
       List<NotifiModel> notifiInit = notifiProvider.listNotifiP;
+
       for (int i = 0; i < notifiInit.length; i++) {
         if (notifiInit[i].type == "newMsg" &&
             notifiInit[i].sourceIdUser == msg["sourceId"]) {
@@ -289,6 +313,7 @@ class _MainScreenState extends State<MainScreen> {
           i--;
         }
       }
+
       notifiInit.insert(0, not);
 
       notifiProvider.userNotifi(notifiInit);
@@ -347,7 +372,7 @@ class _MainScreenState extends State<MainScreen> {
           sourceIdUser: feed["sourceUserId"].toString(),
           targetIdUser: feed["tag"],
           createdAt: feed["createdAt"],
-          content: "",
+          content: feed["feedId"],
           isSeen: false,
           sourceRealnameUser: feed["sourceRealnameUser"],
           sourceUserPathImg: feed["sourceUserPathImg"]

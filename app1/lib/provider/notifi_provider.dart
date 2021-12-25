@@ -16,7 +16,6 @@ class NotifiProvider with ChangeNotifier {
   Future userNotifi(List<NotifiModel> newNotifis) async {
     try {
       listNotifiP = newNotifis;
-      myStream.setFeed(newNotifis);
     } catch (e) {}
     notifyListeners();
   }

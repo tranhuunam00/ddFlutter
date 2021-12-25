@@ -29,7 +29,11 @@ class AppStyles {
     fontFamily: AppFonts.dancing,
   );
   static const TextStyle h4 = TextStyle(
-    fontSize: 20,
+    fontSize: 26,
+    fontFamily: AppFonts.dancing,
+  );
+  static const TextStyle h5 = TextStyle(
+    fontSize: 16,
     fontFamily: AppFonts.dancing,
   );
 }
