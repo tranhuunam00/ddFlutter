@@ -23,7 +23,7 @@ import 'package:provider/provider.dart';
 import '../widgets/app_button.dart';
 import "../widgets/friend_avatar.dart";
 import 'package:http/http.dart' as http;
-import "../widgets/card_feed.dart";
+import '../feed/widget/card_feed.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);

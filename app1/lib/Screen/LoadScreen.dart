@@ -158,7 +158,7 @@ class _LoadScreenState extends State<LoadScreen> {
               Expanded(
                   child: Container(
                 alignment: Alignment.centerLeft,
-                child: Text("Xin chào!!!", style: TextStyle(fontSize: 42)),
+                child: Text("Aloha!!! <3", style: TextStyle(fontSize: 42)),
               )),
               Expanded(
                   child: Container(
@@ -167,11 +167,11 @@ class _LoadScreenState extends State<LoadScreen> {
                         children: [
                           Expanded(
                               flex: 2,
-                              child: Text("English",
+                              child: Text("Enjoy",
                                   style: TextStyle(fontSize: 60))),
                           Padding(
                             padding: const EdgeInsets.only(right: 30),
-                            child: Text("Qoutes", style: AppStyles.h2),
+                            child: Text("Have fun", style: AppStyles.h2),
                           ),
                         ],
                       ))),

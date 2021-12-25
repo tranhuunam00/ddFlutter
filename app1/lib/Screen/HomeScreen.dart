@@ -10,7 +10,7 @@ import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../ui.dart';
-import '../widgets/card_feed.dart';
+import '../feed/widget/card_feed.dart';
 import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {

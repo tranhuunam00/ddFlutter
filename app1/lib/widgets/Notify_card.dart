@@ -1,14 +1,19 @@
+import 'dart:convert';
+
 import 'package:app1/Screen/FriendProfile.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/screens_chat/individual_chat.dart';
+import 'package:app1/feed/model/feed_model.dart';
+import 'package:app1/feed/screen/mainFeedScreen.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
-class Notify_Card extends StatelessWidget {
+class Notify_Card extends StatefulWidget {
   const Notify_Card(
       {Key? key,
       required this.idUserSource,
@@ -26,33 +31,59 @@ class Notify_Card extends StatelessWidget {
   final String content;
   final String createdAt;
   final bool isSeen;
+
+  @override
+  State<Notify_Card> createState() => _Notify_CardState();
+}
+
+class _Notify_CardState extends State<Notify_Card> {
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
-
     return Column(
       children: [
         Container(
           child: InkWell(
             hoverColor: Colors.amber,
-            onTap: () {
-              print(pathImgSource);
-              print(idUserSource);
-              if (type == "addFr") {
+            onTap: () async {
+              final userProvider =
+                  Provider.of<UserProvider>(context, listen: false);
+              print(widget.pathImgSource);
+              print(widget.idUserSource);
+              if (widget.type == "addFr") {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (builder) =>
-                            FriendProfile(frId: idUserSource)));
+                            FriendProfile(frId: widget.idUserSource)));
               }
-              if (type == "confirmFr") {
+              if (widget.type == "confirmFr") {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
                         builder: (builder) =>
-                            FriendProfile(frId: idUserSource)));
+                            FriendProfile(frId: widget.idUserSource)));
               }
-              if (type == "newMsg") {
+              if (widget.type == "newFeed") {
+                FeedBaseModel feed =
+                    await getFeedApi(widget.content, userProvider.jwtP);
+                if (mounted) {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (builder) => MainFeedScreen(
+                              feed: feed,
+                              ownFeedUser: UserModel(
+                                  friend: [],
+                                  hadMessageList: [],
+                                  coverImg: [],
+                                  friendConfirm: [],
+                                  friendRequest: [],
+                                  avatarImg: [widget.pathImgSource],
+                                  realName: widget.realNameSource,
+                                  id: widget.idUserSource))));
+                }
+              }
+              if (widget.type == "newMsg") {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -64,9 +95,9 @@ class Notify_Card extends StatelessWidget {
                                 realName: userProvider.userP.realName,
                               ),
                               chatModel: ChatModel(
-                                id: idUserSource,
-                                realName: realNameSource,
-                                avatar: pathImgSource,
+                                id: widget.idUserSource,
+                                realName: widget.realNameSource,
+                                avatar: widget.pathImgSource,
                               ),
                             )));
               }
@@ -78,8 +109,8 @@ class Notify_Card extends StatelessWidget {
                     radius: 26,
                     child: CircleAvatar(
                       radius: 26,
-                      backgroundImage:
-                          NetworkImage(SERVER_IP + "/upload/" + pathImgSource),
+                      backgroundImage: NetworkImage(
+                          SERVER_IP + "/upload/" + widget.pathImgSource),
                       backgroundColor: Colors.transparent,
                     ),
                   ),
@@ -117,11 +148,11 @@ class Notify_Card extends StatelessWidget {
                       ),
                     )),
                 title: Text(
-                  realNameSource + " đã " + type + " cho bạn",
+                  widget.realNameSource + " đã " + widget.type + " cho bạn",
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                 ),
                 subtitle: Text(
-                  createdAt,
+                  widget.createdAt,
                   style: TextStyle(color: Colors.grey[900], fontSize: 11),
                 )),
           ),
@@ -132,5 +163,90 @@ class Notify_Card extends StatelessWidget {
         )
       ],
     );
+  }
+}
+
+//--------------------------like và dislike-----------------
+postApi(String jwt, data, String sourcePath) async {
+  print("----chạy hàm get api feed---------------");
+  try {
+    http.Response response;
+    String path = SERVER_IP + sourcePath;
+    print(path);
+    response = await http.post(Uri.parse(path),
+        headers: {
+          'Content-type': 'application/json',
+          'Accept': 'application/json',
+          'cookie': "jwt=" + jwt,
+        },
+        body: jsonEncode(data));
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      return "error";
+    }
+  } catch (e) {
+    return "error";
+  }
+}
+
+Future fetchApiFindFeed(String sourceFeedId, String jwt) async {
+  print("----chạy hàm get api feed---------------");
+  try {
+    print("source feed id là ");
+    print(sourceFeedId);
+
+    http.Response response;
+    String path = SERVER_IP + '/feed/' + sourceFeedId;
+    print(path);
+    response = await http.get(
+      Uri.parse(path),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt,
+      },
+    );
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      print("kết quả là feed ");
+      print(json.decode(response.body));
+      return json.decode(response.body);
+    } else {
+      return FeedBaseModel(
+          like: [], rule: [], comment: [], pathImg: [], tag: [], pathVideo: []);
+    }
+  } catch (e) {
+    return FeedBaseModel(
+        like: [], rule: [], comment: [], tag: [], pathImg: [], pathVideo: []);
+  }
+}
+
+//-----------------------like func------------
+getFeedApi(sourceId, jwt) async {
+  FeedBaseModel feedApi = FeedBaseModel(
+      like: [], tag: [], rule: [], comment: [], pathImg: [], pathVideo: []);
+  var data = await fetchApiFindFeed(sourceId, jwt);
+  if (data == "not jwt") {
+    return feedApi;
+  } else {
+    if (data != "error") {
+      print("data:feed là");
+      print(data);
+      print(data["like"]);
+      FeedBaseModel a = FeedBaseModel(
+        like: data["like"],
+        comment: data["comment"],
+        pathImg: data["pathImg"],
+        pathVideo: data["pathVideo"],
+        tag: data["tag"],
+        rule: data["rule"],
+        feedId: data["_id"].toString(),
+        message: data["messages"],
+        createdAt: data["createdAt"],
+      );
+      return a;
+    } else {
+      return feedApi;
+    }
   }
 }

@@ -120,14 +120,20 @@ class _SettingUser extends State<SettingUser> {
         child: Scaffold(
             resizeToAvoidBottomInset: false,
             body: Padding(
-              padding: EdgeInsets.symmetric(vertical: 24, horizontal: 32),
+              padding: EdgeInsets.symmetric(vertical: 50, horizontal: 30),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
                     SizedBox(
-                      height: 90,
+                      height: 30,
                     ),
-                    Text("Thông tin cá nhân"),
+                    Text(
+                      "Thông tin cá nhân",
+                      style: TextStyle(
+                          fontSize: 35,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.blue),
+                    ),
                     Text(
                       "Họ và tên",
                       style:
@@ -224,7 +230,7 @@ class _SettingUser extends State<SettingUser> {
                     // ),//Xã
 
                     SizedBox(
-                      height: 10,
+                      height: 20,
                     ),
 
                     // ............ Ngày sinh
@@ -233,7 +239,7 @@ class _SettingUser extends State<SettingUser> {
                         Text(
                           "Ngày sinh:  ",
                           style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w400),
+                              fontSize: 20, fontWeight: FontWeight.w600),
                         ),
                         RaisedButton(
                             child: Text("Chọn"),
@@ -265,7 +271,7 @@ class _SettingUser extends State<SettingUser> {
                         Text(
                           "Giới tính:",
                           style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w400),
+                              fontSize: 20, fontWeight: FontWeight.w600),
                         ),
                         Row(
                           children: [

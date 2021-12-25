@@ -11,7 +11,7 @@ import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/ui.dart';
 import 'package:app1/widgets/app_button.dart';
-import 'package:app1/widgets/card_feed.dart';
+import 'package:app1/feed/widget/card_feed.dart';
 import 'package:app1/widgets/friend_avatar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';

@@ -6,10 +6,13 @@ import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:app1/ui.dart';
+import 'package:app1/widgets/card_video.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import "../ui.dart";
+import 'package:video_player/video_player.dart';
+
 import 'package:http/http.dart' as http;
 
 class CardFeedStyle extends StatefulWidget {
@@ -28,10 +31,44 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
   FeedBaseModel feedApi = new FeedBaseModel(
       like: [], rule: [], comment: [], pathImg: [], tag: [], pathVideo: []);
   late bool isLike = false;
+  late VideoPlayerController _videoPlayerController;
   @override
   void initState() {
     super.initState();
     feedApi = widget.feed;
+    if (widget.feed.pathImg.length > 0) {
+      for (int i = 0; i < widget.feed.pathImg.length; i++) {
+        if (widget.feed.pathImg[i].toString().substring(
+                    widget.feed.pathImg[i].toString().length - 3,
+                    widget.feed.pathImg[i].toString().length) !=
+                'png' ||
+            widget.feed.pathImg[i].toString().substring(
+                    widget.feed.pathImg[i].toString().length - 3,
+                    widget.feed.pathImg[i].toString().length) !=
+                'jpg' ||
+            widget.feed.pathImg[i].toString().substring(
+                    widget.feed.pathImg[i].toString().length - 3,
+                    widget.feed.pathImg[i].toString().length) !=
+                'gif') {
+          _videoPlayerController = VideoPlayerController.network(
+              SERVER_IP + "/upload/" + widget.feed.pathImg[0].toString())
+            ..addListener(() {})
+            ..setLooping(true)
+            ..initialize().then((_) => _videoPlayerController.pause());
+        }
+      }
+    }
+    for (int i = 0; i < widget.feed.pathVideo.length; i++) {
+      {
+        _videoPlayerController = VideoPlayerController.network(
+            SERVER_IP + "/upload/" + widget.feed.pathVideo[i].toString())
+          ..addListener(() => {
+                // if (mounted) {setState(() {})}
+              })
+          ..setLooping(true)
+          ..initialize().then((_) => _videoPlayerController.pause());
+      }
+    }
   }
 
   @override
@@ -44,18 +81,101 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
         isLike = true;
       }
     }
+    Widget FeedVideosContainer(videosList) {
+      switch (videosList.length) {
+        case 1:
+          return Container(
+            width: size.width - 40,
+            height: size.height - 300,
+            child: Container(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  VideoPlayer(_videoPlayerController),
+                  Positioned(
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      color: Color.fromRGBO(255, 255, 255, 0.4),
+                      child: IconButton(
+                        onPressed: () async {
+                          print("hí");
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (builder) => CardFeedVideoState(
+                                      controller: _videoPlayerController)));
+                        },
+                        icon: Icon(Icons.play_circle_fill_outlined),
+                      ),
+                    ),
+                  ), //position hiển thi icon video
+                ],
+              ),
+            ),
+          );
+          break;
+      }
+      return Container();
+    }
+
     Widget FeedImagesContainer(imagesList) {
       switch (imagesList.length) {
         case 1:
           return Container(
-              width: size.width - 40,
-              height: size.height - 300,
-              child: CachedNetworkImage(
-                imageUrl: SERVER_IP + "/upload/" + imagesList[0],
-                fit: BoxFit.fitWidth,
-                placeholder: (context, url) => CircularProgressIndicator(),
-                errorWidget: (context, url, error) => Icon(Icons.error),
-              ));
+            width: size.width - 40,
+            height: size.height - 300,
+            child: (imagesList[0].toString().substring(
+                            imagesList[0].toString().length - 3,
+                            imagesList[0].toString().length) ==
+                        "png" ||
+                    imagesList[0].toString().substring(
+                            imagesList[0].toString().length - 3,
+                            imagesList[0].toString().length) ==
+                        "jpg" ||
+                    imagesList[0].toString().substring(
+                            imagesList[0].toString().length - 3,
+                            imagesList[0].toString().length) ==
+                        "gif")
+                ? CachedNetworkImage(
+                    imageUrl: SERVER_IP + "/upload/" + imagesList[0],
+                    fit: BoxFit.fitWidth,
+                    placeholder: (context, url) => CircularProgressIndicator(),
+                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  )
+                : Container(
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        VideoPlayer(_videoPlayerController),
+                        Positioned(
+                          top: 0,
+                          bottom: 0,
+                          left: 0,
+                          right: 0,
+                          child: Container(
+                            color: Color.fromRGBO(255, 255, 255, 0.4),
+                            child: IconButton(
+                              onPressed: () async {
+                                print("hí");
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) =>
+                                            CardFeedVideoState(
+                                                controller:
+                                                    _videoPlayerController)));
+                              },
+                              icon: Icon(Icons.play_circle_fill_outlined),
+                            ),
+                          ),
+                        ), //position hiển thi icon video
+                      ],
+                    ),
+                  ),
+          );
           break;
         case 2:
           return Row(
@@ -65,11 +185,39 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                   color: Colors.black,
                   width: (size.width - 50) / 2,
                   height: (size.width - 50) / 2 * 5 / 3,
-                  child: CachedNetworkImage(
-                    imageUrl: SERVER_IP + "/upload/" + imagesList[0],
-                    fit: BoxFit.fitWidth,
-                    placeholder: (context, url) => CircularProgressIndicator(),
-                    errorWidget: (context, url, error) => Icon(Icons.error),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CachedNetworkImage(
+                        imageUrl: SERVER_IP + "/upload/" + imagesList[0],
+                        fit: BoxFit.fitWidth,
+                        placeholder: (context, url) =>
+                            CircularProgressIndicator(),
+                        errorWidget: (context, url, error) => Icon(Icons.error),
+                      ),
+                      Positioned(
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          color: Color.fromRGBO(255, 255, 255, 0.4),
+                          child: IconButton(
+                            onPressed: () async {
+                              print("hí");
+                              // Navigator.push(
+                              //     context,
+                              //     MaterialPageRoute(builder: (builder) =>
+                              //         ListImageFeed( feed: widget.feed ,ownFeedUser: widget.ownFeedUser,)));
+                            },
+                            icon: Icon(
+                              Icons.photo_album_outlined,
+                              size: 5,
+                            ),
+                          ),
+                        ),
+                      ), //position hiển thi icon video
+                    ],
                   )),
               Container(
                   color: Colors.black,
@@ -358,6 +506,11 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
               widget.feed.pathImg.length > 0
                   ? Center(
                       child: FeedImagesContainer(widget.feed.pathImg),
+                    )
+                  : Container(),
+              widget.feed.pathVideo.length > 0
+                  ? Center(
+                      child: FeedVideosContainer(widget.feed.pathVideo),
                     )
                   : Container(),
               Row(
