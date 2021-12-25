@@ -154,6 +154,7 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
                   ],
                 );
               }
+              //code hiện ảnh hoặc video
               return Container(child: Text(index.toString()));
             }),
       ),

@@ -66,23 +66,26 @@ class _Notify_CardState extends State<Notify_Card> {
               if (widget.type == "newFeed") {
                 FeedBaseModel feed =
                     await getFeedApi(widget.content, userProvider.jwtP);
-                if (mounted) {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (builder) => MainFeedScreen(
-                              feed: feed,
-                              ownFeedUser: UserModel(
-                                  friend: [],
-                                  hadMessageList: [],
-                                  coverImg: [],
-                                  friendConfirm: [],
-                                  friendRequest: [],
-                                  avatarImg: [widget.pathImgSource],
-                                  realName: widget.realNameSource,
-                                  id: widget.idUserSource))));
+                if (feed != "not jwt" && feed != "error" && feed.feedId != "") {
+                  if (mounted) {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (builder) => MainFeedScreen(
+                                feed: feed,
+                                ownFeedUser: UserModel(
+                                    friend: [],
+                                    hadMessageList: [],
+                                    coverImg: [],
+                                    friendConfirm: [],
+                                    friendRequest: [],
+                                    avatarImg: [widget.pathImgSource],
+                                    realName: widget.realNameSource,
+                                    id: widget.idUserSource))));
+                  }
                 }
               }
+
               if (widget.type == "newMsg") {
                 Navigator.push(
                     context,

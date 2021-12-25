@@ -29,7 +29,7 @@ final UserModel userMain = UserModel(
     coverImg: [],
     avatarImg: [],
     hadMessageList: []);
-const SERVER_IP = 'http://bdff-2402-800-9efd-9e00-8577-982f-1eec-ab9d.ngrok.io';
+const SERVER_IP = 'http://93bd-2402-800-9efd-9e00-b126-260a-1a7a-e8e8.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();

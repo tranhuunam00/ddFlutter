@@ -38,7 +38,7 @@ class CommentScreen extends StatefulWidget {
 class _CommentScreenState extends State<CommentScreen> {
   final TextEditingController _controller = TextEditingController();
   final TextEditingController _controllerModal = TextEditingController();
-
+  late Socket socket;
   bool isEmojiShowing = false;
   FocusNode focusNode = FocusNode();
 
@@ -49,9 +49,34 @@ class _CommentScreenState extends State<CommentScreen> {
 
   List<CommentFullModel> fullComment = [];
   //.......................................................
+  void connect() {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    print("begin connect....................");
+    socket = io(SERVER_IP, <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": false,
+    });
+    socket.connect();
+    print("comment/" + widget.feed.feedId);
+    socket.emit("signin", userProvider.userP.id);
+    socket.onConnect((data) {
+      socket.on("123", (feed) {
+        print("===========có comment========================");
+        if (mounted) {
+          print("---chạy setstate- số thông báo--");
+
+          print(feed);
+          print(feed["feedId"]);
+        }
+      });
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    connect();
 
     //tắt emoji khi nhập text
     focusNode.addListener(() {
