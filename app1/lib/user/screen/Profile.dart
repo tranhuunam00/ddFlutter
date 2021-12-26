@@ -236,10 +236,11 @@ class _ProfileState extends State<Profile> {
                 }
                 if (index == 1) {
                   return Padding(
-                    padding: const EdgeInsets.only(top: 32.0),
+                    padding: const EdgeInsets.only(top: 32.0, bottom: 32),
                     child: Center(
                       child: Text(userProvider.userP.realName,
-                          style: AppStyles.h2),
+                          style: AppStyles.h2
+                              .copyWith(fontWeight: FontWeight.bold)),
                     ),
                   );
                 }

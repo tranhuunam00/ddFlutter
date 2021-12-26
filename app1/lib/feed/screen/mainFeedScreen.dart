@@ -5,6 +5,7 @@ import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:app1/ui.dart';
 import 'package:app1/widgets/card_video.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
@@ -135,26 +136,38 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
             itemCount: listPathAll.length + 3,
             itemBuilder: (context, index) {
               if (index == 0) {
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.red,
-                    radius: 23,
-                    backgroundImage: AssetImage('assets/images/load.gif'),
-                    child: CircleAvatar(
-                      radius: 23,
-                      backgroundImage: NetworkImage(SERVER_IP +
-                          "/upload/" +
-                          widget.ownFeedUser.avatarImg[
-                              widget.ownFeedUser.avatarImg.length - 1]),
-                      backgroundColor: Colors.transparent,
+                return Container(
+                  color: Colors.blue[100],
+                  child: ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.red,
+                      radius: 30,
+                      backgroundImage: AssetImage('assets/images/load.gif'),
+                      child: CircleAvatar(
+                        radius: 30,
+                        backgroundImage: NetworkImage(SERVER_IP +
+                            "/upload/" +
+                            widget.ownFeedUser.avatarImg[
+                                widget.ownFeedUser.avatarImg.length - 1]),
+                        backgroundColor: Colors.transparent,
+                      ),
                     ),
+                    title: Text(
+                      widget.ownFeedUser.realName,
+                      style: AppStyles.h3.copyWith(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(widget.feed.createdAt.substring(0, 10)),
                   ),
-                  title: Text(widget.ownFeedUser.realName),
-                  subtitle: Text(widget.feed.createdAt),
                 );
               }
               if (index == 1) {
-                return Text(widget.feed.message);
+                return Container(
+                  color: Colors.black12,
+                  child: Padding(
+                      padding: const EdgeInsets.only(
+                          left: 60, top: 30, right: 60, bottom: 30),
+                      child: Text(widget.feed.message, style: AppStyles.h2)),
+                );
               }
               if (index == listPathAll.length + 2) {
                 return Padding(

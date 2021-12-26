@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/user/screen/FriendProfile.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
@@ -43,7 +44,7 @@ class _Notify_CardState extends State<Notify_Card> {
     print("thời gian trong card no");
     print(notifiProvider.timeSeen);
     bool isSeen = false;
-    if (notifiProvider.timeSeen != '') {
+    if (notifiProvider.timeSeen != "") {
       List time = [notifiProvider.timeSeen, widget.createdAt];
       time.sort((a, b) => a.compareTo(b));
       if (time[1] == widget.createdAt) {
@@ -80,8 +81,9 @@ class _Notify_CardState extends State<Notify_Card> {
             onTap: () async {
               final userProvider =
                   Provider.of<UserProvider>(context, listen: false);
+              notifiProvider.timeSeen = DateTime.now().toString();
 
-              print(widget.pathImgSource);
+              print(widget.type);
               print(widget.idUserSource);
               if (widget.type == "addFr") {
                 Navigator.push(
@@ -96,6 +98,22 @@ class _Notify_CardState extends State<Notify_Card> {
                     MaterialPageRoute(
                         builder: (builder) =>
                             FriendProfile(frId: widget.idUserSource)));
+              }
+              if (widget.type == "comment" || widget.type == "commentFeed") {
+                print("bằng comment mà");
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (builder) => CommentScreen(
+                              feed: FeedBaseModel(
+                                  pathImg: [],
+                                  pathVideo: [],
+                                  comment: [],
+                                  tag: [],
+                                  rule: [],
+                                  like: [],
+                                  feedId: widget.content),
+                            )));
               }
               if (widget.type == "newFeed") {
                 FeedBaseModel feed =
@@ -137,6 +155,9 @@ class _Notify_CardState extends State<Notify_Card> {
                                 avatar: widget.pathImgSource,
                               ),
                             )));
+              }
+              if (mounted) {
+                setState(() {});
               }
             },
             child: ListTile(

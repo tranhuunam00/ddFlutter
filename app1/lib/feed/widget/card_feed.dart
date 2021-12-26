@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app1/chat-app/customs/avatar_card.dart';
 import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/feed/screen/comment.dart';
+import 'package:app1/feed/screen/mainFeedScreen.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/comment_provider.dart';
@@ -129,6 +130,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
       switch (imagesList.length) {
         case 1:
           return Container(
+            color: Colors.black12,
             width: size.width - 40,
             height: size.height - 300,
             child: (imagesList[0].toString().substring(
@@ -452,198 +454,220 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
             )
           ],
         ),
-        child: Stack(children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(mainAxisSize: MainAxisSize.max, children: [
-                  CircleAvatar(
-                    backgroundColor: Colors.red,
-                    radius: 23,
-                    backgroundImage: AssetImage('assets/images/load.gif'),
-                    child: CircleAvatar(
-                      radius: 23,
-                      backgroundImage: NetworkImage(SERVER_IP +
-                          "/upload/" +
-                          widget.ownFeedUser.avatarImg[
-                              widget.ownFeedUser.avatarImg.length - 1]),
-                      backgroundColor: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            print("ấn vào card");
+            if (widget.feed.pathImg.length > 0 ||
+                widget.feed.pathVideo.length > 0) {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (builder) => MainFeedScreen(
+                          feed: widget.feed, ownFeedUser: widget.ownFeedUser)));
+            }
+          },
+          child: Stack(children: [
+            Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Container(
+                    color: Colors.blue[100],
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(mainAxisSize: MainAxisSize.max, children: [
+                        CircleAvatar(
+                          backgroundColor: Colors.red,
+                          radius: 23,
+                          backgroundImage: AssetImage('assets/images/load.gif'),
+                          child: CircleAvatar(
+                            radius: 23,
+                            backgroundImage: NetworkImage(SERVER_IP +
+                                "/upload/" +
+                                widget.ownFeedUser.avatarImg[
+                                    widget.ownFeedUser.avatarImg.length - 1]),
+                            backgroundColor: Colors.transparent,
+                          ),
+                        ),
+                        Container(
+                            width: size.width - 180,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                new Text(" " + widget.ownFeedUser.realName,
+                                    style: AppStyles.h4
+                                        .copyWith(fontWeight: FontWeight.bold)),
+                                Row(
+                                  children: [
+                                    Text(
+                                      widget.feed.createdAt.substring(0, 10),
+                                      style: AppStyles.h5,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            )),
+                      ]),
                     ),
                   ),
-                  Container(
-                      width: size.width - 180,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          new Text(" " + widget.ownFeedUser.realName,
-                              style: AppStyles.h4
-                                  .copyWith(fontWeight: FontWeight.bold)),
-                          Row(
-                            children: [
-                              Text(
-                                widget.feed.createdAt.substring(0, 10),
-                                style: AppStyles.h5,
+                  Divider(),
+                  widget.feed.message != ""
+                      ? Container(
+                          constraints: BoxConstraints(minHeight: 100),
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 30, bottom: 8),
+                            child: SizedBox(
+                              width: size.width - 150,
+                              child: Text(
+                                widget.feed.message,
+                                maxLines: 4,
+                                overflow: TextOverflow.fade,
+                                softWrap: false,
+                                style: AppStyles.h2,
                               ),
-                            ],
+                            ),
                           ),
-                        ],
-                      )),
-                ]),
-              ),
-              Divider(),
-              widget.feed.message != ""
-                  ? Padding(
-                      padding: const EdgeInsets.only(left: 30, bottom: 8),
-                      child: SizedBox(
-                        width: size.width - 150,
-                        child: Text(
-                          widget.feed.message,
-                          maxLines: 4,
-                          overflow: TextOverflow.fade,
-                          softWrap: false,
-                          style: TextStyle(
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20.0),
-                        ),
-                      ),
-                    )
-                  : Container(),
-              Divider(),
-              widget.feed.pathImg.length > 0
-                  ? Center(
-                      child: FeedImagesContainer(widget.feed.pathImg),
-                    )
-                  : Container(),
-              widget.feed.pathVideo.length > 0
-                  ? Center(
-                      child: FeedVideosContainer(widget.feed.pathVideo),
-                    )
-                  : Container(),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  feedApi.like.length > 0
-                      ? Row(
-                          children: [
-                            Text(
-                              "   " + feedApi.like.length.toString() + " like",
-                              style: TextStyle(color: Colors.red),
-                            )
-                          ],
                         )
                       : Container(),
-                  totalComment != 0
-                      ? Text(totalComment.toString() + " comment")
-                      : Container()
+                  Divider(),
+                  widget.feed.pathImg.length > 0
+                      ? Center(
+                          child: FeedImagesContainer(widget.feed.pathImg),
+                        )
+                      : Container(),
+                  widget.feed.pathVideo.length > 0
+                      ? Center(
+                          child: FeedVideosContainer(widget.feed.pathVideo),
+                        )
+                      : Container(),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      feedApi.like.length > 0
+                          ? Row(
+                              children: [
+                                Text(
+                                  "   " +
+                                      feedApi.like.length.toString() +
+                                      " like",
+                                  style: TextStyle(color: Colors.red),
+                                )
+                              ],
+                            )
+                          : Container(),
+                      totalComment != 0
+                          ? Text(totalComment.toString() + " comment")
+                          : Container()
+                    ],
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton.icon(
+                          onPressed: () async {
+                            print(feedApi.like.length);
+                            print("tên người đang dùng là : " +
+                                userProvider.userP.userName);
+                            print(widget.feed.feedId);
+                            if (isLike == false) {
+                              List result = await Future.wait([
+                                //lấy feed mới để hiển thị số like.........
+                                getFeedApi(
+                                    widget.feed.feedId, userProvider.jwtP),
+                                //like bài viết
+                                postApi(
+                                    userProvider.jwtP,
+                                    {
+                                      "feedId": widget.feed.feedId,
+                                      "event": "like",
+                                      "createdAt": DateTime.now().toString()
+                                    },
+                                    "/feed/likeFeed")
+                              ]);
+                              if (mounted) {
+                                setState(() {
+                                  isLike = !isLike;
+                                  feedApi.like = result[0].like;
+                                  feedApi.like.add(userProvider.userP.id);
+                                });
+                              }
+                            } else {
+                              List result = await Future.wait([
+                                //lấy feed mới để hiển thị số like.........
+                                getFeedApi(
+                                    widget.feed.feedId, userProvider.jwtP),
+                                //like bài viết
+                                postApi(
+                                    userProvider.jwtP,
+                                    {
+                                      "feedId": widget.feed.feedId,
+                                      "event": "dislike",
+                                      "createdAt": DateTime.now().toString()
+                                    },
+                                    "/feed/likeFeed")
+                              ]);
+                              if (mounted) {
+                                setState(() {
+                                  isLike = !isLike;
+                                  feedApi.like = result[0].like;
+                                  feedApi.like.remove(userProvider.userP.id);
+                                });
+                              }
+                            }
+                          },
+                          icon: Icon(Icons.tag,
+                              color: isLike ? Colors.blue : Colors.grey),
+                          label: Text("Yêu thích",
+                              style: TextStyle(
+                                  color: isLike ? Colors.blue : Colors.grey))),
+                      TextButton.icon(
+                          onPressed: () async {
+                            commentProvider.userFeedId(widget.feed.feedId);
+                            print(widget.ownFeedUser.id);
+                            print("bình luận");
+                            FeedBaseModel feed1 = widget.feed;
+                            print(widget.feed);
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (builder) =>
+                                        CommentScreen(feed: widget.feed)));
+                          },
+                          icon: Icon(Icons.message_outlined, color: Colors.red),
+                          label: Text("Bình luận"))
+                    ],
+                  )
                 ],
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  TextButton.icon(
-                      onPressed: () async {
-                        print(feedApi.like.length);
-                        print("tên người đang dùng là : " +
-                            userProvider.userP.userName);
-                        print(widget.feed.feedId);
-                        if (isLike == false) {
-                          List result = await Future.wait([
-                            //lấy feed mới để hiển thị số like.........
-                            getFeedApi(widget.feed.feedId, userProvider.jwtP),
-                            //like bài viết
-                            postApi(
-                                userProvider.jwtP,
-                                {
-                                  "feedId": widget.feed.feedId,
-                                  "event": "like",
-                                  "createdAt": DateTime.now().toString()
-                                },
-                                "/feed/likeFeed")
-                          ]);
-                          if (mounted) {
-                            setState(() {
-                              isLike = !isLike;
-                              feedApi.like = result[0].like;
-                              feedApi.like.add(userProvider.userP.id);
-                            });
-                          }
-                        } else {
-                          List result = await Future.wait([
-                            //lấy feed mới để hiển thị số like.........
-                            getFeedApi(widget.feed.feedId, userProvider.jwtP),
-                            //like bài viết
-                            postApi(
-                                userProvider.jwtP,
-                                {
-                                  "feedId": widget.feed.feedId,
-                                  "event": "dislike",
-                                  "createdAt": DateTime.now().toString()
-                                },
-                                "/feed/likeFeed")
-                          ]);
-                          if (mounted) {
-                            setState(() {
-                              isLike = !isLike;
-                              feedApi.like = result[0].like;
-                              feedApi.like.remove(userProvider.userP.id);
-                            });
-                          }
-                        }
-                      },
-                      icon: Icon(Icons.tag,
-                          color: isLike ? Colors.blue : Colors.grey),
-                      label: Text("Yêu thích",
-                          style: TextStyle(
-                              color: isLike ? Colors.blue : Colors.grey))),
-                  TextButton.icon(
-                      onPressed: () async {
-                        commentProvider.userFeedId(widget.feed.feedId);
-                        print(widget.ownFeedUser.id);
-                        print("bình luận");
-                        FeedBaseModel feed1 = widget.feed;
-                        print(widget.feed);
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (builder) =>
-                                    CommentScreen(feed: widget.feed)));
-                      },
-                      icon: Icon(Icons.message_outlined, color: Colors.red),
-                      label: Text("Bình luận"))
-                ],
-              )
-            ],
-          ),
-          Positioned(
-            right: 24,
-            child: Material(
-              color: Colors.orange[50],
-              child: Container(
-                  alignment: Alignment.center,
-                  width: 40,
-                  height: 40,
-                  child: InkWell(
-                    onTap: () {
-                      print("hi");
-                    },
-                    overlayColor: MaterialStateProperty.all(Colors.blue),
-                    child: Container(
-                        width: 40,
-                        child: Text(
-                          "...",
-                          style: TextStyle(
-                            fontSize: 24,
-                          ),
-                          textAlign: TextAlign.center,
-                        )),
-                  )),
             ),
-          ),
-        ]));
+            Positioned(
+              right: 24,
+              child: Material(
+                color: Colors.blue[100],
+                child: Container(
+                    alignment: Alignment.center,
+                    width: 40,
+                    height: 40,
+                    child: InkWell(
+                      onTap: () {
+                        print("hi");
+                      },
+                      overlayColor: MaterialStateProperty.all(Colors.blue),
+                      child: Container(
+                          width: 40,
+                          child: Text(
+                            "...",
+                            style: TextStyle(
+                              fontSize: 24,
+                            ),
+                            textAlign: TextAlign.center,
+                          )),
+                    )),
+              ),
+            ),
+          ]),
+        ));
   }
 
   //-------------------GetApi init----------------------------------------

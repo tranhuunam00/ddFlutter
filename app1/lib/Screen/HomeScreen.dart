@@ -136,40 +136,50 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               }
               if (index == 1) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12.0),
-                  child: Row(
+                return Container(
+                  child: Column(
                     children: [
                       Padding(
-                        padding: const EdgeInsets.only(top: 8, right: 8.0),
-                        child: CircleAvatar(
-                          backgroundColor: Colors.red,
-                          radius: 23,
-                          backgroundImage: AssetImage('assets/images/load.gif'),
-                          child: CircleAvatar(
-                            radius: 23,
-                            backgroundImage: NetworkImage(SERVER_IP +
-                                "/upload/" +
-                                userProvider.userP.avatarImg[
-                                    userProvider.userP.avatarImg.length - 1]),
-                            backgroundColor: Colors.transparent,
-                          ),
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Row(
+                          children: [
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(top: 8, right: 8.0),
+                              child: CircleAvatar(
+                                backgroundColor: Colors.red,
+                                radius: 32,
+                                backgroundImage:
+                                    AssetImage('assets/images/load.gif'),
+                                child: CircleAvatar(
+                                  radius: 32,
+                                  backgroundImage: NetworkImage(SERVER_IP +
+                                      "/upload/" +
+                                      userProvider.userP.avatarImg[
+                                          userProvider.userP.avatarImg.length -
+                                              1]),
+                                  backgroundColor: Colors.transparent,
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                                width: size.width - 150,
+                                child: InkWell(
+                                    child: Text("Bạn đang nghĩ gì..."),
+                                    onTap: () {
+                                      print(listFeedAll.length);
+
+                                      Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (builder) =>
+                                                      PostFeedScreen()))
+                                          .then((value) => setState(() {}));
+                                    })),
+                          ],
                         ),
                       ),
-                      SizedBox(
-                          width: size.width - 150,
-                          child: InkWell(
-                              child: Text("Bạn đang nghĩ gì"),
-                              onTap: () {
-                                print(listFeedAll.length);
-
-                                Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (builder) =>
-                                                PostFeedScreen()))
-                                    .then((value) => setState(() {}));
-                              }))
+                      Divider()
                     ],
                   ),
                 );

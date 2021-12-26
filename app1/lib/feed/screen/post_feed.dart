@@ -59,12 +59,13 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
   ScrollController _scrollController = ScrollController();
   bool tag = false;
   int popTime = 0;
+  bool isSendApi = false;
   String rule = "every";
   //.......................................................
   @override
   void initState() {
     super.initState();
-
+    isSendApi = false;
     //tắt emoji khi nhập text
     focusNode.addListener(() {
       if (focusNode.hasFocus) {
@@ -179,74 +180,85 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                   color: Colors.black87),
                             ),
                           ),
-                          onTap: () async {
-                            print("list tag là");
-                            print(listIdTag);
-                            List<String> listPathSv = [];
-                            print(listFileImage);
-                            if (listFileImage != null) {
-                              if (listFileImage.length > 0) {
-                                listPathSv = await onImageSend(
-                                    listFileImage, userProvider.jwtP);
-                              }
-                            }
-                            if (listFileVideo.length > 0) {
-                              listPathSv = await onImageSend(
-                                  listFileVideo, userProvider.jwtP);
-                            }
-                            print("listPathSv: ");
-                            print(listPathSv);
-                            print(_controller.text);
-                            FeedBaseModel feed = new FeedBaseModel(
-                                like: [],
-                                rule: [rule],
-                                comment: [],
-                                pathVideo:
-                                    listFileVideo.length > 0 ? listPathSv : [],
-                                tag: listIdTag,
-                                pathImg:
-                                    listFileImage.length > 0 ? listPathSv : [],
-                                createdAt: DateTime.now().toString(),
-                                sourceUserId: userProvider.userP.id,
-                                message: _controller.text,
-                                sourceUserName: userProvider.userP.userName);
-                            print('ND : ' + _controller.text);
-                            String newIdFeed = await PostFeedFunction(feed);
-                            if (newIdFeed == "not jwt") {
-                              print(newIdFeed);
-                            } else {
-                              if (newIdFeed != "error") {
-                                FeedBaseModel a = new FeedBaseModel(
-                                    like: [],
-                                    rule: [rule],
-                                    comment: [],
-                                    tag: listIdTag,
-                                    pathVideo: listFileVideo.length > 0
-                                        ? listPathSv
-                                        : [],
-                                    pathImg: listFileVideo.length == 0
-                                        ? listPathSv
-                                        : [],
-                                    feedId: newIdFeed,
-                                    createdAt: DateTime.now().toString(),
-                                    sourceUserId: userProvider.userP.id,
-                                    message: _controller.text,
-                                    sourceUserName:
-                                        userProvider.userP.userName);
-                                List<FeedBaseModel> b = feedProvider.listFeedsP;
-                                b.insert(0, a);
-                                print("đã tạo mới bài viết rồi!");
-                                feedProvider.userFeed(b);
-                                Navigator.pop(context);
-                              }
-                            }
-                            setState(() {
-                              for (var i = 0; i < listIdTag.length; i++) {
-                                print("Người thứ " + i.toString());
-                                print(listRealNameTag[i]);
-                              }
-                            });
-                          },
+                          onTap: !isSendApi
+                              ? () async {
+                                  setState(() {
+                                    isSendApi = true;
+                                  });
+                                  print("list tag là");
+                                  print(listIdTag);
+                                  List<String> listPathSv = [];
+                                  print(listFileImage);
+                                  if (listFileImage != null) {
+                                    if (listFileImage.length > 0) {
+                                      listPathSv = await onImageSend(
+                                          listFileImage, userProvider.jwtP);
+                                    }
+                                  }
+                                  if (listFileVideo.length > 0) {
+                                    listPathSv = await onImageSend(
+                                        listFileVideo, userProvider.jwtP);
+                                  }
+                                  print("listPathSv: ");
+                                  print(listPathSv);
+                                  print(_controller.text);
+                                  FeedBaseModel feed = new FeedBaseModel(
+                                      like: [],
+                                      rule: [rule],
+                                      comment: [],
+                                      pathVideo: listFileVideo.length > 0
+                                          ? listPathSv
+                                          : [],
+                                      tag: listIdTag,
+                                      pathImg: listFileImage.length > 0
+                                          ? listPathSv
+                                          : [],
+                                      createdAt: DateTime.now().toString(),
+                                      sourceUserId: userProvider.userP.id,
+                                      message: _controller.text,
+                                      sourceUserName:
+                                          userProvider.userP.userName);
+                                  print('ND : ' + _controller.text);
+                                  String newIdFeed =
+                                      await PostFeedFunction(feed);
+                                  if (newIdFeed == "not jwt") {
+                                    print(newIdFeed);
+                                  } else {
+                                    if (newIdFeed != "error") {
+                                      FeedBaseModel a = new FeedBaseModel(
+                                          like: [],
+                                          rule: [rule],
+                                          comment: [],
+                                          tag: listIdTag,
+                                          pathVideo: listFileVideo.length > 0
+                                              ? listPathSv
+                                              : [],
+                                          pathImg: listFileVideo.length == 0
+                                              ? listPathSv
+                                              : [],
+                                          feedId: newIdFeed,
+                                          createdAt: DateTime.now().toString(),
+                                          sourceUserId: userProvider.userP.id,
+                                          message: _controller.text,
+                                          sourceUserName:
+                                              userProvider.userP.userName);
+                                      List<FeedBaseModel> b =
+                                          feedProvider.listFeedsP;
+                                      b.insert(0, a);
+                                      print("đã tạo mới bài viết rồi!");
+                                      feedProvider.userFeed(b);
+                                      Navigator.pop(context);
+                                    }
+                                  }
+                                  setState(() {
+                                    isSendApi = false;
+                                    for (var i = 0; i < listIdTag.length; i++) {
+                                      print("Người thứ " + i.toString());
+                                      print(listRealNameTag[i]);
+                                    }
+                                  });
+                                }
+                              : null,
                         )
                       : InkWell(
                           child: Padding(

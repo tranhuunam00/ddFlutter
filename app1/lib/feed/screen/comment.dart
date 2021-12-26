@@ -18,6 +18,7 @@ import 'package:app1/provider/comment_provider.dart';
 import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:app1/ui.dart';
 import 'package:app1/widgets/dismit_keybord.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
@@ -301,6 +302,7 @@ class _CommentScreenState extends State<CommentScreen> {
       return DismissKeyboard(
         child: Stack(children: [
           Scaffold(
+              appBar: AppBar(),
               backgroundColor: Colors.white,
               body: Container(
                 height: MediaQuery.of(context).size.height,
@@ -334,10 +336,13 @@ class _CommentScreenState extends State<CommentScreen> {
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                 children: [
-                                                  Text("   " +
-                                                      widget.feed.like.length
-                                                          .toString() +
-                                                      " người thích "),
+                                                  Text(
+                                                      "   " +
+                                                          widget
+                                                              .feed.like.length
+                                                              .toString() +
+                                                          " người thích ",
+                                                      style: AppStyles.h4),
                                                   IconButton(
                                                       onPressed: () {},
                                                       icon: Icon(Icons.ac_unit))
@@ -358,7 +363,7 @@ class _CommentScreenState extends State<CommentScreen> {
                                   return Column(
                                     children: [
                                       Container(
-                                        color: Colors.lightGreen,
+                                        color: Colors.orange[100],
                                         child: ListTile(
                                           onTap: () {
                                             showModalBottomSheet<String>(
@@ -478,15 +483,22 @@ class _CommentScreenState extends State<CommentScreen> {
                                               print("ấn vào avatar");
                                             },
                                             child: CircleAvatar(
-                                              backgroundImage: NetworkImage(
-                                                  SERVER_IP +
-                                                      "/upload/" +
-                                                      fullComment[index - 1]
-                                                          .avatarImg),
+                                              radius: 30,
+                                              child: CircleAvatar(
+                                                radius: 30,
+                                                backgroundImage: NetworkImage(
+                                                    SERVER_IP +
+                                                        "/upload/" +
+                                                        fullComment[index - 1]
+                                                            .avatarImg),
+                                              ),
                                             ),
                                           ),
                                           title: Text(
-                                              fullComment[index - 1].realName),
+                                              fullComment[index - 1].realName,
+                                              style: AppStyles.h4.copyWith(
+                                                  color: Colors.lightBlue,
+                                                  fontWeight: FontWeight.bold)),
                                           subtitle: Text(fullComment[index - 1]
                                               .comment
                                               .messages),

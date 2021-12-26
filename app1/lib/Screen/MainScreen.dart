@@ -267,7 +267,7 @@ class _MainScreenState extends State<MainScreen> {
       if (index == 4) {
         _numberNotifications = 0;
         print("Ấn vào thông váo");
-        notifiProvider.timeSeen = DateTime.now().toString();
+
         // notifiProvider.userTimeSeenNotifi(DateTime.now().toString());
         print(notifiProvider.timeSeen);
       }
