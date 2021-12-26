@@ -654,15 +654,18 @@ class _CommentScreenState extends State<CommentScreen> {
                                         radius: 25,
                                         backgroundColor: Colors.blueGrey,
                                         child: IconButton(
-                                          icon: Icon(
-                                            Icons.send,
-                                            color: isSendBtn
-                                                ? Colors.blue
-                                                : Colors.grey,
-                                          ),
+                                          icon: isSendBtn
+                                              ? Image.asset(
+                                                  "assets/icons/sendIcon.png",
+                                                  height: 40)
+                                              : Image.asset(
+                                                  "assets/icons/notSendIcon.png",
+                                                  height: 40),
                                           onPressed: isSendBtn
                                               ? () async {
-                                                  isSendBtn = false;
+                                                  setState(() {
+                                                    isSendBtn = false;
+                                                  });
                                                   await _sendCmt(
                                                       userProvider,
                                                       fullComment,
@@ -677,8 +680,9 @@ class _CommentScreenState extends State<CommentScreen> {
                                                         duration: Duration(
                                                             milliseconds: 100),
                                                         curve: Curves.easeOut);
-                                                    setState() {}
-                                                    ;
+                                                    setState(() {
+                                                      isSendBtn = true;
+                                                    });
                                                   }
                                                 }
                                               : null,

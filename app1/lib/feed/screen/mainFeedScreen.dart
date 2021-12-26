@@ -246,8 +246,9 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
                                     builder: (builder) =>
                                         CommentScreen(feed: widget.feed)));
                           },
-                          icon: Icon(Icons.message_outlined, color: Colors.red),
-                          label: Text("Bình luận"))
+                          icon: Image.asset("assets/icons/messageIcon.png",
+                              height: 50),
+                          label: Text(""))
                     ],
                   ),
                 );

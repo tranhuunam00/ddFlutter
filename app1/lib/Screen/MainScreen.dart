@@ -247,7 +247,6 @@ class _MainScreenState extends State<MainScreen> {
                   sourceIdUser: data["sourceUserId"],
                   targetIdUser: data["targetUserId"],
                 ));
-
             notifiProvider.userNotifi(notifiInit);
             if (mounted) {
               setState(() {
@@ -477,44 +476,59 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: BottomNavigationBar(
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.home,
-                  // color: Colors.grey[500],
-                ),
-                title: Container(
-                  child: Text("home"),
-                  decoration: BoxDecoration(
-                    border: Border(bottom: BorderSide()),
-                  ),
-                ),
+                icon: Image.asset("assets/icons/homeIcon.png", height: 30),
+                title: _selectedIndex == 0
+                    ? Container(
+                        child: Text("Trang chủ"),
+                        decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide()),
+                        ),
+                      )
+                    : Container(),
                 backgroundColor: Colors.green),
             BottomNavigationBarItem(
-                icon: Icon(
-                  Icons.person,
-                ),
-                title: SizedBox(),
+                icon: Image.asset("assets/icons/profileIcon.png", height: 30),
+                title: _selectedIndex == 1
+                    ? Container(
+                        child: Text("Tôi"),
+                        decoration: BoxDecoration(
+                          border: Border(bottom: BorderSide()),
+                        ),
+                      )
+                    : Container(),
                 backgroundColor: Colors.yellow),
             BottomNavigationBarItem(
-              icon: Icon(
-                Icons.search,
-              ),
-              title: SizedBox(),
+              icon: Image.asset("assets/icons/findIcon.png", height: 30),
+              title: _selectedIndex == 2
+                  ? Container(
+                      child: Text("Tìm kiếm"),
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide()),
+                      ),
+                    )
+                  : Container(),
               backgroundColor: Colors.blue,
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.location_on),
-              title: SizedBox(),
+              icon: Image.asset("assets/icons/messageIcon.png", height: 30),
+              title: _selectedIndex == 3
+                  ? Container(
+                      child: Text("Tin nhắn"),
+                      decoration: BoxDecoration(
+                        border: Border(bottom: BorderSide()),
+                      ),
+                    )
+                  : Container(),
               backgroundColor: Colors.blue,
             ),
             BottomNavigationBarItem(
-              icon: Icon(
-                Icons.notification_important_outlined,
-              ),
+              icon: Image.asset("assets/icons/notifiIcon.png", height: 30),
               title: _numberNotifications != 0
                   ? CircleAvatar(
                       backgroundColor: Colors.blue,
                       radius: 9,
-                      child: Text(_numberNotifications.toString()),
+                      child: Text(_numberNotifications.toString(),
+                          style: TextStyle(color: Colors.red)),
                     )
                   : SizedBox(),
               backgroundColor: Colors.blue,

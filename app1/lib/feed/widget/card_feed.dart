@@ -10,6 +10,7 @@ import 'package:app1/provider/comment_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/ui.dart';
 import 'package:app1/widgets/card_video.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -458,6 +459,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
           onTap: () {
             print("ấn vào card");
             if (widget.feed.pathImg.length > 0 ||
+                widget.feed.message.length > 50 ||
                 widget.feed.pathVideo.length > 0) {
               Navigator.push(
                   context,
@@ -518,13 +520,14 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                           child: Padding(
                             padding: const EdgeInsets.only(left: 30, bottom: 8),
                             child: SizedBox(
-                              width: size.width - 150,
-                              child: Text(
+                              width: size.width,
+                              child: AutoSizeText(
                                 widget.feed.message,
-                                maxLines: 4,
-                                overflow: TextOverflow.fade,
-                                softWrap: false,
-                                style: AppStyles.h2,
+                                maxLines: 5,
+                                minFontSize: 18,
+                                style: widget.feed.message.length > 30
+                                    ? AppStyles.h3
+                                    : AppStyles.h2,
                               ),
                             ),
                           ),
@@ -616,9 +619,12 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                               }
                             }
                           },
-                          icon: Icon(Icons.tag,
-                              color: isLike ? Colors.blue : Colors.grey),
-                          label: Text("Yêu thích",
+                          icon: isLike
+                              ? Image.asset("assets/icons/likedIcon.png",
+                                  height: 40)
+                              : Image.asset("assets/icons/notLikeIcon.png",
+                                  height: 40),
+                          label: Text("",
                               style: TextStyle(
                                   color: isLike ? Colors.blue : Colors.grey))),
                       TextButton.icon(
@@ -634,8 +640,9 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                                     builder: (builder) =>
                                         CommentScreen(feed: widget.feed)));
                           },
-                          icon: Icon(Icons.message_outlined, color: Colors.red),
-                          label: Text("Bình luận"))
+                          icon: Image.asset("assets/icons/messageIcon.png",
+                              height: 40),
+                          label: Text(""))
                     ],
                   )
                 ],
