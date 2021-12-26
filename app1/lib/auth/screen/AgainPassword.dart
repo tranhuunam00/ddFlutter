@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:app1/main.dart';
 
 import 'package:app1/model/forgot_user.dart';
+import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../ui.dart';
 import '../../widgets/text_input_style.dart';
 
@@ -46,6 +48,8 @@ class _AgainForgotScreenState extends State<AgainForgotScreen> {
   bool _visibility = true;
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     OutlineInputBorder getBorder() {
       return OutlineInputBorder(
         borderRadius: BorderRadius.all(Radius.circular(48.0)),
@@ -150,18 +154,36 @@ class _AgainForgotScreenState extends State<AgainForgotScreen> {
                       label: "Gửi",
                       onTap: () async {
                         print(widget.userName);
-                        String a = await forgotPwConfirmFunction(
-                          widget.userName,
-                          _passwordController.text,
-                          widget.token,
-                          widget.email,
-                        );
-                        if (a == "done") {
-                          Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (builder) => LoginScreen()));
-                        } else {}
+                        if (widget.token != userProvider.jwtP) {
+                          String a = await forgotPwConfirmFunction(
+                            widget.userName,
+                            _passwordController.text,
+                            widget.token,
+                            widget.email,
+                          );
+                          if (a == "done") {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (builder) => LoginScreen()));
+                          } else {}
+                        } else {
+                          var r = await PutApi(
+                              widget.token,
+                              {
+                                "userName": widget.userName,
+                                "email": widget.email,
+                                "token": widget.token,
+                                "password": _passwordController.text
+                              },
+                              "/user/updatePassword");
+                          if (r == "done") {
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (builder) => LoginScreen()));
+                          }
+                        }
                       })
                   : AppBTnStyle(
                       onTap: null,
@@ -174,5 +196,26 @@ class _AgainForgotScreenState extends State<AgainForgotScreen> {
         )),
       ),
     );
+  }
+}
+
+Future PutApi(String jwt, data, String pathApi) async {
+  http.Response response;
+  print("----post---------" + pathApi);
+  response = await http.put(Uri.parse(SERVER_IP + pathApi),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt
+      },
+      body: jsonEncode(data));
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("-----kêt quả post--------");
+    print(json.decode(response.body).toString());
+    return json.decode(response.body);
+  } else {
+    print("---------------put lỗi---------");
+    return "error";
   }
 }

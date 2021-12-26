@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:app1/auth/screen/AgainPassword.dart';
 import 'package:app1/user/screen/FriendProfile.dart';
 import 'package:app1/Screen/LoadScreen.dart';
 import 'package:app1/Screen/MainScreen.dart';
@@ -247,8 +248,19 @@ class _ProfileState extends State<Profile> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                          child:
-                              AppBTnStyle(label: "Đổi mật khẩu", onTap: () {})),
+                          child: AppBTnStyle(
+                              label: "Đổi mật khẩu",
+                              onTap: () {
+                                print("đổi mật khẩu");
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) => AgainForgotScreen(
+                                            userName:
+                                                userProvider.userP.userName,
+                                            email: userProvider.userP.email,
+                                            token: userProvider.jwtP)));
+                              })),
                       AppBTnStyle(
                           label: "Đăng xuất",
                           onTap: () async {

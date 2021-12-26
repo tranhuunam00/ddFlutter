@@ -45,6 +45,7 @@ class _CommentScreenState extends State<CommentScreen> {
 
   final ImagePicker _picker = ImagePicker();
   bool isSendBtn = false;
+
   int popTime = 0;
   ScrollController _scrollController = ScrollController();
 
@@ -202,7 +203,7 @@ class _CommentScreenState extends State<CommentScreen> {
               ? userProvider
                   .userP.avatarImg[userProvider.userP.avatarImg.length - 1]
               : "avatarNull"));
-      commentProvider.listCommentP = fullComment;
+      commentProvider.listCommentP[widget.feed.feedId] = fullComment;
       if (mounted) {
         _controller.clear();
       }
@@ -649,17 +650,24 @@ class _CommentScreenState extends State<CommentScreen> {
                                           ),
                                           onPressed: isSendBtn
                                               ? () async {
+                                                  isSendBtn = false;
                                                   await _sendCmt(
                                                       userProvider,
                                                       fullComment,
                                                       _controller.text,
                                                       commentProvider);
-                                                  _scrollController.animateTo(
-                                                      _scrollController.position
-                                                          .maxScrollExtent,
-                                                      duration: Duration(
-                                                          milliseconds: 300),
-                                                      curve: Curves.easeOut);
+
+                                                  if (mounted) {
+                                                    _scrollController.animateTo(
+                                                        _scrollController
+                                                            .position
+                                                            .maxScrollExtent,
+                                                        duration: Duration(
+                                                            milliseconds: 100),
+                                                        curve: Curves.easeOut);
+                                                    setState() {}
+                                                    ;
+                                                  }
                                                 }
                                               : null,
                                         )),
