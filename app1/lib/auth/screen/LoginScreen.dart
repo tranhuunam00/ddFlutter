@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:app1/Screen/Profile.dart';
-import 'package:app1/Screen/SettingUser.dart';
+import 'package:app1/user/screen/Profile.dart';
+import 'package:app1/user/screen/SettingUser.dart';
 import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/feed/model/feed_model.dart';
 
@@ -16,18 +16,18 @@ import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../widgets/text_input_style.dart';
+import '../../widgets/text_input_style.dart';
 import 'package:http/http.dart' as http;
-import "../widgets/dismit_keybord.dart";
-import '../widgets/app_button.dart';
-import "../widgets/background.dart";
-import '../ui.dart';
-import "./RegisterScreen.dart";
-import "./ForgotScreen.dart";
-import 'MainScreen.dart';
+import '../../widgets/dismit_keybord.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/background.dart';
+import '../../ui.dart';
+import 'RegisterScreen.dart';
+import 'ForgotScreen.dart';
+import '../../Screen/MainScreen.dart';
 import 'package:provider/provider.dart';
-import '../auth_social/google_sign_in.dart';
-import '../auth_social/facebook_sign_in.dart';
+import '../../auth_social/google_sign_in.dart';
+import '../../auth_social/facebook_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 class LoginScreen extends StatefulWidget {

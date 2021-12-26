@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app1/Screen/FriendProfile.dart';
+import 'package:app1/user/screen/FriendProfile.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/screens_chat/individual_chat.dart';
 import 'package:app1/feed/model/feed_model.dart';
@@ -8,6 +8,7 @@ import 'package:app1/feed/screen/mainFeedScreen.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:app1/ui.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -39,6 +40,26 @@ class Notify_Card extends StatefulWidget {
 class _Notify_CardState extends State<Notify_Card> {
   @override
   Widget build(BuildContext context) {
+    String textAction = "";
+    if (widget.type == "newMsg") {
+      textAction = " gửi tin nhắn cho bạn";
+    }
+    ;
+    if (widget.type == "newFeed") {
+      textAction = " thêm 1 bài viết mới";
+    }
+    if (widget.type == "newTag") {
+      textAction = " gắn thẻ bạn trong 1 bài viết mới";
+    }
+    if (widget.type == "comment" || widget.type == "commentFeed") {
+      textAction = " bình luận trong bài viết của bạn";
+    }
+    if (widget.type == "addFr") {
+      textAction = " gửi lời mời kết bạn";
+    }
+    if (widget.type == "confirmFr") {
+      textAction = " chấp nhận lời mời";
+    }
     return Column(
       children: [
         Container(
@@ -109,9 +130,9 @@ class _Notify_CardState extends State<Notify_Card> {
                 leading: CustomPaint(
                   child: CircleAvatar(
                     backgroundImage: AssetImage('assets/images/load.gif'),
-                    radius: 26,
+                    radius: 30,
                     child: CircleAvatar(
-                      radius: 26,
+                      radius: 30,
                       backgroundImage: NetworkImage(
                           SERVER_IP + "/upload/" + widget.pathImgSource),
                       backgroundColor: Colors.transparent,
@@ -150,13 +171,23 @@ class _Notify_CardState extends State<Notify_Card> {
                         textAlign: TextAlign.right,
                       ),
                     )),
-                title: Text(
-                  widget.realNameSource + " đã " + widget.type + " cho bạn",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                ),
+                title: RichText(
+                    text: TextSpan(
+                        text: widget.realNameSource,
+                        style: AppStyles.h6.copyWith(color: Colors.lightBlue),
+                        children: [
+                      TextSpan(
+                        text: " đã ",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                      TextSpan(
+                        text: textAction,
+                        style: TextStyle(color: Colors.orangeAccent),
+                      )
+                    ])),
                 subtitle: Text(
-                  widget.createdAt,
-                  style: TextStyle(color: Colors.grey[900], fontSize: 11),
+                  widget.createdAt.substring(0, 19),
+                  style: TextStyle(color: Colors.grey[900], fontSize: 12),
                 )),
           ),
         ),

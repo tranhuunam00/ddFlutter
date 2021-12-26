@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app1/Screen/FriendProfile.dart';
+import 'package:app1/user/screen/FriendProfile.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';

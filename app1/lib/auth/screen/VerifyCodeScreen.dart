@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:app1/Screen/AgainPassword.dart';
-import 'package:app1/Screen/LoginScreen.dart';
+import 'package:app1/auth/screen/AgainPassword.dart';
+import 'package:app1/auth/screen/LoginScreen.dart';
 import 'package:app1/main.dart';
 
 import 'package:app1/model/forgot_user.dart';

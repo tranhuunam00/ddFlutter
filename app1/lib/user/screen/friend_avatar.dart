@@ -1,12 +1,12 @@
-import 'package:app1/Screen/FriendProfile.dart';
-import 'package:app1/Screen/Profile.dart';
-import 'package:app1/Screen/test3.dart';
+import 'package:app1/user/screen/FriendProfile.dart';
+import 'package:app1/user/screen/Profile.dart';
+
 import 'package:app1/main.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../ui.dart';
+import '../../ui.dart';
 
 class AvatarFriendBtn extends StatelessWidget {
   final String? id;

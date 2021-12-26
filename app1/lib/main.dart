@@ -3,6 +3,7 @@ import 'package:app1/chat-app/screens_chat/LoginScreen.dart';
 import 'package:app1/chat-app/screens_chat/home.dart';
 import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/comment_provider.dart';
 import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/notifi_provider.dart';
@@ -29,7 +30,8 @@ final UserModel userMain = UserModel(
     coverImg: [],
     avatarImg: [],
     hadMessageList: []);
-const SERVER_IP = 'http://93bd-2402-800-9efd-9e00-b126-260a-1a7a-e8e8.ngrok.io';
+const SERVER_IP =
+    'http://940b-2401-d800-f2b1-d41f-d050-aa44-3e6f-187d.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -59,6 +61,9 @@ class MyApp extends StatelessWidget {
           }),
           ChangeNotifierProvider(create: (context) {
             return NotifiProvider();
+          }),
+          ChangeNotifierProvider(create: (context) {
+            return CommentProvider();
           })
         ],
         child: MaterialApp(

@@ -22,7 +22,7 @@ import 'package:provider/provider.dart';
 import 'package:readmore/readmore.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 
-import '../../ui.dart';
+import '../../../ui.dart';
 
 class AllFriendScreen extends StatefulWidget {
   //final AllFriendScreen ? chatModel;
@@ -95,7 +95,6 @@ class _AllFriendScreen extends State<AllFriendScreen> {
   Widget build(BuildContext context) {
     return DismissKeyboard(
         child: Scaffold(
-      backgroundColor: AppColors.primaryColor,
       body: Column(
         children: <Widget>[
           SizedBox(
@@ -131,7 +130,7 @@ class _AllFriendScreen extends State<AllFriendScreen> {
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
-                            "Gắn thẻ bạn bè",
+                            "Tất cả bạn bè",
                             style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
@@ -147,14 +146,16 @@ class _AllFriendScreen extends State<AllFriendScreen> {
                       ? GestureDetector(
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text(
-                              "Gắn thẻ",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.black87),
-                            ),
+                            child: widget.tag
+                                ? Text(
+                                    "Gắn thẻ",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w800,
+                                        color: Colors.black87),
+                                  )
+                                : Container(),
                           ),
                           onTap: () async {
                             print(ListTargetName);

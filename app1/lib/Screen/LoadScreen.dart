@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app1/Screen/SettingUser.dart';
+import 'package:app1/user/screen/SettingUser.dart';
 import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/main.dart';
@@ -16,7 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import "../ui.dart";
 import 'package:shared_preferences/shared_preferences.dart';
-import "LoginScreen.dart";
+import '../auth/screen/LoginScreen.dart';
 
 import '../Screen/MainScreen.dart';
 import 'package:http/http.dart' as http;
@@ -373,13 +373,16 @@ getNotiifiUserAll(result, List<NotifiModel> notifiInit, List idSources) {
           realName: result[i]["realName"]);
     }
   }
-  for (int i = 0; i < notifiInit.length; i++) {
-    notifiInit[i].sourceRealnameUser =
-        notifiUser[notifiInit[i].sourceIdUser]!.realName;
-    notifiInit[i].sourceUserPathImg =
-        notifiUser[notifiInit[i].sourceIdUser]!.avatarImg[
-            notifiUser[notifiInit[i].sourceIdUser]!.avatarImg.length - 1];
+  if (notifiInit.length > 0) {
+    for (int i = 0; i < notifiInit.length; i++) {
+      notifiInit[i].sourceRealnameUser =
+          notifiUser[notifiInit[i].sourceIdUser]!.realName;
+      notifiInit[i].sourceUserPathImg =
+          notifiUser[notifiInit[i].sourceIdUser]!.avatarImg[
+              notifiUser[notifiInit[i].sourceIdUser]!.avatarImg.length - 1];
+    }
   }
+
   return notifiInit;
 }
 

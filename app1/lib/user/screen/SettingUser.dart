@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:developer';
 import 'dart:ui';
 
-import 'package:app1/Screen/LoginScreen.dart';
+import 'package:app1/auth/screen/LoginScreen.dart';
 import 'package:app1/Screen/MainScreen.dart';
-import 'package:app1/Screen/Profile.dart';
+import 'package:app1/user/screen/Profile.dart';
 import 'package:app1/main.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/widgets/app_button.dart';
@@ -16,7 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
-import '../ui.dart';
+import '../../ui.dart';
 
 class SettingUser extends StatefulWidget {
   const SettingUser({Key? key}) : super(key: key);

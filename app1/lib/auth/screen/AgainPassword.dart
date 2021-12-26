@@ -4,16 +4,16 @@ import 'package:app1/main.dart';
 
 import 'package:app1/model/forgot_user.dart';
 import 'package:flutter/material.dart';
-import '../ui.dart';
-import '../widgets/text_input_style.dart';
+import '../../ui.dart';
+import '../../widgets/text_input_style.dart';
 
-import "../widgets/dismit_keybord.dart";
-import '../widgets/app_button.dart';
-import "../widgets/background.dart";
+import '../../widgets/dismit_keybord.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/background.dart';
 import 'package:http/http.dart' as http;
 
-import './LoginScreen.dart' '';
-import './RegisterScreen.dart';
+import 'LoginScreen.dart';
+import 'RegisterScreen.dart';
 
 class AgainForgotScreen extends StatefulWidget {
   const AgainForgotScreen(

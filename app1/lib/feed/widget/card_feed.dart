@@ -5,6 +5,7 @@ import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/comment_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/ui.dart';
 import 'package:app1/widgets/card_video.dart';
@@ -74,6 +75,9 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final commentProvider =
+        Provider.of<CommentProvider>(context, listen: false);
+
     Size size = MediaQuery.of(context).size;
     for (int i = 0; i < feedApi.like.length; i++) {
       if (feedApi.like[i] == userProvider.userP.id) {
@@ -597,6 +601,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                               color: isLike ? Colors.blue : Colors.grey))),
                   TextButton.icon(
                       onPressed: () async {
+                        commentProvider.userFeedId(widget.feed.feedId);
                         print(widget.ownFeedUser.id);
                         print("bình luận");
                         FeedBaseModel feed1 = widget.feed;

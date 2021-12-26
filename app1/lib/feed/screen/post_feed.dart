@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:app1/Screen/All_Fr_Screen.dart';
+import 'package:app1/user/screen/All_Fr_Screen.dart';
 import 'package:app1/Screen/HomeScreen.dart';
 import 'package:app1/chat-app/customs/OwnFile_card.dart';
 import 'package:app1/chat-app/customs/OwnMessageCard.dart';

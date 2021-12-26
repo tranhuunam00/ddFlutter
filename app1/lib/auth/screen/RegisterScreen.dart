@@ -1,17 +1,17 @@
 import 'dart:convert';
 
-import 'package:app1/Screen/VerifyCodeScreen.dart';
+import 'package:app1/auth/screen/VerifyCodeScreen.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 
 import 'package:flutter/material.dart';
-import '../widgets/text_input_style.dart';
+import '../../widgets/text_input_style.dart';
 import 'package:http/http.dart' as http;
-import "../widgets/dismit_keybord.dart";
-import '../widgets/app_button.dart';
-import "../widgets/background.dart";
-import '../ui.dart';
-import './LoginScreen.dart';
+import '../../widgets/dismit_keybord.dart';
+import '../../widgets/app_button.dart';
+import '../../widgets/background.dart';
+import '../../ui.dart';
+import 'LoginScreen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);

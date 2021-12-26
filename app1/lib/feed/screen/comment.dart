@@ -14,6 +14,7 @@ import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/feed/screen/like_screen.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/comment_provider.dart';
 import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/user_provider.dart';
@@ -51,6 +52,9 @@ class _CommentScreenState extends State<CommentScreen> {
   //.......................................................
   void connect() {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final commentProvider =
+        Provider.of<CommentProvider>(context, listen: false);
+
     print("begin connect....................");
     socket = io(SERVER_IP, <String, dynamic>{
       "transports": ["websocket"],
@@ -60,13 +64,6 @@ class _CommentScreenState extends State<CommentScreen> {
     print(socket.connected);
     print(widget.feed.feedId);
     socket.emit("signin", userProvider.userP.id);
-    socket.onConnect((data) {
-      socket.on(widget.feed.feedId.toString(), (feed) {
-        print("---chạy setstate- số thông báo--");
-        print(data);
-        print("n-------nhận 123----------------");
-      });
-    });
   }
 
   @override
@@ -102,6 +99,9 @@ class _CommentScreenState extends State<CommentScreen> {
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final feedProvider = Provider.of<FeedProvider>(context, listen: false);
+      final commentProvider =
+          Provider.of<CommentProvider>(context, listen: false);
+
       List<String> idComment = [];
       List<UserModel> users = [];
       List<CommentBaseModel> comments = [];
@@ -166,6 +166,7 @@ class _CommentScreenState extends State<CommentScreen> {
           }
         }
       }
+      commentProvider.listCommentP[widget.feed.feedId] = fullComment;
 
       if (mounted) {
         setState(() {});
@@ -175,7 +176,7 @@ class _CommentScreenState extends State<CommentScreen> {
   }
 
   ///////////--------------------------------gửi bfinh luân--------------
-  _sendCmt(userProvider, fullComment, text) async {
+  _sendCmt(userProvider, fullComment, text, commentProvider) async {
     var result = await PostApi(
         userProvider.jwtP,
         {
@@ -201,8 +202,11 @@ class _CommentScreenState extends State<CommentScreen> {
               ? userProvider
                   .userP.avatarImg[userProvider.userP.avatarImg.length - 1]
               : "avatarNull"));
+      commentProvider.listCommentP = fullComment;
+      if (mounted) {
+        _controller.clear();
+      }
 
-      _controller.clear();
       if (mounted)
         setState(() {
           isSendBtn = false;
@@ -283,100 +287,158 @@ class _CommentScreenState extends State<CommentScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    Map<String, List<CommentFullModel>> comments = {};
+    return Consumer<CommentProvider>(
+        builder: (context, commentProvider, child) {
+      comments = commentProvider.listCommentP;
+      if (comments[widget.feed.feedId] != null) {
+        comments[widget.feed.feedId]!
+            .sort((a, b) => a.comment.createdAt.compareTo(b.comment.createdAt));
+        fullComment == comments[widget.feed.feedId];
+      }
 
-    return DismissKeyboard(
-      child: Stack(children: [
-        Scaffold(
-            backgroundColor: Colors.white,
-            body: Container(
-              height: MediaQuery.of(context).size.height,
-              width: MediaQuery.of(context).size.width,
-              child: WillPopScope(
-                child: Column(
-                  children: [
-                    Expanded(
-                        child: ListView.builder(
-                            controller: _scrollController,
-                            itemCount: fullComment.length + 1,
-                            itemBuilder: (context, index) {
-                              if (index == 0) {
-                                return Material(
-                                  child: InkWell(
-                                    onTap: () async {
-                                      print("---ấn vào like--");
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (builder) => LikeScreen(
-                                                  feed: widget.feed)));
-                                    },
-                                    child: Column(
-                                      children: [
-                                        SizedBox(
-                                            height: 50,
-                                            child: Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment
-                                                      .spaceBetween,
-                                              children: [
-                                                Text("   " +
-                                                    widget.feed.like.length
-                                                        .toString() +
-                                                    " người thích "),
-                                                IconButton(
-                                                    onPressed: () {},
-                                                    icon: Icon(Icons.ac_unit))
-                                              ],
-                                            )),
-                                        Divider(
-                                          indent: 32,
-                                          endIndent: 16,
-                                          thickness: 3,
-                                        )
-                                      ],
+      return DismissKeyboard(
+        child: Stack(children: [
+          Scaffold(
+              backgroundColor: Colors.white,
+              body: Container(
+                height: MediaQuery.of(context).size.height,
+                width: MediaQuery.of(context).size.width,
+                child: WillPopScope(
+                  child: Column(
+                    children: [
+                      Expanded(
+                          child: ListView.builder(
+                              controller: _scrollController,
+                              itemCount: fullComment.length + 1,
+                              itemBuilder: (context, index) {
+                                if (index == 0) {
+                                  return Material(
+                                    child: InkWell(
+                                      onTap: () async {
+                                        print("---ấn vào like--");
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (builder) =>
+                                                    LikeScreen(
+                                                        feed: widget.feed)));
+                                      },
+                                      child: Column(
+                                        children: [
+                                          SizedBox(
+                                              height: 50,
+                                              child: Row(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                children: [
+                                                  Text("   " +
+                                                      widget.feed.like.length
+                                                          .toString() +
+                                                      " người thích "),
+                                                  IconButton(
+                                                      onPressed: () {},
+                                                      icon: Icon(Icons.ac_unit))
+                                                ],
+                                              )),
+                                          Divider(
+                                            indent: 32,
+                                            endIndent: 16,
+                                            thickness: 3,
+                                          )
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                );
-                              }
-                              if (fullComment[index - 1].comment.pathImg ==
-                                  "") {
-                                return Column(
-                                  children: [
-                                    Container(
-                                      color: Colors.lightGreen,
-                                      child: ListTile(
-                                        onTap: () {
-                                          showModalBottomSheet<String>(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return Container(
-                                                height: 400,
-                                                child: Center(
-                                                  child: Column(
-                                                    // crossAxisAlignment:
-                                                    //     CrossAxisAlignment.center,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: <Widget>[
-                                                      TextField(
-                                                          controller:
-                                                              _controllerModal,
-                                                          decoration:
-                                                              InputDecoration(
-                                                            hintText: "nhập",
-                                                          )),
-                                                      SizedBox(),
-                                                      Material(
-                                                        child: InkWell(
-                                                            onTap: () async {
-                                                              var result =
-                                                                  await PutApi(
-                                                                      userProvider
-                                                                          .jwtP,
-                                                                      {
-                                                                        "baseCommentDto":
-                                                                            {
+                                  );
+                                }
+                                if (fullComment[index - 1].comment.pathImg ==
+                                    "") {
+                                  return Column(
+                                    children: [
+                                      Container(
+                                        color: Colors.lightGreen,
+                                        child: ListTile(
+                                          onTap: () {
+                                            showModalBottomSheet<String>(
+                                              context: context,
+                                              builder: (BuildContext context) {
+                                                return Container(
+                                                  height: 400,
+                                                  child: Center(
+                                                    child: Column(
+                                                      // crossAxisAlignment:
+                                                      //     CrossAxisAlignment.center,
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .spaceBetween,
+                                                      children: <Widget>[
+                                                        TextField(
+                                                            controller:
+                                                                _controllerModal,
+                                                            decoration:
+                                                                InputDecoration(
+                                                              hintText: "nhập",
+                                                            )),
+                                                        SizedBox(),
+                                                        Material(
+                                                          child: InkWell(
+                                                              onTap: () async {
+                                                                var result =
+                                                                    await PutApi(
+                                                                        userProvider
+                                                                            .jwtP,
+                                                                        {
+                                                                          "baseCommentDto":
+                                                                              {
+                                                                            "pathImg":
+                                                                                "",
+                                                                            "messages":
+                                                                                fullComment[index - 1].comment.messages,
+                                                                            "sourceUserId":
+                                                                                userProvider.userP.id,
+                                                                            "createdAt":
+                                                                                fullComment[index - 1].comment.createdAt,
+                                                                          },
+                                                                          "newMessage":
+                                                                              _controllerModal.text,
+                                                                          "newPathImg":
+                                                                              ""
+                                                                        },
+                                                                        "/feed/" +
+                                                                            widget.feed.feedId +
+                                                                            "/comment");
+                                                                print(
+                                                                    "kết quả trả về khi put");
+                                                                print(result);
+                                                                if (result ==
+                                                                    "done") {
+                                                                  fullComment[index -
+                                                                              1]
+                                                                          .comment
+                                                                          .messages ==
+                                                                      _controllerModal
+                                                                          .text;
+                                                                  if (mounted) {
+                                                                    //nguyên nhân chưa đổi vì set state của bottom chứ k phải của màn hình ,
+                                                                    // phải pop về rồi set hoặc dùng provider
+                                                                    setState(
+                                                                        () {});
+                                                                  }
+                                                                }
+                                                              },
+                                                              child: Text(
+                                                                  "Sửa bình luận")),
+                                                        ),
+                                                        SizedBox(),
+                                                        Material(
+                                                          child: InkWell(
+                                                              onTap: () async {
+                                                                var result =
+                                                                    await DeleteApi(
+                                                                        userProvider
+                                                                            .jwtP,
+                                                                        {
                                                                           "pathImg":
                                                                               "",
                                                                           "messages": fullComment[index - 1]
@@ -389,330 +451,282 @@ class _CommentScreenState extends State<CommentScreen> {
                                                                               .comment
                                                                               .createdAt,
                                                                         },
-                                                                        "newMessage":
-                                                                            _controllerModal.text,
-                                                                        "newPathImg":
-                                                                            ""
-                                                                      },
-                                                                      "/feed/" +
-                                                                          widget
-                                                                              .feed
-                                                                              .feedId +
-                                                                          "/comment");
-                                                              print(
-                                                                  "kết quả trả về khi put");
-                                                              print(result);
-                                                              if (result ==
-                                                                  "done") {
-                                                                fullComment[index -
-                                                                            1]
-                                                                        .comment
-                                                                        .messages ==
-                                                                    _controllerModal
-                                                                        .text;
-                                                                if (mounted) {
-                                                                  //nguyên nhân chưa đổi vì set state của bottom chứ k phải của màn hình ,
-                                                                  // phải pop về rồi set hoặc dùng provider
-                                                                  setState(
-                                                                      () {});
-                                                                }
-                                                              }
-                                                            },
-                                                            child: Text(
-                                                                "Sửa bình luận")),
-                                                      ),
-                                                      SizedBox(),
-                                                      Material(
-                                                        child: InkWell(
-                                                            onTap: () async {
-                                                              var result =
-                                                                  await DeleteApi(
-                                                                      userProvider
-                                                                          .jwtP,
-                                                                      {
-                                                                        "pathImg":
-                                                                            "",
-                                                                        "messages": fullComment[index -
-                                                                                1]
-                                                                            .comment
-                                                                            .messages,
-                                                                        "sourceUserId": userProvider
-                                                                            .userP
-                                                                            .id,
-                                                                        "createdAt": fullComment[index -
-                                                                                1]
-                                                                            .comment
-                                                                            .createdAt,
-                                                                      },
-                                                                      "/feed/" +
-                                                                          widget
-                                                                              .feed
-                                                                              .feedId +
-                                                                          "/comment");
-                                                              print(
-                                                                  "kết quả trả về khi put");
-                                                              print(result);
-                                                            },
-                                                            child: Text(
-                                                                "Xóa bình luận")),
-                                                      ),
-                                                      SizedBox(),
-                                                    ],
+                                                                        "/feed/" +
+                                                                            widget.feed.feedId +
+                                                                            "/comment");
+                                                                print(
+                                                                    "kết quả trả về khi put");
+                                                                print(result);
+                                                              },
+                                                              child: Text(
+                                                                  "Xóa bình luận")),
+                                                        ),
+                                                        SizedBox(),
+                                                      ],
+                                                    ),
                                                   ),
-                                                ),
-                                              );
+                                                );
+                                              },
+                                            );
+                                            print(fullComment.length);
+                                            print(index.toString());
+                                          },
+                                          hoverColor: Colors.blue,
+                                          leading: InkWell(
+                                            onTap: () {
+                                              print("ấn vào avatar");
                                             },
-                                          );
-                                          print(fullComment.length);
-                                          print(index.toString());
-                                        },
-                                        hoverColor: Colors.blue,
-                                        leading: InkWell(
-                                          onTap: () {
-                                            print("ấn vào avatar");
-                                          },
-                                          child: CircleAvatar(
-                                            backgroundImage: NetworkImage(
-                                                SERVER_IP +
-                                                    "/upload/" +
-                                                    fullComment[index - 1]
-                                                        .avatarImg),
+                                            child: CircleAvatar(
+                                              backgroundImage: NetworkImage(
+                                                  SERVER_IP +
+                                                      "/upload/" +
+                                                      fullComment[index - 1]
+                                                          .avatarImg),
+                                            ),
                                           ),
-                                        ),
-                                        title: Text(
-                                            fullComment[index - 1].realName),
-                                        subtitle: Text(fullComment[index - 1]
-                                            .comment
-                                            .messages),
-                                      ),
-                                    ),
-                                    SizedBox(
-                                      height: 10,
-                                    )
-                                  ],
-                                );
-                              } else {
-                                return Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    CircleAvatar(
-                                      child: CircleAvatar(
-                                        backgroundImage: NetworkImage(
-                                            SERVER_IP +
-                                                "/upload/" +
-                                                fullComment[index - 1]
-                                                    .avatarImg),
-                                      ),
-                                    ),
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Text(
+                                          title: Text(
                                               fullComment[index - 1].realName),
+                                          subtitle: Text(fullComment[index - 1]
+                                              .comment
+                                              .messages),
                                         ),
-                                        ReplyFileCard(
-                                            path: fullComment[index - 1]
-                                                .comment
-                                                .pathImg),
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              }
-                            })),
-                    //tin nhắn..............................................
-                    //put text............................................
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Container(
-                            height: 70,
-                            child: Row(
-                              children: [
-                                Container(
-                                    width:
-                                        MediaQuery.of(context).size.width - 57,
-                                    child: Card(
-                                        margin: const EdgeInsets.only(
-                                            left: 2, right: 2, bottom: 8),
-                                        shape: RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(25)),
-                                        //input text...........................................
-                                        child: TextField(
-                                          focusNode: focusNode,
-                                          controller: _controller,
-                                          onChanged: (value) {
-                                            if (value.length > 0) {
-                                              if (mounted)
-                                                setState(() {
-                                                  isSendBtn = true;
-                                                });
-                                            } else {
-                                              if (mounted)
-                                                setState(() {
-                                                  isSendBtn = false;
-                                                });
-                                            }
-                                          },
-                                          textAlignVertical:
-                                              TextAlignVertical.center,
-                                          keyboardType: TextInputType.multiline,
-                                          maxLines: 5,
-                                          minLines: 1,
-                                          decoration: InputDecoration(
-                                            hintText: "Nhập ... ",
-                                            border: InputBorder.none,
-                                            prefixIcon: IconButton(
-                                              icon: Icon(Icons.emoji_emotions),
-                                              onPressed: () {
+                                      ),
+                                      SizedBox(
+                                        height: 10,
+                                      )
+                                    ],
+                                  );
+                                } else {
+                                  return Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      CircleAvatar(
+                                        child: CircleAvatar(
+                                          backgroundImage: NetworkImage(
+                                              SERVER_IP +
+                                                  "/upload/" +
+                                                  fullComment[index - 1]
+                                                      .avatarImg),
+                                        ),
+                                      ),
+                                      Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Text(fullComment[index - 1]
+                                                .realName),
+                                          ),
+                                          ReplyFileCard(
+                                              path: fullComment[index - 1]
+                                                  .comment
+                                                  .pathImg),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                }
+                              })),
+                      //tin nhắn..............................................
+                      //put text............................................
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Container(
+                              height: 70,
+                              child: Row(
+                                children: [
+                                  Container(
+                                      width: MediaQuery.of(context).size.width -
+                                          57,
+                                      child: Card(
+                                          margin: const EdgeInsets.only(
+                                              left: 2, right: 2, bottom: 8),
+                                          shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(25)),
+                                          //input text...........................................
+                                          child: TextField(
+                                            focusNode: focusNode,
+                                            controller: _controller,
+                                            onChanged: (value) {
+                                              if (value.length > 0) {
                                                 if (mounted)
                                                   setState(() {
-                                                    focusNode.unfocus();
-                                                    focusNode.canRequestFocus =
-                                                        false;
-                                                    isEmojiShowing =
-                                                        !isEmojiShowing;
+                                                    isSendBtn = true;
                                                   });
-                                              },
-                                            ),
-                                            suffixIcon: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  IconButton(
-                                                    icon:
-                                                        Icon(Icons.camera_alt),
-                                                    onPressed: () {
-                                                      if (mounted)
-                                                        setState(() {
-                                                          popTime = 2;
-                                                        });
-                                                      Navigator.push(
-                                                          context,
-                                                          MaterialPageRoute(
-                                                              builder: (builder) =>
-                                                                  CameraScreen(
-                                                                    targetId:
-                                                                        "",
-                                                                    event:
-                                                                        "comment",
-                                                                    onImageSend:
-                                                                        onImageSend,
-                                                                  )));
-                                                    },
-                                                  ),
-                                                  IconButton(
-                                                    icon:
-                                                        Icon(Icons.attach_file),
-                                                    onPressed: () {
-                                                      showModalBottomSheet(
-                                                          backgroundColor:
-                                                              Colors
-                                                                  .transparent,
-                                                          context: context,
-                                                          builder: (builder) =>
-                                                              bottomSheet());
-                                                    },
-                                                  ),
-                                                ]),
-                                            contentPadding: EdgeInsets.all(5),
-                                          ),
-                                        ))),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      bottom: 8.0, left: 2, right: 2),
-                                  child: CircleAvatar(
-                                      radius: 25,
-                                      backgroundColor: Colors.blueGrey,
-                                      child: IconButton(
-                                        icon: Icon(
-                                          Icons.send,
-                                          color: isSendBtn
-                                              ? Colors.blue
-                                              : Colors.grey,
-                                        ),
-                                        onPressed: isSendBtn
-                                            ? () async {
-                                                await _sendCmt(
-                                                    userProvider,
-                                                    fullComment,
-                                                    _controller.text);
-                                                _scrollController.animateTo(
-                                                    _scrollController.position
-                                                        .maxScrollExtent,
-                                                    duration: Duration(
-                                                        milliseconds: 300),
-                                                    curve: Curves.easeOut);
+                                              } else {
+                                                if (mounted)
+                                                  setState(() {
+                                                    isSendBtn = false;
+                                                  });
                                               }
-                                            : null,
-                                      )),
-                                ),
-                              ],
+                                            },
+                                            textAlignVertical:
+                                                TextAlignVertical.center,
+                                            keyboardType:
+                                                TextInputType.multiline,
+                                            maxLines: 5,
+                                            minLines: 1,
+                                            decoration: InputDecoration(
+                                              hintText: "Nhập ... ",
+                                              border: InputBorder.none,
+                                              prefixIcon: IconButton(
+                                                icon:
+                                                    Icon(Icons.emoji_emotions),
+                                                onPressed: () {
+                                                  if (mounted)
+                                                    setState(() {
+                                                      focusNode.unfocus();
+                                                      focusNode
+                                                              .canRequestFocus =
+                                                          false;
+                                                      isEmojiShowing =
+                                                          !isEmojiShowing;
+                                                    });
+                                                },
+                                              ),
+                                              suffixIcon: Row(
+                                                  mainAxisSize:
+                                                      MainAxisSize.min,
+                                                  children: [
+                                                    IconButton(
+                                                      icon: Icon(
+                                                          Icons.camera_alt),
+                                                      onPressed: () {
+                                                        if (mounted)
+                                                          setState(() {
+                                                            popTime = 2;
+                                                          });
+                                                        Navigator.push(
+                                                            context,
+                                                            MaterialPageRoute(
+                                                                builder:
+                                                                    (builder) =>
+                                                                        CameraScreen(
+                                                                          targetId:
+                                                                              "",
+                                                                          event:
+                                                                              "comment",
+                                                                          onImageSend:
+                                                                              onImageSend,
+                                                                        )));
+                                                      },
+                                                    ),
+                                                    IconButton(
+                                                      icon: Icon(
+                                                          Icons.attach_file),
+                                                      onPressed: () {
+                                                        showModalBottomSheet(
+                                                            backgroundColor:
+                                                                Colors
+                                                                    .transparent,
+                                                            context: context,
+                                                            builder: (builder) =>
+                                                                bottomSheet());
+                                                      },
+                                                    ),
+                                                  ]),
+                                              contentPadding: EdgeInsets.all(5),
+                                            ),
+                                          ))),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        bottom: 8.0, left: 2, right: 2),
+                                    child: CircleAvatar(
+                                        radius: 25,
+                                        backgroundColor: Colors.blueGrey,
+                                        child: IconButton(
+                                          icon: Icon(
+                                            Icons.send,
+                                            color: isSendBtn
+                                                ? Colors.blue
+                                                : Colors.grey,
+                                          ),
+                                          onPressed: isSendBtn
+                                              ? () async {
+                                                  await _sendCmt(
+                                                      userProvider,
+                                                      fullComment,
+                                                      _controller.text,
+                                                      commentProvider);
+                                                  _scrollController.animateTo(
+                                                      _scrollController.position
+                                                          .maxScrollExtent,
+                                                      duration: Duration(
+                                                          milliseconds: 300),
+                                                      curve: Curves.easeOut);
+                                                }
+                                              : null,
+                                        )),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          //emoji................................................
-                          Offstage(
-                            offstage: !isEmojiShowing,
-                            child: SizedBox(
-                              height: 250,
-                              child: EmojiPicker(
-                                  onEmojiSelected:
-                                      (Category category, Emoji emoji) {
-                                    _onEmojiSelected(emoji);
-                                  },
-                                  onBackspacePressed: _onBackspacePressed,
-                                  config: Config(
-                                      columns: 7,
-                                      emojiSizeMax:
-                                          24 * (Platform.isIOS ? 1.30 : 1.0),
-                                      verticalSpacing: 0,
-                                      horizontalSpacing: 0,
-                                      initCategory: Category.RECENT,
-                                      bgColor: const Color(0xFFF2F2F2),
-                                      indicatorColor: Colors.blue,
-                                      iconColor: Colors.grey,
-                                      iconColorSelected: Colors.blue,
-                                      progressIndicatorColor: Colors.blue,
-                                      backspaceColor: Colors.blue,
-                                      showRecentsTab: true,
-                                      recentsLimit: 28,
-                                      noRecentsText: 'No Recents',
-                                      noRecentsStyle: const TextStyle(
-                                          fontSize: 20, color: Colors.black26),
-                                      tabIndicatorAnimDuration:
-                                          kTabScrollDuration,
-                                      categoryIcons: const CategoryIcons(),
-                                      buttonMode: ButtonMode.MATERIAL)),
+                            //emoji................................................
+                            Offstage(
+                              offstage: !isEmojiShowing,
+                              child: SizedBox(
+                                height: 250,
+                                child: EmojiPicker(
+                                    onEmojiSelected:
+                                        (Category category, Emoji emoji) {
+                                      _onEmojiSelected(emoji);
+                                    },
+                                    onBackspacePressed: _onBackspacePressed,
+                                    config: Config(
+                                        columns: 7,
+                                        emojiSizeMax:
+                                            24 * (Platform.isIOS ? 1.30 : 1.0),
+                                        verticalSpacing: 0,
+                                        horizontalSpacing: 0,
+                                        initCategory: Category.RECENT,
+                                        bgColor: const Color(0xFFF2F2F2),
+                                        indicatorColor: Colors.blue,
+                                        iconColor: Colors.grey,
+                                        iconColorSelected: Colors.blue,
+                                        progressIndicatorColor: Colors.blue,
+                                        backspaceColor: Colors.blue,
+                                        showRecentsTab: true,
+                                        recentsLimit: 28,
+                                        noRecentsText: 'No Recents',
+                                        noRecentsStyle: const TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.black26),
+                                        tabIndicatorAnimDuration:
+                                            kTabScrollDuration,
+                                        categoryIcons: const CategoryIcons(),
+                                        buttonMode: ButtonMode.MATERIAL)),
+                              ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-                //ấn quay lại thì kiểm tra xem có bật emoji k?
-                onWillPop: () {
-                  if (isEmojiShowing) {
-                    if (mounted)
-                      setState(() {
-                        isEmojiShowing = false;
-                      });
-                  } else {
-                    if (mounted) {
-                      Navigator.pop(context);
+                    ],
+                  ),
+                  //ấn quay lại thì kiểm tra xem có bật emoji k?
+                  onWillPop: () {
+                    if (isEmojiShowing) {
+                      if (mounted)
+                        setState(() {
+                          isEmojiShowing = false;
+                        });
+                    } else {
+                      if (mounted) {
+                        Navigator.pop(context);
+                      }
                     }
-                  }
-                  return Future.value(false);
-                },
-              ),
-            )),
-      ]),
-    );
+                    return Future.value(false);
+                  },
+                ),
+              )),
+        ]),
+      );
+    });
   }
 
   Widget bottomSheet() {

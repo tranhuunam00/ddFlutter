@@ -5,11 +5,14 @@ import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:app1/widgets/card_video.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:video_player/video_player.dart';
 
 class MainFeedScreen extends StatefulWidget {
   const MainFeedScreen(
@@ -29,10 +32,85 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
   FeedBaseModel feedApi = new FeedBaseModel(
       like: [], rule: [], comment: [], pathImg: [], tag: [], pathVideo: []);
   late bool isLike = false;
+  VideoPlayerController? _videoPlayerController;
   @override
   void initState() {
     super.initState();
     feedApi = widget.feed;
+
+    for (int i = 0; i < widget.feed.pathVideo.length; i++) {
+      {
+        _videoPlayerController = VideoPlayerController.network(
+            SERVER_IP + "/upload/" + widget.feed.pathVideo[i].toString())
+          ..addListener(() => {
+                // if (mounted) {setState(() {})}
+              })
+          ..setLooping(true)
+          ..initialize().then((_) => _videoPlayerController!.pause());
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if (_videoPlayerController != null) {
+      _videoPlayerController!.pause();
+    }
+  }
+
+  Widget FeedImagesContainer(imagesPath) {
+    return Container(
+      width: MediaQuery.of(context).size.width - 40,
+      height: MediaQuery.of(context).size.height - 300,
+      child: (imagesPath.toString().substring(imagesPath.toString().length - 3,
+                      imagesPath.toString().length) ==
+                  "png" ||
+              imagesPath.toString().substring(imagesPath.toString().length - 3,
+                      imagesPath.toString().length) ==
+                  "jpg" ||
+              imagesPath.toString().substring(imagesPath.toString().length - 3,
+                      imagesPath.toString().length) ==
+                  "gif")
+          ? CachedNetworkImage(
+              imageUrl: SERVER_IP + "/upload/" + imagesPath,
+              fit: BoxFit.fitWidth,
+              placeholder: (context, url) => CircularProgressIndicator(),
+              errorWidget: (context, url, error) => Icon(Icons.error),
+            )
+          : Container(
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _videoPlayerController != null
+                      ? VideoPlayer(_videoPlayerController!)
+                      : Container(),
+                  Positioned(
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: Container(
+                      color: Color.fromRGBO(255, 255, 255, 0.4),
+                      child: IconButton(
+                        onPressed: () async {
+                          print("hí");
+                          _videoPlayerController != null
+                              ? Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (builder) => CardFeedVideoState(
+                                          controller: _videoPlayerController!)))
+                              : null;
+                        },
+                        icon: Icon(Icons.play_circle_fill_outlined),
+                      ),
+                    ),
+                  ), //position hiển thi icon video
+                ],
+              ),
+            ),
+    );
   }
 
   @override
@@ -79,83 +157,98 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
                 return Text(widget.feed.message);
               }
               if (index == listPathAll.length + 2) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton.icon(
-                        onPressed: () async {
-                          print(feedApi.like.length);
-                          print("tên người đang dùng là : " +
-                              userProvider.userP.userName);
-                          print(widget.feed.feedId);
-                          if (isLike == false) {
-                            List result = await Future.wait([
-                              //lấy feed mới để hiển thị số like.........
-                              getFeedApi(widget.feed.feedId, userProvider.jwtP),
-                              //like bài viết
-                              postApi(
-                                  userProvider.jwtP,
-                                  {
-                                    "feedId": widget.feed.feedId,
-                                    "event": "like",
-                                    "createdAt": DateTime.now().toString()
-                                  },
-                                  "/feed/likeFeed")
-                            ]);
-                            if (mounted) {
-                              setState(() {
-                                isLike = !isLike;
-                                feedApi.like = result[0].like;
-                                feedApi.like.add(userProvider.userP.id);
-                              });
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 30.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      TextButton.icon(
+                          onPressed: () async {
+                            print(feedApi.like.length);
+                            print("tên người đang dùng là : " +
+                                userProvider.userP.userName);
+                            print(widget.feed.feedId);
+                            if (isLike == false) {
+                              List result = await Future.wait([
+                                //lấy feed mới để hiển thị số like.........
+                                getFeedApi(
+                                    widget.feed.feedId, userProvider.jwtP),
+                                //like bài viết
+                                postApi(
+                                    userProvider.jwtP,
+                                    {
+                                      "feedId": widget.feed.feedId,
+                                      "event": "like",
+                                      "createdAt": DateTime.now().toString()
+                                    },
+                                    "/feed/likeFeed")
+                              ]);
+                              if (mounted) {
+                                setState(() {
+                                  isLike = !isLike;
+                                  feedApi.like = result[0].like;
+                                  feedApi.like.add(userProvider.userP.id);
+                                });
+                              }
+                            } else {
+                              List result = await Future.wait([
+                                //lấy feed mới để hiển thị số like.........
+                                getFeedApi(
+                                    widget.feed.feedId, userProvider.jwtP),
+                                //like bài viết
+                                postApi(
+                                    userProvider.jwtP,
+                                    {
+                                      "feedId": widget.feed.feedId,
+                                      "event": "dislike",
+                                      "createdAt": DateTime.now().toString()
+                                    },
+                                    "/feed/likeFeed")
+                              ]);
+                              if (mounted) {
+                                setState(() {
+                                  isLike = !isLike;
+                                  feedApi.like = result[0].like;
+                                  feedApi.like.remove(userProvider.userP.id);
+                                });
+                              }
                             }
-                          } else {
-                            List result = await Future.wait([
-                              //lấy feed mới để hiển thị số like.........
-                              getFeedApi(widget.feed.feedId, userProvider.jwtP),
-                              //like bài viết
-                              postApi(
-                                  userProvider.jwtP,
-                                  {
-                                    "feedId": widget.feed.feedId,
-                                    "event": "dislike",
-                                    "createdAt": DateTime.now().toString()
-                                  },
-                                  "/feed/likeFeed")
-                            ]);
-                            if (mounted) {
-                              setState(() {
-                                isLike = !isLike;
-                                feedApi.like = result[0].like;
-                                feedApi.like.remove(userProvider.userP.id);
-                              });
-                            }
-                          }
-                        },
-                        icon: Icon(Icons.tag,
-                            color: isLike ? Colors.blue : Colors.grey),
-                        label: Text("Yêu thích",
-                            style: TextStyle(
-                                color: isLike ? Colors.blue : Colors.grey))),
-                    TextButton.icon(
-                        onPressed: () async {
-                          print(widget.ownFeedUser.id);
-                          print("bình luận");
-                          FeedBaseModel feed1 = widget.feed;
-                          print(widget.feed);
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (builder) =>
-                                      CommentScreen(feed: widget.feed)));
-                        },
-                        icon: Icon(Icons.message_outlined, color: Colors.red),
-                        label: Text("Bình luận"))
-                  ],
+                          },
+                          icon: Icon(Icons.tag,
+                              color: isLike ? Colors.blue : Colors.grey),
+                          label: Text("Yêu thích",
+                              style: TextStyle(
+                                  color: isLike ? Colors.blue : Colors.grey))),
+                      TextButton.icon(
+                          onPressed: () async {
+                            print(widget.ownFeedUser.id);
+                            print("bình luận");
+                            FeedBaseModel feed1 = widget.feed;
+                            print(widget.feed);
+                            print('Số lượng ảnh hoặc video là' +
+                                listPathAll.length.toString());
+                            Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (builder) =>
+                                        CommentScreen(feed: widget.feed)));
+                          },
+                          icon: Icon(Icons.message_outlined, color: Colors.red),
+                          label: Text("Bình luận"))
+                    ],
+                  ),
                 );
               }
-              //code hiện ảnh hoặc video
-              return Container(child: Text(index.toString()));
+
+              return Column(
+                children: [
+                  Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height * 3 / 5,
+                      child: FeedImagesContainer(listPathAll[index - 2])),
+                  Divider()
+                ],
+              );
             }),
       ),
     );

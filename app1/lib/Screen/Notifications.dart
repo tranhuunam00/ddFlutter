@@ -25,23 +25,25 @@ class _NotifiScreenState extends State<NotifiScreen> {
 
   @override
   Widget build(BuildContext context) {
+    List listNotAll = [];
     final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
     return Consumer<NotifiProvider>(builder: (context, notifiProvider, child) {
+      listNotAll = notifiProvider.listNotifiP;
+      listNotAll.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
       return Scaffold(
           appBar: AppBar(title: Text("Thông báo")),
           body: ListView.builder(
-              itemCount: notifiProvider.listNotifiP.length,
+              itemCount: listNotAll.length,
               itemBuilder: (context, index) {
                 return Notify_Card(
-                  idUserSource: notifiProvider.listNotifiP[index].sourceIdUser,
-                  realNameSource:
-                      notifiProvider.listNotifiP[index].sourceRealnameUser,
-                  isSeen: notifiProvider.listNotifiP[index].isSeen,
-                  createdAt: notifiProvider.listNotifiP[index].createdAt,
-                  content: notifiProvider.listNotifiP[index].content,
-                  pathImgSource:
-                      notifiProvider.listNotifiP[index].sourceUserPathImg,
-                  type: notifiProvider.listNotifiP[index].type,
+                  idUserSource: listNotAll[index].sourceIdUser,
+                  realNameSource: listNotAll[index].sourceRealnameUser,
+                  isSeen: listNotAll[index].isSeen,
+                  createdAt: listNotAll[index].createdAt,
+                  content: listNotAll[index].content,
+                  pathImgSource: listNotAll[index].sourceUserPathImg,
+                  type: listNotAll[index].type,
                 );
               }));
     });

@@ -5,10 +5,12 @@ import 'package:app1/Screen/SearchScreen.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/chat-app/screens_chat/LoginScreen.dart';
+import 'package:app1/feed/model/comment_model.dart';
 import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/notifi_modal.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:app1/provider/comment_provider.dart';
 import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/notifi_provider.dart';
@@ -18,7 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart';
-import './Profile.dart';
+import '../user/screen/Profile.dart';
 import './HomeScreen.dart';
 import 'package:http/http.dart' as http;
 
@@ -37,6 +39,9 @@ class _MainScreenState extends State<MainScreen> {
   //----------connetc socket--------------------------------------------
   void connect(String id) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final commentProvider =
+        Provider.of<CommentProvider>(context, listen: false);
+
     print("begin connect....................");
     socket = io(SERVER_IP, <String, dynamic>{
       "transports": ["websocket"],
@@ -61,6 +66,34 @@ class _MainScreenState extends State<MainScreen> {
           print(feed);
           print(feed["feedId"]);
           setListFeedP(feed);
+        }
+      });
+      socket.on("comment", (comment) {
+        print("---chạy setstate- số thông báo--");
+
+        _numberNotifications = _numberNotifications + 1;
+        print(comment);
+        Map<String, List<CommentFullModel>> listCommenPInit = {};
+        CommentFullModel cmtNew = CommentFullModel(
+          comment: CommentBaseModel(
+            pathImg: comment["pathImg"],
+            messages: comment["messages"],
+            createdAt: comment["createdAt"],
+            sourceUserId: comment["id"],
+          ),
+          avatarImg: comment["avatar"],
+          realName: comment["realName"],
+        );
+        if (commentProvider.listCommentP[comment["feedId"]] == null &&
+            commentProvider.feedId == comment["feedId"]) {
+          listCommenPInit[comment["feedId"]] = [cmtNew];
+          commentProvider.userComment(listCommenPInit);
+        }
+        if (commentProvider.listCommentP[comment["feedId"]] != null &&
+            commentProvider.feedId == comment["feedId"]) {
+          listCommenPInit = commentProvider.listCommentP;
+          listCommenPInit[comment["feedId"]]!.add(cmtNew);
+          commentProvider.userComment(listCommenPInit);
         }
       });
       socket.on("newTag", (feed) {

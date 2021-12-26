@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:app1/Screen/FriendProfile.dart';
+import 'package:app1/user/screen/FriendProfile.dart';
 import 'package:app1/Screen/LoadScreen.dart';
 import 'package:app1/Screen/MainScreen.dart';
-import 'package:app1/Screen/SettingUser.dart';
-import 'package:app1/Screen/test3.dart';
+import 'package:app1/user/screen/SettingUser.dart';
+
 import 'package:app1/auth_social/google_sign_in.dart';
 import 'package:app1/chat-app/screens_chat/CameraView.dart';
 import 'package:app1/feed/screen/post_feed.dart';
@@ -13,7 +13,7 @@ import 'package:app1/model/friendUser.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/user_provider.dart';
-import 'package:app1/Screen/All_Fr_Screen.dart';
+import 'package:app1/user/screen/All_Fr_Screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:camera/camera.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -21,10 +21,10 @@ import 'package:flutter/material.dart';
 import 'package:app1/ui.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
-import '../widgets/app_button.dart';
-import "../widgets/friend_avatar.dart";
+import '../../widgets/app_button.dart';
+import 'friend_avatar.dart';
 import 'package:http/http.dart' as http;
-import '../feed/widget/card_feed.dart';
+import '../../feed/widget/card_feed.dart';
 
 class Profile extends StatefulWidget {
   const Profile({Key? key}) : super(key: key);
@@ -248,7 +248,7 @@ class _ProfileState extends State<Profile> {
                     children: [
                       Container(
                           child:
-                              AppBTnStyle(label: "Thay đổi 1", onTap: () {})),
+                              AppBTnStyle(label: "Đổi mật khẩu", onTap: () {})),
                       AppBTnStyle(
                           label: "Đăng xuất",
                           onTap: () async {

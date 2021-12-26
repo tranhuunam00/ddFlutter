@@ -32,6 +32,10 @@ class AppStyles {
     fontSize: 26,
     fontFamily: AppFonts.dancing,
   );
+  static const TextStyle h6 = TextStyle(
+    fontSize: 22,
+    fontFamily: AppFonts.dancing,
+  );
   static const TextStyle h5 = TextStyle(
     fontSize: 16,
     fontFamily: AppFonts.dancing,

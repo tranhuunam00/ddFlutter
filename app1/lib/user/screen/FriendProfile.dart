@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:app1/Screen/All_Fr_Screen.dart';
+import 'package:app1/user/screen/All_Fr_Screen.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/screens_chat/individual_chat.dart';
 import 'package:app1/feed/model/feed_model.dart';
@@ -12,7 +12,7 @@ import 'package:app1/provider/user_provider.dart';
 import 'package:app1/ui.dart';
 import 'package:app1/widgets/app_button.dart';
 import 'package:app1/feed/widget/card_feed.dart';
-import 'package:app1/widgets/friend_avatar.dart';
+import 'package:app1/user/screen/friend_avatar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
