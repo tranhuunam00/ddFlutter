@@ -23,10 +23,14 @@ class _NotifiScreenState extends State<NotifiScreen> {
     super.initState();
   }
 
+  String timeSeen = "";
   @override
   Widget build(BuildContext context) {
     List listNotAll = [];
+
     final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
+
+    timeSeen = notifiProvider.timeSeen;
     return Consumer<NotifiProvider>(builder: (context, notifiProvider, child) {
       listNotAll = notifiProvider.listNotifiP;
       listNotAll.sort((a, b) => b.createdAt.compareTo(a.createdAt));
@@ -39,7 +43,6 @@ class _NotifiScreenState extends State<NotifiScreen> {
                 return Notify_Card(
                   idUserSource: listNotAll[index].sourceIdUser,
                   realNameSource: listNotAll[index].sourceRealnameUser,
-                  isSeen: listNotAll[index].isSeen,
                   createdAt: listNotAll[index].createdAt,
                   content: listNotAll[index].content,
                   pathImgSource: listNotAll[index].sourceUserPathImg,

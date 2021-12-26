@@ -261,9 +261,15 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   void _onItemTapped(int index) {
+    final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
+
     setState(() {
       if (index == 4) {
         _numberNotifications = 0;
+        print("Ấn vào thông váo");
+        notifiProvider.timeSeen = DateTime.now().toString();
+        // notifiProvider.userTimeSeenNotifi(DateTime.now().toString());
+        print(notifiProvider.timeSeen);
       }
       ;
       _selectedIndex = index;

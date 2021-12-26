@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/user/screen/FriendProfile.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/screens_chat/individual_chat.dart';
@@ -21,7 +22,6 @@ class Notify_Card extends StatefulWidget {
       required this.pathImgSource,
       required this.realNameSource,
       required this.type,
-      required this.isSeen,
       required this.createdAt,
       required this.content})
       : super(key: key);
@@ -31,7 +31,6 @@ class Notify_Card extends StatefulWidget {
   final String type;
   final String content;
   final String createdAt;
-  final bool isSeen;
 
   @override
   State<Notify_Card> createState() => _Notify_CardState();
@@ -40,6 +39,18 @@ class Notify_Card extends StatefulWidget {
 class _Notify_CardState extends State<Notify_Card> {
   @override
   Widget build(BuildContext context) {
+    final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
+    print("thời gian trong card no");
+    print(notifiProvider.timeSeen);
+    bool isSeen = false;
+    if (notifiProvider.timeSeen != '') {
+      List time = [notifiProvider.timeSeen, widget.createdAt];
+      time.sort((a, b) => a.compareTo(b));
+      if (time[1] == widget.createdAt) {
+        isSeen = true;
+      }
+    }
+
     String textAction = "";
     if (widget.type == "newMsg") {
       textAction = " gửi tin nhắn cho bạn";
@@ -63,11 +74,13 @@ class _Notify_CardState extends State<Notify_Card> {
     return Column(
       children: [
         Container(
+          color: isSeen != true ? Colors.grey[300] : Colors.white,
           child: InkWell(
             hoverColor: Colors.amber,
             onTap: () async {
               final userProvider =
                   Provider.of<UserProvider>(context, listen: false);
+
               print(widget.pathImgSource);
               print(widget.idUserSource);
               if (widget.type == "addFr") {

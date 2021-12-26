@@ -11,11 +11,18 @@ import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 
 class NotifiProvider with ChangeNotifier {
   MyStream myStream = new MyStream();
-
+  String timeSeen = "";
   List<NotifiModel> listNotifiP = [];
   Future userNotifi(List<NotifiModel> newNotifis) async {
     try {
       listNotifiP = newNotifis;
+    } catch (e) {}
+    notifyListeners();
+  }
+
+  Future userTimeSeenNotifi(String timeSeen) async {
+    try {
+      timeSeen = timeSeen;
     } catch (e) {}
     notifyListeners();
   }
