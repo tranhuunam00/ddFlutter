@@ -95,12 +95,9 @@ class _AllFriendScreen extends State<AllFriendScreen> {
   Widget build(BuildContext context) {
     return DismissKeyboard(
         child: Scaffold(
+      appBar: AppBar(title: Text("Tất cả bạn bè")),
       body: Column(
         children: <Widget>[
-          SizedBox(
-            height: 20,
-          ),
-
           Padding(
             padding: const EdgeInsets.only(top: 1, bottom: 1),
             child: Container(
@@ -109,37 +106,6 @@ class _AllFriendScreen extends State<AllFriendScreen> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () async {
-                          print("Trở về ");
-                          Navigator.pop(context);
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
-                          child: Icon(Icons.arrow_back,
-                              size: 25, color: Colors.black87),
-                        ),
-                      ), // nút trở về
-
-                      GestureDetector(
-                        onTap: () async {
-                          print("ShowInfo - ...");
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            "Tất cả bạn bè",
-                            style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: Colors.black87),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                   (checkTag)
 
                       /// chỗ nút gắn thẻ  khi đã có chọn được bạn tag
@@ -169,7 +135,7 @@ class _AllFriendScreen extends State<AllFriendScreen> {
                           child: Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Text(
-                              "Gắn thẻ",
+                              "",
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                   fontSize: 18,
@@ -267,8 +233,17 @@ class _AllFriendScreen extends State<AllFriendScreen> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
                 child: CircleAvatar(
-                  child: Text(index.toString()),
-                  backgroundColor: Colors.brown.shade50,
+                  backgroundColor: Colors.red,
+                  radius: 23,
+                  backgroundImage: AssetImage('assets/images/load.gif'),
+                  child: CircleAvatar(
+                    radius: 23,
+                    backgroundImage: NetworkImage(SERVER_IP +
+                        "/upload/" +
+                        allFr[index]
+                            .avatarImg[allFr[index].avatarImg.length - 1]),
+                    backgroundColor: Colors.transparent,
+                  ),
                 ),
               ), // Ảnh người cmt
 

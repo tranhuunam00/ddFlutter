@@ -15,6 +15,7 @@ import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../widgets/text_input_style.dart';
 import 'package:http/http.dart' as http;
@@ -40,6 +41,8 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   bool isLoading = false;
   late FocusNode? myFocusNode;
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -168,9 +171,10 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               (_userNameController.text.length >= 6 == true &&
                       _passwordController.text.length >= 6 == true)
-                  ? AppBTnStyle(
-                      label: "Đăng nhập",
-                      onTap: isLoading == false
+                  ? RoundedLoadingButton(
+                      child: Text("Đăng nhập"),
+                      controller: _btnController,
+                      onPressed: isLoading == false
                           ? () async {
                               isLoading = true;
                               print(isValidInput);
@@ -292,7 +296,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     feedProvider.userFeed(newListFeedOwnInit);
                                     feedProvider.userFrFeed(newListFeedFrInit);
                                     isLoading = false;
-
+                                    _btnController.success();
                                     if (user.realName == "user") {
                                       print("---chưa nhập thông tin---mới ");
                                       Navigator.pushReplacement(

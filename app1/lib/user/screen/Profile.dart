@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:app1/ui.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import '../../widgets/app_button.dart';
 import 'friend_avatar.dart';
 import 'package:http/http.dart' as http;
@@ -41,7 +42,8 @@ class _ProfileState extends State<Profile> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final feedProvider = Provider.of<FeedProvider>(context, listen: false);
-
+    final RoundedLoadingButtonController _btnLogoutController =
+        RoundedLoadingButtonController();
     String pathAvatar = userProvider.userP.avatarImg != null &&
             userProvider.userP.avatarImg.length != 0
         ? SERVER_IP +
@@ -229,6 +231,79 @@ class _ProfileState extends State<Profile> {
                                       : print("chọn file");
                                 },
                               ),
+                            )),
+                        Positioned(
+                            top: size.height / 36 * 9 - 20,
+                            right: 0,
+                            child: IconButton(
+                              icon: Text("...", style: TextStyle(fontSize: 30)),
+                              onPressed: () {
+                                showModalBottomSheet(
+                                    context: context,
+                                    builder: (builder) => Container(
+                                          height: 300,
+                                          child: Column(
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 38.0),
+                                                child: RoundedLoadingButton(
+                                                    child: Text('Đăng xuất',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white)),
+                                                    controller:
+                                                        _btnLogoutController,
+                                                    onPressed: () async {
+                                                      await logoutFunction(
+                                                          userProvider.jwtP);
+                                                      await storage.delete(
+                                                          key: "jwt");
+                                                      await userProvider
+                                                          .UserLogOut();
+                                                      _btnLogoutController
+                                                          .success();
+                                                      Navigator.pushReplacement(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (builder) =>
+                                                                  LoadScreen()));
+                                                    }),
+                                              ),
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    top: 38.0),
+                                                child: RoundedLoadingButton(
+                                                    child: Text('Đổi mật khẩu',
+                                                        style: TextStyle(
+                                                            color:
+                                                                Colors.white)),
+                                                    controller:
+                                                        _btnLogoutController,
+                                                    onPressed: () async {
+                                                      _btnLogoutController
+                                                          .success();
+                                                      print("đổi mật khẩu");
+                                                      Navigator.push(
+                                                          context,
+                                                          MaterialPageRoute(
+                                                              builder: (builder) => AgainForgotScreen(
+                                                                  userName:
+                                                                      userProvider
+                                                                          .userP
+                                                                          .userName,
+                                                                  email:
+                                                                      userProvider
+                                                                          .userP
+                                                                          .email,
+                                                                  token: userProvider
+                                                                      .jwtP)));
+                                                    }),
+                                              ),
+                                            ],
+                                          ),
+                                        ));
+                              },
                             ))
                       ],
                     ),
@@ -248,268 +323,274 @@ class _ProfileState extends State<Profile> {
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
-                          child: AppBTnStyle(
-                              label: "Đổi mật khẩu",
-                              onTap: () {
-                                print("đổi mật khẩu");
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (builder) => AgainForgotScreen(
-                                            userName:
-                                                userProvider.userP.userName,
-                                            email: userProvider.userP.email,
-                                            token: userProvider.jwtP)));
-                              })),
-                      AppBTnStyle(
-                          label: "Đăng xuất",
-                          onTap: () async {
-                            await logoutFunction(userProvider.jwtP);
-                            await storage.delete(key: "jwt");
-                            await userProvider.UserLogOut();
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (builder) => LoadScreen()));
-                          }),
+                      Container()
+                      // Container(
+                      //     child: AppBTnStyle(
+                      //         label: "Đổi mật khẩu",
+                      //         onTap: () {
+                      //           print("đổi mật khẩu");
+                      //           Navigator.push(
+                      //               context,
+                      //               MaterialPageRoute(
+                      //                   builder: (builder) => AgainForgotScreen(
+                      //                       userName:
+                      //                           userProvider.userP.userName,
+                      //                       email: userProvider.userP.email,
+                      //                       token: userProvider.jwtP)));
+                      //         })),
+                      // AppBTnStyle(
+                      //     label: "Đăng xuất",
+                      //     onTap: () async {
+                      //       await logoutFunction(userProvider.jwtP);
+                      //       await storage.delete(key: "jwt");
+                      //       await userProvider.UserLogOut();
+                      //       Navigator.pushReplacement(
+                      //           context,
+                      //           MaterialPageRoute(
+                      //               builder: (builder) => LoadScreen()));
+                      //     }),
                     ],
                   );
                 }
                 if (index == 3) {
-                  return Padding(
-                    padding: const EdgeInsets.all(4.0),
-                    child: Column(
-                      children: <Widget>[
-                        Row(
-                          children: [
-                            Icon(Icons.lock_clock),
-                            Text(
-                                "   Bắt đầu từ " +
-                                    userProvider.userP.createdAt
-                                        .substring(4, 15),
-                                style: AppStyles.h4),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.badge),
-                            Text("   Học tại đh Công Nghệ",
-                                style: AppStyles.h4),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Icon(Icons.add_to_home_screen_sharp),
-                            Text("  Quê quán " + userProvider.userP.addressTinh,
-                                style: AppStyles.h4),
-                          ],
-                        ),
-                        TextButton.icon(
-                            onPressed: () {},
-                            icon: Icon(Icons.wysiwyg),
-                            label: Text("   Xem chi tiết")),
-                        AppBTnStyle(
-                            label: "Cài đặt riêng tư",
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (builder) => SettingUser()));
-                              // print(feedProvider.listFeedsFrP[5].sourceUserId);
-                            }),
-                        Divider(height: 60, color: Colors.black),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(children: [
-                              Text("Bạn bè", style: AppStyles.h4),
-                              Text(
-                                  (userProvider.listFriendsP.length - 1)
-                                      .toString(),
-                                  style: AppStyles.h4)
-                            ]),
-                            Icon(Icons.search)
-                          ],
-                        ),
-                        Material(
-                          child: GridView.count(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 4,
-                              mainAxisSpacing: 4,
-                              childAspectRatio: 4 / 5,
-                              physics:
-                                  NeverScrollableScrollPhysics(), // to disable GridView's scrolling
-                              shrinkWrap:
-                                  true, // You won't see infinite size error
-                              children: frGirdView(userProvider.listFriendsP,
-                                  userProvider.userP.friend)),
-                        ),
-                        AppBTnStyle(
-                            label: "Xem tất cả bạn bè",
-                            onTap: () {
-                              Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (builder) => AllFriendScreen(
-                                          tag: false,
-                                          user: userProvider.userP)));
-                              print(userProvider.listFriendsP);
-                              print("----xem tất cả bạn bè-----------");
-                            }),
-                        Divider(
-                          height: 60,
-                          color: Colors.black,
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Đăng",
-                              style: TextStyle(
-                                  fontSize: 24, fontWeight: FontWeight.bold),
-                            ),
-                            Icon(Icons.sort_sharp)
-                          ],
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 12.0),
-                          child: Row(
+                  return Container(
+                    child: Padding(
+                      padding: const EdgeInsets.all(4.0),
+                      child: Column(
+                        children: <Widget>[
+                          Row(
                             children: [
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(top: 8, right: 8.0),
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.red,
-                                  radius: 23,
-                                  backgroundImage:
-                                      AssetImage('assets/images/load.gif'),
+                              Icon(Icons.lock_clock),
+                              Text(
+                                  "   Bắt đầu từ " +
+                                      userProvider.userP.createdAt
+                                          .substring(4, 15),
+                                  style: AppStyles.h4),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.badge),
+                              Text("   Học tại đh Công Nghệ",
+                                  style: AppStyles.h4),
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(Icons.add_to_home_screen_sharp),
+                              Text(
+                                  "  Quê quán " +
+                                      userProvider.userP.addressTinh,
+                                  style: AppStyles.h4),
+                            ],
+                          ),
+                          TextButton.icon(
+                              onPressed: () {},
+                              icon: Icon(Icons.wysiwyg),
+                              label: Text("   Xem chi tiết")),
+                          IconButton(
+                              icon: Image.asset("assets/icons/settingIcon.png"),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) => SettingUser()));
+                                // print(feedProvider.listFeedsFrP[5].sourceUserId);
+                              }),
+                          Divider(height: 60, color: Colors.black),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(children: [
+                                Text("Bạn bè", style: AppStyles.h4),
+                                Text(
+                                    (userProvider.listFriendsP.length - 1)
+                                        .toString(),
+                                    style: AppStyles.h4)
+                              ]),
+                              Icon(Icons.search)
+                            ],
+                          ),
+                          Material(
+                            child: GridView.count(
+                                crossAxisCount: 3,
+                                crossAxisSpacing: 4,
+                                mainAxisSpacing: 4,
+                                childAspectRatio: 4 / 5,
+                                physics:
+                                    NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+                                shrinkWrap:
+                                    true, // You won't see infinite size error
+                                children: frGirdView(userProvider.listFriendsP,
+                                    userProvider.userP.friend)),
+                          ),
+                          IconButton(
+                              icon:
+                                  Image.asset("assets/icons/allPeopleIcon.png"),
+                              onPressed: () {
+                                Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (builder) => AllFriendScreen(
+                                            tag: false,
+                                            user: userProvider.userP)));
+                                print(userProvider.listFriendsP);
+                                print("----xem tất cả bạn bè-----------");
+                              }),
+                          Divider(
+                            height: 60,
+                            color: Colors.black,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Đăng",
+                                style: TextStyle(
+                                    fontSize: 24, fontWeight: FontWeight.bold),
+                              ),
+                              Icon(Icons.sort_sharp)
+                            ],
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Row(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 8, right: 8.0),
                                   child: CircleAvatar(
+                                    backgroundColor: Colors.red,
                                     radius: 23,
-                                    backgroundImage: NetworkImage(SERVER_IP +
-                                        "/upload/" +
-                                        userProvider.userP.avatarImg[
-                                            userProvider
-                                                    .userP.avatarImg.length -
-                                                1]),
-                                    backgroundColor: Colors.transparent,
+                                    backgroundImage:
+                                        AssetImage('assets/images/load.gif'),
+                                    child: CircleAvatar(
+                                      radius: 23,
+                                      backgroundImage: NetworkImage(SERVER_IP +
+                                          "/upload/" +
+                                          userProvider.userP.avatarImg[
+                                              userProvider
+                                                      .userP.avatarImg.length -
+                                                  1]),
+                                      backgroundColor: Colors.transparent,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                  width: size.width - 150,
-                                  child: InkWell(
-                                      child: Text("Bạn đang nghĩ gì"),
-                                      onTap: () {
-                                        Navigator.push(
-                                                context,
-                                                MaterialPageRoute(
-                                                    builder: (builder) =>
-                                                        PostFeedScreen()))
-                                            .then((value) => setState(() {}));
-                                      }))
-                            ],
+                                SizedBox(
+                                    width: size.width - 150,
+                                    child: InkWell(
+                                        child: Text("Bạn đang nghĩ gì"),
+                                        onTap: () {
+                                          Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (builder) =>
+                                                          PostFeedScreen()))
+                                              .then((value) => setState(() {}));
+                                        }))
+                              ],
+                            ),
                           ),
-                        ),
-                        Divider(
-                          height: 40,
-                          color: Colors.black,
-                        ),
-                        Container(
-                          height: 40,
-                          child: ListView(
-                            physics: ClampingScrollPhysics(),
-                            scrollDirection: Axis.horizontal,
-                            shrinkWrap: true,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(right: 16),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width:
-                                            1, //                   <--- border width here
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(16))),
-                                  child: TextButton.icon(
-                                      style: ButtonStyle(
-                                        fixedSize: MaterialStateProperty.all(
-                                            Size(120, 30)),
-                                      ),
-                                      onPressed: () {},
-                                      icon: Icon(Icons.home),
-                                      label: Text("hình ảnh")),
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 8.0, right: 8),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width:
-                                            1, //                   <--- border width here
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(16))),
-                                  child: TextButton.icon(
-                                      style: ButtonStyle(
-                                        fixedSize: MaterialStateProperty.all(
-                                            Size(120, 30)),
-                                      ),
-                                      onPressed: () {},
-                                      icon: Icon(Icons.home),
-                                      label: Text("hình ảnh")),
-                                ),
-                              ),
-                              Padding(
-                                padding:
-                                    const EdgeInsets.only(left: 8.0, right: 8),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width:
-                                            1, //                   <--- border width here
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(16))),
-                                  child: TextButton.icon(
-                                      style: ButtonStyle(
-                                        fixedSize: MaterialStateProperty.all(
-                                            Size(120, 30)),
-                                      ),
-                                      onPressed: () {},
-                                      icon: Icon(Icons.home),
-                                      label: Text("hình ảnh")),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(right: 16),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                      border: Border.all(
-                                        width: 1,
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(16))),
-                                  child: TextButton.icon(
-                                      style: ButtonStyle(
-                                        fixedSize: MaterialStateProperty.all(
-                                            Size(120, 30)),
-                                      ),
-                                      onPressed: () {},
-                                      icon: Icon(Icons.home),
-                                      label: Text("hình ảnh")),
-                                ),
-                              ),
-                            ],
+                          Divider(
+                            height: 40,
+                            color: Colors.black,
                           ),
-                        ),
-                        Divider(
-                          height: 40,
-                        ),
-                      ],
+                          Container(
+                            height: 40,
+                            child: ListView(
+                              physics: ClampingScrollPhysics(),
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 16),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width:
+                                              1, //                   <--- border width here
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(16))),
+                                    child: TextButton.icon(
+                                        style: ButtonStyle(
+                                          fixedSize: MaterialStateProperty.all(
+                                              Size(120, 30)),
+                                        ),
+                                        onPressed: () {},
+                                        icon: Icon(Icons.home),
+                                        label: Text("hình ảnh")),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 8),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width:
+                                              1, //                   <--- border width here
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(16))),
+                                    child: TextButton.icon(
+                                        style: ButtonStyle(
+                                          fixedSize: MaterialStateProperty.all(
+                                              Size(120, 30)),
+                                        ),
+                                        onPressed: () {},
+                                        icon: Icon(Icons.home),
+                                        label: Text("hình ảnh")),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 8),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width:
+                                              1, //                   <--- border width here
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(16))),
+                                    child: TextButton.icon(
+                                        style: ButtonStyle(
+                                          fixedSize: MaterialStateProperty.all(
+                                              Size(120, 30)),
+                                        ),
+                                        onPressed: () {},
+                                        icon: Icon(Icons.home),
+                                        label: Text("hình ảnh")),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 16),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width: 1,
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(16))),
+                                    child: TextButton.icon(
+                                        style: ButtonStyle(
+                                          fixedSize: MaterialStateProperty.all(
+                                              Size(120, 30)),
+                                        ),
+                                        onPressed: () {},
+                                        icon: Icon(Icons.home),
+                                        label: Text("hình ảnh")),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Divider(
+                            height: 40,
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 }

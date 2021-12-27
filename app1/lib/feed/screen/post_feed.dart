@@ -19,6 +19,7 @@ import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/widgets/dismit_keybord.dart';
+import 'package:cool_alert/cool_alert.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -26,6 +27,7 @@ import 'package:flutter/widgets.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import 'package:socket_io_client/socket_io_client.dart';
 import 'package:video_player/video_player.dart';
 
@@ -42,6 +44,8 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
   final TextEditingController _controller = TextEditingController();
   bool isEmojiShowing = false;
   bool isVisible = false;
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   bool checkTag = true;
   String photopath = "";
   FocusNode focusNode = FocusNode();
@@ -167,7 +171,9 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                   (_controller.text.length > 0 == true ||
                           dem >
                               0) // kiểm tra có chữ hoặc có ảnh chưa để có thể ấn nút đăng
-                      ? InkWell(
+                      ? RoundedLoadingButton(
+                          width: 50,
+                          controller: _btnController,
                           child: Padding(
                             padding: const EdgeInsets.only(
                                 top: 20.0, right: 5, left: 5),
@@ -180,7 +186,7 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                   color: Colors.black87),
                             ),
                           ),
-                          onTap: !isSendApi
+                          onPressed: !isSendApi
                               ? () async {
                                   setState(() {
                                     isSendApi = true;
@@ -250,6 +256,12 @@ class _PostFeedScreenState extends State<PostFeedScreen> {
                                       Navigator.pop(context);
                                     }
                                   }
+                                  _btnController.success();
+                                  CoolAlert.show(
+                                    context: context,
+                                    type: CoolAlertType.success,
+                                    text: "Tạo mới thành công !",
+                                  );
                                   setState(() {
                                     isSendApi = false;
                                     for (var i = 0; i < listIdTag.length; i++) {

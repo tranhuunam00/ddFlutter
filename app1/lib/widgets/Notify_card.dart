@@ -60,8 +60,11 @@ class _Notify_CardState extends State<Notify_Card> {
     if (widget.type == "newFeed") {
       textAction = " thêm 1 bài viết mới";
     }
-    if (widget.type == "newTag") {
+    if (widget.type == "tagFeed" || widget.type == "newTag") {
       textAction = " gắn thẻ bạn trong 1 bài viết mới";
+    }
+    if (widget.type == "likeFeed") {
+      textAction = " yêu thích bài viết của bạn";
     }
     if (widget.type == "comment" || widget.type == "commentFeed") {
       textAction = " bình luận trong bài viết của bạn";

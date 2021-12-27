@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:adaptive_dialog/adaptive_dialog.dart';
 import 'package:app1/chat-app/customs/avatar_card.dart';
 import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/feed/screen/comment.dart';
@@ -7,13 +8,16 @@ import 'package:app1/feed/screen/mainFeedScreen.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/comment_provider.dart';
+import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:app1/ui.dart';
 import 'package:app1/widgets/card_video.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cool_alert/cool_alert.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:simple_logger/simple_logger.dart';
 import 'package:video_player/video_player.dart';
 
 import 'package:http/http.dart' as http;
@@ -36,6 +40,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
   late bool isLike = false;
   late VideoPlayerController _videoPlayerController;
   List listRealNameTag = [];
+  bool isDeleteIcon = false;
   @override
   void initState() {
     super.initState();
@@ -95,6 +100,8 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final feedProvider = Provider.of<FeedProvider>(context, listen: false);
+
     final commentProvider =
         Provider.of<CommentProvider>(context, listen: false);
 
@@ -510,48 +517,51 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                       ),
 
                       //--------------------------------tag------------------------------------------
-                      title: RichText(
-                          text: TextSpan(
-                              text: widget.ownFeedUser.realName,
-                              style: AppStyles.h3.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black),
-                              children: [
-                            listRealNameTag.length > 0
-                                ? TextSpan(
-                                    text: " cùng với ",
-                                    style: TextStyle(
-                                        color: Colors.black, fontSize: 18),
-                                  )
-                                : TextSpan(),
-                            listRealNameTag.length > 0
-                                ? TextSpan(
-                                    text: listRealNameTag[0],
-                                    style: AppStyles.h6.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black),
-                                  )
-                                : TextSpan(),
-                            listRealNameTag.length > 1
-                                ? TextSpan(
-                                    text: ", " + listRealNameTag[1],
-                                    style: AppStyles.h6.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black),
-                                  )
-                                : TextSpan(),
-                            listRealNameTag.length > 2
-                                ? TextSpan(
-                                    text: " và " +
-                                        (listRealNameTag.length - 2)
-                                            .toString() +
-                                        " người khác",
-                                    style: AppStyles.h6.copyWith(
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black),
-                                  )
-                                : TextSpan(),
-                          ])),
+                      title: Padding(
+                        padding: const EdgeInsets.only(right: 40),
+                        child: RichText(
+                            text: TextSpan(
+                                text: widget.ownFeedUser.realName,
+                                style: AppStyles.h3.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black),
+                                children: [
+                              listRealNameTag.length > 0
+                                  ? TextSpan(
+                                      text: " cùng với ",
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 18),
+                                    )
+                                  : TextSpan(),
+                              listRealNameTag.length > 0
+                                  ? TextSpan(
+                                      text: listRealNameTag[0],
+                                      style: AppStyles.h6.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
+                                    )
+                                  : TextSpan(),
+                              listRealNameTag.length > 1
+                                  ? TextSpan(
+                                      text: ", " + listRealNameTag[1],
+                                      style: AppStyles.h6.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
+                                    )
+                                  : TextSpan(),
+                              listRealNameTag.length > 2
+                                  ? TextSpan(
+                                      text: " và " +
+                                          (listRealNameTag.length - 2)
+                                              .toString() +
+                                          " người khác",
+                                      style: AppStyles.h6.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
+                                    )
+                                  : TextSpan(),
+                            ])),
+                      ),
                       subtitle: Text(
                         widget.feed.createdAt.substring(0, 10),
                         style: AppStyles.h5,
@@ -699,11 +709,15 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                 color: Colors.blue[100],
                 child: Container(
                     alignment: Alignment.center,
-                    width: 40,
-                    height: 40,
+                    width: 70,
+                    height: 50,
                     child: InkWell(
                       onTap: () {
-                        print("hi");
+                        if (mounted) {
+                          setState(() {
+                            isDeleteIcon = true;
+                          });
+                        }
                       },
                       overlayColor: MaterialStateProperty.all(Colors.blue),
                       child: Container(
@@ -718,6 +732,55 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                     )),
               ),
             ),
+            (isDeleteIcon && widget.feed.sourceUserId == userProvider.userP.id)
+                ? Positioned(
+                    right: 10,
+                    child: Material(
+                      color: Colors.blue[100],
+                      child: TextButton.icon(
+                          onPressed: () async {
+                            commentProvider.userFeedId(widget.feed.feedId);
+                            print(widget.ownFeedUser.id);
+                            print("xóa bài viết");
+                            if (mounted) {
+                              setState(() {
+                                isDeleteIcon = false;
+                              });
+                            }
+                            print(widget.feed);
+                            var result = await showOkCancelAlertDialog(
+                                context: context,
+                                onWillPop: () async {
+                                  return true;
+                                },
+                                title: "Bạn có chắc chắn muốn xóa?");
+                            if (result == OkCancelResult.ok) {
+                              var resultDeleteApi = await DeleteApi(
+                                  userProvider.jwtP,
+                                  {},
+                                  "/feed/" + widget.feed.feedId);
+                              if (resultDeleteApi == "done") {
+                                List<FeedBaseModel> listFeedsPNew =
+                                    feedProvider.listFeedsP;
+                                listFeedsPNew.remove(widget.feed);
+                                feedProvider.userFeed(listFeedsPNew);
+                                // Singleton (factory)
+                                final logger = SimpleLogger();
+                                logger.info('Hello info!');
+                                CoolAlert.show(
+                                  context: context,
+                                  type: CoolAlertType.success,
+                                  text: "Đã xóa bài viết!",
+                                );
+                              }
+                            }
+                          },
+                          icon: Image.asset("assets/icons/deleteIcon.png",
+                              height: 45),
+                          label: Text("")),
+                    ),
+                  )
+                : Container()
           ]),
         ));
   }
@@ -834,10 +897,52 @@ Future<dynamic> getApi(String jwt, String pathApi) async {
   }
 }
 
+Future<dynamic> delete(String jwt, String pathApi) async {
+  print("--------get Api---------" + pathApi);
+  print(jwt);
+  var res = await http.get(
+    Uri.parse(SERVER_IP + pathApi),
+    headers: {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+      'cookie': "jwt=" + jwt,
+    },
+  );
+  if (res.statusCode == 200 || res.statusCode == 201) {
+    var data = json.decode(res.body);
+    print("result " + pathApi);
+    print(data);
+    return data;
+  } else {
+    return "error";
+  }
+}
+
 Future PostApi(String jwt, data, String pathApi) async {
   http.Response response;
   print("----post---------" + pathApi);
   response = await http.post(Uri.parse(SERVER_IP + pathApi),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt
+      },
+      body: jsonEncode(data));
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("-----kêt quả post--------");
+    print(json.decode(response.body).toString());
+    return json.decode(response.body);
+  } else {
+    print("---------------post lỗi---------");
+    return "error";
+  }
+}
+
+Future DeleteApi(String jwt, data, String pathApi) async {
+  http.Response response;
+  print("----post---------" + pathApi);
+  response = await http.delete(Uri.parse(SERVER_IP + pathApi),
       headers: {
         'Content-type': 'application/json',
         'Accept': 'application/json',

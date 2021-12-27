@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app1/main.dart';
+import 'package:app1/model/notifi_modal.dart';
 import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/widgets/Notify_card.dart';
 import 'package:app1/widgets/app_button.dart';
@@ -26,13 +27,14 @@ class _NotifiScreenState extends State<NotifiScreen> {
   String timeSeen = "";
   @override
   Widget build(BuildContext context) {
-    List listNotAll = [];
+    List<NotifiModel> listNotAll = [];
 
     final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
 
     timeSeen = notifiProvider.timeSeen;
     return Consumer<NotifiProvider>(builder: (context, notifiProvider, child) {
       listNotAll = notifiProvider.listNotifiP;
+
       listNotAll.sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
       return Scaffold(

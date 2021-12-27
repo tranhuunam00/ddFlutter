@@ -33,12 +33,29 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
   FeedBaseModel feedApi = new FeedBaseModel(
       like: [], rule: [], comment: [], pathImg: [], tag: [], pathVideo: []);
   late bool isLike = false;
+  List listRealNameTag = [];
   VideoPlayerController? _videoPlayerController;
   @override
   void initState() {
     super.initState();
-    feedApi = widget.feed;
+    //-------------------------------lấy Api của Tag--------------------------
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (widget.feed.tag.length > 0) {
+        var getListUsertagApi = await PostApi(
+            userProvider.jwtP, {"listUser": widget.feed.tag}, "/user/listUser");
+        if (getListUsertagApi != "not jwt" && getListUsertagApi != "error") {
+          if (getListUsertagApi.length > 0) {
+            listRealNameTag = getRealNameApi(getListUsertagApi);
+            if (mounted) {
+              setState(() {});
+            }
+          }
+        }
+      }
+    });
 
+    feedApi = widget.feed;
     for (int i = 0; i < widget.feed.pathVideo.length; i++) {
       {
         _videoPlayerController = VideoPlayerController.network(
@@ -136,28 +153,101 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
             itemCount: listPathAll.length + 3,
             itemBuilder: (context, index) {
               if (index == 0) {
-                return Container(
-                  color: Colors.blue[100],
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.red,
-                      radius: 30,
-                      backgroundImage: AssetImage('assets/images/load.gif'),
-                      child: CircleAvatar(
-                        radius: 30,
-                        backgroundImage: NetworkImage(SERVER_IP +
-                            "/upload/" +
-                            widget.ownFeedUser.avatarImg[
-                                widget.ownFeedUser.avatarImg.length - 1]),
-                        backgroundColor: Colors.transparent,
+                return Stack(
+                  children: [
+                    Container(
+                      color: Colors.blue[100],
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.red,
+                          radius: 23,
+                          backgroundImage: AssetImage('assets/images/load.gif'),
+                          child: CircleAvatar(
+                            radius: 23,
+                            backgroundImage: NetworkImage(SERVER_IP +
+                                "/upload/" +
+                                widget.ownFeedUser.avatarImg[
+                                    widget.ownFeedUser.avatarImg.length - 1]),
+                            backgroundColor: Colors.transparent,
+                          ),
+                        ),
+
+                        //--------------------------------tag------------------------------------------
+                        title: RichText(
+                            text: TextSpan(
+                                text: widget.ownFeedUser.realName,
+                                style: AppStyles.h3.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black),
+                                children: [
+                              listRealNameTag.length > 0
+                                  ? TextSpan(
+                                      text: " cùng với ",
+                                      style: TextStyle(
+                                          color: Colors.black, fontSize: 18),
+                                    )
+                                  : TextSpan(),
+                              listRealNameTag.length > 0
+                                  ? TextSpan(
+                                      text: listRealNameTag[0],
+                                      style: AppStyles.h6.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
+                                    )
+                                  : TextSpan(),
+                              listRealNameTag.length > 1
+                                  ? TextSpan(
+                                      text: ", " + listRealNameTag[1],
+                                      style: AppStyles.h6.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
+                                    )
+                                  : TextSpan(),
+                              listRealNameTag.length > 2
+                                  ? TextSpan(
+                                      text: " và " +
+                                          (listRealNameTag.length - 2)
+                                              .toString() +
+                                          " người khác",
+                                      style: AppStyles.h6.copyWith(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black),
+                                    )
+                                  : TextSpan(),
+                            ])),
+                        subtitle: Text(
+                          widget.feed.createdAt.substring(0, 10),
+                          style: AppStyles.h5,
+                        ),
                       ),
                     ),
-                    title: Text(
-                      widget.ownFeedUser.realName,
-                      style: AppStyles.h3.copyWith(fontWeight: FontWeight.bold),
+                    Positioned(
+                      right: 24,
+                      child: Material(
+                        color: Colors.blue[100],
+                        child: Container(
+                            alignment: Alignment.center,
+                            width: 40,
+                            height: 40,
+                            child: InkWell(
+                              onTap: () {
+                                print("hi");
+                              },
+                              overlayColor:
+                                  MaterialStateProperty.all(Colors.blue),
+                              child: Container(
+                                  width: 40,
+                                  child: Text(
+                                    "...",
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  )),
+                            )),
+                      ),
                     ),
-                    subtitle: Text(widget.feed.createdAt.substring(0, 10)),
-                  ),
+                  ],
                 );
               }
               if (index == 1) {
@@ -227,8 +317,11 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
                               }
                             }
                           },
-                          icon: Icon(Icons.tag,
-                              color: isLike ? Colors.blue : Colors.grey),
+                          icon: isLike
+                              ? Image.asset("assets/icons/likedIcon.png",
+                                  height: 40)
+                              : Image.asset("assets/icons/notLikeIcon.png",
+                                  height: 40),
                           label: Text("Yêu thích",
                               style: TextStyle(
                                   color: isLike ? Colors.blue : Colors.grey))),
@@ -351,4 +444,14 @@ postApi(String jwt, data, String sourcePath) async {
   } catch (e) {
     return "error";
   }
+}
+
+//ten tag
+getRealNameApi(result) {
+  List newRN = [];
+  for (int i = 0; i < result.length; i++) {
+    newRN.add(result[i]["realName"]);
+  }
+
+  return newRN;
 }

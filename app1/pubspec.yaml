@@ -58,9 +58,10 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
+  simple_logger: ^1.9.0
+  cool_alert: ^1.1.0
   
-  
-
+  rounded_loading_button: ^2.0.9
 dev_dependencies:
   flutter_test:
     sdk: flutter
