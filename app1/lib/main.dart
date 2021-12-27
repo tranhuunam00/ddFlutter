@@ -11,7 +11,9 @@ import 'package:app1/provider/user_provider.dart';
 import 'package:app1/test_emoji.dart';
 import 'package:app1/widgets/search.dart';
 import 'package:camera/camera.dart';
+import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import "package:app1/ui.dart";
 import "Screen/LoadScreen.dart";
 import 'package:firebase_core/firebase_core.dart';
@@ -68,7 +70,24 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
             title: "app1",
             // home: ChatLoginScreen()
-            home: LoadScreen()
+            home: AnimatedSplashScreen(
+                duration: 2000,
+                splash: Container(
+                    width: 200,
+                    height: 500,
+                    child: Column(
+                      children: [
+                        Text("407 GG", style: AppStyles.h3),
+                        Container(
+                            width: 200,
+                            height: 150,
+                            child: Image.asset("assets/icons/lolIcon.jpg")),
+                      ],
+                    )),
+                nextScreen: LoadScreen(),
+                splashTransition: SplashTransition.rotationTransition,
+                // pageTransitionType: PageTransitionType.scale,
+                backgroundColor: Colors.amber)
             //  home: Search()
             // home: Test()
             // home: Test()

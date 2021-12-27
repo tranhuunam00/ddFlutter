@@ -313,8 +313,15 @@ class _CommentScreenState extends State<CommentScreen> {
                       Expanded(
                           child: ListView.builder(
                               controller: _scrollController,
-                              itemCount: fullComment.length + 1,
+                              itemCount: fullComment.length + 2,
                               itemBuilder: (context, index) {
+                                if (index == fullComment.length + 1) {
+                                  if (fullComment.length == 0) {
+                                    return Text("Hãy bình luận đầu tiên!");
+                                  } else {
+                                    return Container();
+                                  }
+                                }
                                 if (index == 0) {
                                   return Material(
                                     child: InkWell(

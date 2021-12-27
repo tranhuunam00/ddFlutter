@@ -115,7 +115,6 @@ class _SettingUser extends State<SettingUser> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-
     return DismissKeyboard(
         child: Scaffold(
             resizeToAvoidBottomInset: false,

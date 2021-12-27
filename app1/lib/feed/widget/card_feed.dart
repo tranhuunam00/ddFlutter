@@ -60,7 +60,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
         }
       }
     });
-    //-------------------------------------------------------------
+    //------------------------------------------------casx-------------
     feedApi = widget.feed;
     if (widget.feed.pathImg.length > 0) {
       for (int i = 0; i < widget.feed.pathImg.length; i++) {
@@ -215,7 +215,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
             children: [
               Container(
                   color: Colors.black,
-                  width: (size.width - 50) / 2,
+                  width: (size.width - 36) / 2,
                   height: (size.width - 50) / 2 * 5 / 3,
                   child: Stack(
                     fit: StackFit.expand,
@@ -237,10 +237,6 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                           child: IconButton(
                             onPressed: () async {
                               print("hí");
-                              // Navigator.push(
-                              //     context,
-                              //     MaterialPageRoute(builder: (builder) =>
-                              //         ListImageFeed( feed: widget.feed ,ownFeedUser: widget.ownFeedUser,)));
                             },
                             icon: Icon(
                               Icons.photo_album_outlined,
@@ -254,7 +250,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
               Container(
                   color: Colors.black,
                   height: (size.width - 50) / 2 * 5 / 3,
-                  width: (size.width - 50) / 2,
+                  width: (size.width - 36) / 2,
                   child: CachedNetworkImage(
                     imageUrl: SERVER_IP + "/upload/" + imagesList[1],
                     fit: BoxFit.fitWidth,
@@ -270,7 +266,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
             children: [
               Container(
                   color: Colors.black38,
-                  width: (size.width - 50) / 2,
+                  width: (size.width - 36) / 2,
                   height: size.width,
                   child: CachedNetworkImage(
                     imageUrl: SERVER_IP + "/upload/" + imagesList[0],
@@ -279,7 +275,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                     errorWidget: (context, url, error) => Icon(Icons.error),
                   )),
               Container(
-                width: (size.width - 50) / 2,
+                width: (size.width - 32) / 2,
                 height: size.width,
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
@@ -287,8 +283,8 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                   children: [
                     Container(
                         color: Colors.black38,
-                        height: (size.width - 10) / 2,
-                        width: (size.width - 50) / 2,
+                        height: (size.width - 6) / 2,
+                        width: (size.width - 36) / 2,
                         child: CachedNetworkImage(
                           imageUrl: SERVER_IP + "/upload/" + imagesList[1],
                           fit: BoxFit.fitWidth,
@@ -299,8 +295,8 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                         )),
                     Container(
                         color: Colors.black38,
-                        height: (size.width - 10) / 2,
-                        width: (size.width - 50) / 2,
+                        height: (size.width - 6) / 2,
+                        width: (size.width - 36) / 2,
                         child: CachedNetworkImage(
                           imageUrl: SERVER_IP + "/upload/" + imagesList[2],
                           fit: BoxFit.fitWidth,
@@ -321,7 +317,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
             children: [
               Container(
                   color: Colors.black38,
-                  width: (size.width - 50) / 2,
+                  width: (size.width - 36) / 2,
                   height: size.width,
                   child: CachedNetworkImage(
                     imageUrl: SERVER_IP + "/upload/" + imagesList[0],
@@ -330,7 +326,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                     errorWidget: (context, url, error) => Icon(Icons.error),
                   )),
               Container(
-                width: (size.width - 50) / 2,
+                width: (size.width - 36) / 2,
                 height: size.width,
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
@@ -339,7 +335,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                     Container(
                         color: Colors.black38,
                         height: (size.width - 10) / 3,
-                        width: (size.width - 50) / 2,
+                        width: (size.width - 36) / 2,
                         child: CachedNetworkImage(
                           imageUrl: SERVER_IP + "/upload/" + imagesList[1],
                           fit: BoxFit.fitWidth,
@@ -351,7 +347,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                     Container(
                         color: Colors.black38,
                         height: (size.width - 10) / 3,
-                        width: (size.width - 50) / 2,
+                        width: (size.width - 36) / 2,
                         child: CachedNetworkImage(
                           imageUrl: SERVER_IP + "/upload/" + imagesList[2],
                           fit: BoxFit.fitWidth,
@@ -363,7 +359,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                     Container(
                         color: Colors.black38,
                         height: (size.width - 10) / 3,
-                        width: (size.width - 50) / 2,
+                        width: (size.width - 36) / 2,
                         child: CachedNetworkImage(
                           imageUrl: SERVER_IP + "/upload/" + imagesList[3],
                           fit: BoxFit.fitWidth,
@@ -384,7 +380,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
             children: [
               Container(
                   color: Colors.black38,
-                  width: (size.width - 42) / 2,
+                  width: (size.width - 36) / 2,
                   height: size.width,
                   child: CachedNetworkImage(
                     imageUrl: SERVER_IP + "/upload/" + imagesList[0],
@@ -393,7 +389,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                     errorWidget: (context, url, error) => Icon(Icons.error),
                   )),
               Container(
-                width: (size.width - 50) / 2,
+                width: (size.width - 36) / 2,
                 height: size.width,
                 child: Column(
                   mainAxisSize: MainAxisSize.max,
@@ -402,7 +398,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                     Container(
                         color: Colors.black38,
                         height: (size.width - 10) / 3,
-                        width: (size.width - 50) / 2,
+                        width: (size.width - 36) / 2,
                         child: CachedNetworkImage(
                           imageUrl: SERVER_IP + "/upload/" + imagesList[1],
                           fit: BoxFit.fitWidth,
@@ -414,7 +410,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                     Container(
                         color: Colors.black38,
                         height: (size.width - 10) / 3,
-                        width: (size.width - 50) / 2,
+                        width: (size.width - 36) / 2,
                         child: CachedNetworkImage(
                           imageUrl: SERVER_IP + "/upload/" + imagesList[2],
                           fit: BoxFit.fitWidth,
@@ -427,7 +423,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                       Container(
                           color: Colors.black38,
                           height: (size.width - 10) / 3,
-                          width: (size.width - 50) / 2,
+                          width: (size.width - 36) / 2,
                           child: CachedNetworkImage(
                             imageUrl: SERVER_IP + "/upload/" + imagesList[3],
                             fit: BoxFit.fitWidth,
@@ -439,7 +435,7 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                       Container(
                         color: Colors.black45,
                         height: (size.width - 10) / 3,
-                        width: (size.width - 50) / 2,
+                        width: (size.width - 36) / 2,
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           crossAxisAlignment: CrossAxisAlignment.center,

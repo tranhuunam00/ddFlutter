@@ -150,12 +150,9 @@ class _AllFriendScreen extends State<AllFriendScreen> {
             ),
           ),
 
-          Divider(
-            height: 0.5,
-            color: Colors.black,
-          ), //gạch ngang
+          //gạch ngang
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.only(bottom: 20),
             child: Container(
               child: Row(
                 children: [
@@ -217,9 +214,16 @@ class _AllFriendScreen extends State<AllFriendScreen> {
     return Padding(
       padding: const EdgeInsets.all(2.0),
       child: CircleAvatar(
-        child: Text(addressValueTag[index].toString()),
-        backgroundColor: Colors.brown.shade50,
-      ),
+          backgroundColor: Colors.red,
+          radius: 30,
+          backgroundImage: AssetImage('assets/images/load.gif'),
+          child: CircleAvatar(
+            radius: 30,
+            backgroundImage: NetworkImage(SERVER_IP +
+                "/upload/" +
+                allFr[index].avatarImg[allFr[index].avatarImg.length - 1]),
+            backgroundColor: Colors.transparent,
+          )),
     );
   }
 
@@ -234,10 +238,10 @@ class _AllFriendScreen extends State<AllFriendScreen> {
                 padding: const EdgeInsets.fromLTRB(8, 2, 8, 8),
                 child: CircleAvatar(
                   backgroundColor: Colors.red,
-                  radius: 23,
+                  radius: 30,
                   backgroundImage: AssetImage('assets/images/load.gif'),
                   child: CircleAvatar(
-                    radius: 23,
+                    radius: 30,
                     backgroundImage: NetworkImage(SERVER_IP +
                         "/upload/" +
                         allFr[index]
@@ -247,13 +251,7 @@ class _AllFriendScreen extends State<AllFriendScreen> {
                 ),
               ), // Ảnh người cmt
 
-              Text(
-                allFr[index].realName,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black54),
-              ),
+              Text(allFr[index].realName, style: AppStyles.h4),
             ],
           ),
           widget.tag
