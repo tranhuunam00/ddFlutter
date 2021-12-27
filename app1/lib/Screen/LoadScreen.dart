@@ -144,11 +144,12 @@ class _LoadScreenState extends State<LoadScreen> {
     final messageProvider =
         Provider.of<MessageProvider>(context, listen: false);
 
-    Future.delayed(const Duration(milliseconds: 5000), () {
+    if (userProvider.userP.userName != "") {
       setState(() {
         isLoading = false;
       });
-    });
+    }
+
     print(userProvider.userP.userName);
     return Scaffold(
         backgroundColor: AppColors.primaryColor,

@@ -35,9 +35,27 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
       like: [], rule: [], comment: [], pathImg: [], tag: [], pathVideo: []);
   late bool isLike = false;
   late VideoPlayerController _videoPlayerController;
+  List listRealNameTag = [];
   @override
   void initState() {
     super.initState();
+    //-------------------------------lấy Api của Tag--------------------------
+    WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
+      final userProvider = Provider.of<UserProvider>(context, listen: false);
+      if (widget.feed.tag.length > 0) {
+        var getListUsertagApi = await PostApi(
+            userProvider.jwtP, {"listUser": widget.feed.tag}, "/user/listUser");
+        if (getListUsertagApi != "not jwt" && getListUsertagApi != "error") {
+          if (getListUsertagApi.length > 0) {
+            listRealNameTag = getRealNameApi(getListUsertagApi);
+            if (mounted) {
+              setState(() {});
+            }
+          }
+        }
+      }
+    });
+    //-------------------------------------------------------------
     feedApi = widget.feed;
     if (widget.feed.pathImg.length > 0) {
       for (int i = 0; i < widget.feed.pathImg.length; i++) {
@@ -476,41 +494,68 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
                 children: [
                   Container(
                     color: Colors.blue[100],
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Row(mainAxisSize: MainAxisSize.max, children: [
-                        CircleAvatar(
-                          backgroundColor: Colors.red,
+                    child: ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.red,
+                        radius: 23,
+                        backgroundImage: AssetImage('assets/images/load.gif'),
+                        child: CircleAvatar(
                           radius: 23,
-                          backgroundImage: AssetImage('assets/images/load.gif'),
-                          child: CircleAvatar(
-                            radius: 23,
-                            backgroundImage: NetworkImage(SERVER_IP +
-                                "/upload/" +
-                                widget.ownFeedUser.avatarImg[
-                                    widget.ownFeedUser.avatarImg.length - 1]),
-                            backgroundColor: Colors.transparent,
-                          ),
+                          backgroundImage: NetworkImage(SERVER_IP +
+                              "/upload/" +
+                              widget.ownFeedUser.avatarImg[
+                                  widget.ownFeedUser.avatarImg.length - 1]),
+                          backgroundColor: Colors.transparent,
                         ),
-                        Container(
-                            width: size.width - 180,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                      ),
+
+                      //--------------------------------tag------------------------------------------
+                      title: RichText(
+                          text: TextSpan(
+                              text: widget.ownFeedUser.realName,
+                              style: AppStyles.h3.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black),
                               children: [
-                                new Text(" " + widget.ownFeedUser.realName,
-                                    style: AppStyles.h4
-                                        .copyWith(fontWeight: FontWeight.bold)),
-                                Row(
-                                  children: [
-                                    Text(
-                                      widget.feed.createdAt.substring(0, 10),
-                                      style: AppStyles.h5,
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            )),
-                      ]),
+                            listRealNameTag.length > 0
+                                ? TextSpan(
+                                    text: " cùng với ",
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 18),
+                                  )
+                                : TextSpan(),
+                            listRealNameTag.length > 0
+                                ? TextSpan(
+                                    text: listRealNameTag[0],
+                                    style: AppStyles.h6.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black),
+                                  )
+                                : TextSpan(),
+                            listRealNameTag.length > 1
+                                ? TextSpan(
+                                    text: ", " + listRealNameTag[1],
+                                    style: AppStyles.h6.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black),
+                                  )
+                                : TextSpan(),
+                            listRealNameTag.length > 2
+                                ? TextSpan(
+                                    text: " và " +
+                                        (listRealNameTag.length - 2)
+                                            .toString() +
+                                        " người khác",
+                                    style: AppStyles.h6.copyWith(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black),
+                                  )
+                                : TextSpan(),
+                          ])),
+                      subtitle: Text(
+                        widget.feed.createdAt.substring(0, 10),
+                        style: AppStyles.h5,
+                      ),
                     ),
                   ),
                   Divider(),
@@ -766,4 +811,55 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
       return "error";
     }
   }
+}
+
+Future<dynamic> getApi(String jwt, String pathApi) async {
+  print("--------get Api---------" + pathApi);
+  print(jwt);
+  var res = await http.get(
+    Uri.parse(SERVER_IP + pathApi),
+    headers: {
+      'Content-type': 'application/json',
+      'Accept': 'application/json',
+      'cookie': "jwt=" + jwt,
+    },
+  );
+  if (res.statusCode == 200 || res.statusCode == 201) {
+    var data = json.decode(res.body);
+    print("result " + pathApi);
+    print(data);
+    return data;
+  } else {
+    return "error";
+  }
+}
+
+Future PostApi(String jwt, data, String pathApi) async {
+  http.Response response;
+  print("----post---------" + pathApi);
+  response = await http.post(Uri.parse(SERVER_IP + pathApi),
+      headers: {
+        'Content-type': 'application/json',
+        'Accept': 'application/json',
+        'cookie': "jwt=" + jwt
+      },
+      body: jsonEncode(data));
+
+  if (response.statusCode == 200 || response.statusCode == 201) {
+    print("-----kêt quả post--------");
+    print(json.decode(response.body).toString());
+    return json.decode(response.body);
+  } else {
+    print("---------------post lỗi---------");
+    return "error";
+  }
+}
+
+getRealNameApi(result) {
+  List newRN = [];
+  for (int i = 0; i < result.length; i++) {
+    newRN.add(result[i]["realName"]);
+  }
+
+  return newRN;
 }
