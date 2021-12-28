@@ -32,7 +32,7 @@ final UserModel userMain = UserModel(
     coverImg: [],
     avatarImg: [],
     hadMessageList: []);
-const SERVER_IP = 'http://3000-113-168-164-54.ngrok.io';
+const SERVER_IP = 'http://f627-113-168-164-54.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
             title: "app1",
             // home: ChatLoginScreen()
             home: AnimatedSplashScreen(
-                duration: 2000,
+                duration: 1400,
                 splash: Container(
                     width: 200,
                     height: 500,

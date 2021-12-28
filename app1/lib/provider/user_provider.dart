@@ -29,7 +29,10 @@ class UserProvider with ChangeNotifier {
   String jwtP = "";
 
   Map<String, UserModel> listFriendsP = {};
+  Map<String, UserModel> listFrOfFrP = {};
+
   Map<String, UserModel> listHadChatP = {};
+  Map<String, UserModel> listConfirmFrP = {};
 
   Future userLogin(UserModel user, String jwt) async {
     try {
@@ -61,6 +64,20 @@ class UserProvider with ChangeNotifier {
     try {
       listHadChatP = newFrList;
       myStream.setMessage(newFrList);
+    } catch (e) {}
+    notifyListeners();
+  }
+
+  Future userConfirmFr(Map<String, UserModel> newFrList) async {
+    try {
+      listConfirmFrP = newFrList;
+    } catch (e) {}
+    notifyListeners();
+  }
+
+  Future userFrOfFr(Map<String, UserModel> newFrListNew) async {
+    try {
+      listFrOfFrP = newFrListNew;
     } catch (e) {}
     notifyListeners();
   }

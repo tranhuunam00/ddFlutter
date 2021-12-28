@@ -202,6 +202,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     Map<String, UserModel> listFrInit = {};
                                     Map<String, UserModel> listHadChat = {};
                                     List<FeedBaseModel> listFeedsInit = [];
+                                    Map<String, UserModel> listConfirmFr = {};
+                                    Map<String, UserModel> listFrOfFr = {};
+
+                                    Map<String, int> listIdFrOfFr = {};
                                     List<FeedBaseModel> newListFeedOwnInit = [];
                                     List<FeedBaseModel> newListFeedFrInit = [];
                                     listMsgInit = await getAllMsgFr(
@@ -212,9 +216,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                         user.id,
                                         user.hadMessageList);
                                     var result = await Future.wait([
-                                      getApi(
-                                          jwt, "/user/allAvatarFr/" + user.id),
-                                      getApi(jwt, "/user/allInforHadChat"),
+                                      PostApi(jwt, {"listUser": user.friend},
+                                          "/user/listUser"),
+                                      PostApi(
+                                          jwt,
+                                          {"listUser": user.hadMessageList},
+                                          "/user/listUser"),
                                       getApi(
                                           jwt,
                                           "/notification/findLimit?limit=50&offset=0&targetUserId=" +
@@ -222,22 +229,40 @@ class _LoginScreenState extends State<LoginScreen> {
                                       getApi(jwt,
                                           "/notification/findLimitNotTargetId?limit=50&offset=0"),
                                       getFeedInit(user.id, jwt, user.friend),
+                                      PostApi(
+                                          jwt,
+                                          {"listUser": user.friendConfirm},
+                                          "/user/listUser"),
                                     ]);
-                                    listFrInit =
-                                        getFriendUser(result[0], user.friend);
+                                    listFrInit = getFriendUser(
+                                        result[0], user.friend, true)[0];
+                                    listConfirmFr = getFriendUser(
+                                        result[5], user.friendConfirm, false);
+
+                                    listIdFrOfFr = getFriendUser(
+                                        result[0], user.friend, true)[1];
                                     listHadChat = getFriendUser(
-                                        result[1], user.hadMessageList);
+                                        result[1], user.hadMessageList, false);
                                     var notifiInitNotAvatar =
                                         getNotiifiUserInitNotAvatar(
                                             result[2], jwt);
+                                    List keyIdFrOfFr = [];
+                                    keyIdFrOfFr.addAll(listIdFrOfFr.keys);
                                     var userListResultApi = await Future.wait([
                                       PostApi(
                                           jwt,
                                           {"listUser": notifiInitNotAvatar[1]},
-                                          "/user/listUser")
+                                          "/user/listUser"),
+                                      PostApi(jwt, {"listUser": keyIdFrOfFr},
+                                          "/user/listUser"),
                                     ]);
                                     print("lấy user notifiInit");
                                     print(userListResultApi[0]);
+                                    listFrOfFr = getFriendUser(
+                                        userListResultApi[1],
+                                        keyIdFrOfFr,
+                                        false);
+
                                     List<NotifiModel> notifiInit = [];
                                     notifiInit = getNotiifiUserAll(
                                         userListResultApi[0],
@@ -290,6 +315,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                     notifiProvider.userNotifi(notifiInit);
                                     messageProvider.userMessage(listMsgInit);
                                     userProvider.userFriends(listFrInit);
+                                    userProvider.listFrOfFrP = listFrOfFr;
+                                    userProvider.listConfirmFrP = listConfirmFr;
                                     userProvider.userHadChats(listHadChat);
                                     notifiInit.sort((a, b) =>
                                         b.createdAt.compareTo(a.createdAt));
@@ -414,27 +441,42 @@ Future<Map<String, List<MessageModel>>> getAllMsgFr(String jwt, int limit,
 }
 
 //----------------------lay thoong tin cua toan bo ban be---------------
-getFriendUser(result, List listFr) {
+getFriendUser(result, List listFr, bool isFr) {
   Map<String, UserModel> chatFriend = {};
-
   print("------chạy get avatar---------");
-
+  Map<String, int> frOfFr = {};
   print("ket qua la :");
   print(result);
   if (result != "error" && result != "not jwt") {
     for (var i = 0; i < listFr.length; i++) {
       chatFriend[listFr[i]] = UserModel(
-          friend: [],
-          friendConfirm: [],
-          friendRequest: [],
-          coverImg: [],
-          hadMessageList: [],
-          id: result[listFr[i]][2],
-          avatarImg: [result[listFr[i]][0]],
-          realName: result[listFr[i]][1]);
+        friend: result[i]["friend"],
+        friendConfirm: [],
+        friendRequest: [],
+        coverImg: [],
+        addressTinh: result[i]["addressTinh"],
+        hadMessageList: [],
+        id: result[i]["_id"],
+        avatarImg: result[i]["avatarImg"],
+        realName: result[i]["realName"],
+      );
+      if (isFr && chatFriend[listFr[i]]!.friend.length > 0) {
+        for (int j = 0; j < chatFriend[listFr[i]]!.friend.length; j++) {
+          if (frOfFr[chatFriend[listFr[i]]!.friend[j]] == null) {
+            frOfFr[chatFriend[listFr[i]]!.friend[j]] = 1;
+          } else {
+            frOfFr[chatFriend[listFr[i]]!.friend[j]] =
+                frOfFr[chatFriend[listFr[i]]!.friend[j]]! + 1;
+          }
+        }
+      }
     }
   }
-  return chatFriend;
+  if (isFr) {
+    return [chatFriend, frOfFr];
+  } else {
+    return chatFriend;
+  }
 }
 
 Future<dynamic> getApi(String jwt, String pathApi) async {

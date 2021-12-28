@@ -1,9 +1,11 @@
 import 'dart:convert';
 
+import 'package:app1/ui.dart';
 import 'package:app1/user/screen/FriendProfile.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:app1/user/screen/suggestFriend.dart';
 import 'package:app1/widgets/app_button.dart';
 import 'package:app1/widgets/dismit_keybord.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,11 +22,12 @@ class SearchScreen extends StatefulWidget {
 
 class _SearchScreenState extends State<SearchScreen> {
   TextEditingController _textController = TextEditingController();
-
+  Map<String, UserModel> allFrConfirm = {};
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     Size size = MediaQuery.of(context).size;
+    allFrConfirm = userProvider.listConfirmFrP;
 
     TextEditingController _textModalController = TextEditingController();
     return DismissKeyboard(
@@ -122,7 +125,11 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                     InkWell(
                       onTap: () {
-                        print("hihi");
+                        print(userProvider.listFrOfFrP);
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (builder) => SuggestFriendScreen()));
                       },
                       child: Container(
                           alignment: Alignment.center,
@@ -140,6 +147,70 @@ class _SearchScreenState extends State<SearchScreen> {
                   ],
                 ),
               )),
+          Divider(),
+          Container(
+            height: size.height - 300,
+            child: ListView.builder(
+                itemCount: userProvider.listConfirmFrP.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    return Padding(
+                      padding: const EdgeInsets.all(10.0),
+                      child: InkWell(
+                        onTap: () {
+                          print(userProvider.listConfirmFrP);
+                        },
+                        child: Text(
+                          " Lời mời kết bạn ",
+                          style: AppStyles.h3,
+                        ),
+                      ),
+                    );
+                  }
+                  return Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: InkWell(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (builder) => FriendProfile(
+                                    frId: allFrConfirm[userProvider
+                                            .userP.friendConfirm[index - 1]]!
+                                        .id)));
+                      },
+                      child: ListTile(
+                          tileColor: index % 2 == 0
+                              ? Colors.amberAccent[100]
+                              : Colors.lightBlueAccent[100],
+                          title: Text(
+                              allFrConfirm[userProvider
+                                      .userP.friendConfirm[index - 1]]!
+                                  .realName,
+                              style: AppStyles.h4),
+                          leading: CircleAvatar(
+                              backgroundColor: Colors.red,
+                              radius: 30,
+                              backgroundImage:
+                                  AssetImage('assets/images/load.gif'),
+                              child: CircleAvatar(
+                                radius: 30,
+                                backgroundImage: NetworkImage(SERVER_IP +
+                                    "/upload/" +
+                                    allFrConfirm[userProvider
+                                            .userP.friendConfirm[index - 1]]!
+                                        .avatarImg[allFrConfirm[userProvider
+                                                .userP
+                                                .friendConfirm[index - 1]]!
+                                            .avatarImg
+                                            .length -
+                                        1]),
+                                backgroundColor: Colors.transparent,
+                              ))),
+                    ),
+                  );
+                }),
+          )
         ]),
       ),
     );

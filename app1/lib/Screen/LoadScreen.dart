@@ -43,6 +43,11 @@ class _LoadScreenState extends State<LoadScreen> {
   Map<String, List<MessageModel>> listMsgInit = {};
   Map<String, UserModel> listFrInit = {};
   Map<String, UserModel> listHadChat = {};
+  Map<String, UserModel> listConfirmFr = {};
+  Map<String, UserModel> listFrOfFr = {};
+
+  Map<String, int> listIdFrOfFr = {};
+
   List<NotifiModel> notifiInit = [];
   List<FeedBaseModel> listFeedsInit = [];
   List<FeedBaseModel> newListFeedOwnInit = [];
@@ -65,27 +70,35 @@ class _LoadScreenState extends State<LoadScreen> {
       print(userInit);
       if (userInit.userName != "") {
         var result = await Future.wait([
-          getApi(jwt, "/user/allAvatarFr/" + userInit.id),
-          getApi(jwt, "/user/allInforHadChat"),
+          PostApi(jwt, {"listUser": userInit.friend}, "/user/listUser"),
+          PostApi(jwt, {"listUser": userInit.hadMessageList}, "/user/listUser"),
           getApi(
               jwt,
               "/notification/findLimit?limit=50&offset=0&targetUserId=" +
                   userInit.id),
           getApi(jwt, "/notification/findLimitNotTargetId?limit=50&offset=0"),
           getFeedInit(userInit.id, jwt, userInit.friend),
+          PostApi(jwt, {"listUser": userInit.friendConfirm}, "/user/listUser"),
         ]);
 
         listMsgInit = await getAllMsgFr(jwt, 10, 0, "/message/allMsgFR",
             userInit.id, userInit.hadMessageList);
-        listFrInit = getFriendUser(result[0], userInit.friend);
-        listHadChat = getFriendUser(result[1], userInit.hadMessageList);
+        listFrInit = getFriendUser(result[0], userInit.friend, true)[0];
+        listHadChat = getFriendUser(result[1], userInit.hadMessageList, false);
+        listConfirmFr = getFriendUser(result[5], userInit.friendConfirm, false);
 
+        listIdFrOfFr = getFriendUser(result[0], userInit.friend, true)[1];
         var notifiInitNotAvatar = getNotiifiUserInitNotAvatar(result[2], jwt);
+        List keyIdFrOfFr = [];
+        keyIdFrOfFr.addAll(listIdFrOfFr.keys);
         var userListResultApi = await Future.wait([
-          PostApi(jwt, {"listUser": notifiInitNotAvatar[1]}, "/user/listUser")
+          PostApi(jwt, {"listUser": notifiInitNotAvatar[1]}, "/user/listUser"),
+          PostApi(jwt, {"listUser": keyIdFrOfFr}, "/user/listUser"),
         ]);
         print("lấy user notifiInit");
         print(userListResultApi[0]);
+
+        listFrOfFr = getFriendUser(userListResultApi[1], keyIdFrOfFr, false);
         notifiInit = getNotiifiUserAll(userListResultApi[0],
             notifiInitNotAvatar[0], notifiInitNotAvatar[1]);
         print("kết quả 3 là ");
@@ -188,7 +201,8 @@ class _LoadScreenState extends State<LoadScreen> {
                                 userProvider.userFriends(listFrInit);
                                 userProvider.userHadChats(listHadChat);
                                 notifiProvider.userNotifi(notifiInit);
-
+                                userProvider.listFrOfFrP = listFrOfFr;
+                                userProvider.listConfirmFrP = listConfirmFr;
                                 feedProvider.userFeed(newListFeedOwnInit);
                                 feedProvider.userFrFeed(newListFeedFrInit);
                               }
@@ -309,27 +323,42 @@ Future<Map<String, List<MessageModel>>> getAllMsgFr(String jwt, int limit,
 }
 
 //----------------------lay thoong tin cua toan bo ban be---------------
-getFriendUser(result, List listFr) {
+getFriendUser(result, List listFr, bool isFr) {
   Map<String, UserModel> chatFriend = {};
-
   print("------chạy get avatar---------");
-
+  Map<String, int> frOfFr = {};
   print("ket qua la :");
   print(result);
   if (result != "error" && result != "not jwt") {
     for (var i = 0; i < listFr.length; i++) {
       chatFriend[listFr[i]] = UserModel(
-          friend: [],
-          friendConfirm: [],
-          friendRequest: [],
-          coverImg: [],
-          hadMessageList: [],
-          id: result[listFr[i]][2],
-          avatarImg: [result[listFr[i]][0]],
-          realName: result[listFr[i]][1]);
+        friend: result[i]["friend"],
+        friendConfirm: [],
+        friendRequest: [],
+        coverImg: [],
+        addressTinh: result[i]["addressTinh"],
+        hadMessageList: [],
+        id: result[i]["_id"],
+        avatarImg: result[i]["avatarImg"],
+        realName: result[i]["realName"],
+      );
+      if (isFr && chatFriend[listFr[i]]!.friend.length > 0) {
+        for (int j = 0; j < chatFriend[listFr[i]]!.friend.length; j++) {
+          if (frOfFr[chatFriend[listFr[i]]!.friend[j]] == null) {
+            frOfFr[chatFriend[listFr[i]]!.friend[j]] = 1;
+          } else {
+            frOfFr[chatFriend[listFr[i]]!.friend[j]] =
+                frOfFr[chatFriend[listFr[i]]!.friend[j]]! + 1;
+          }
+        }
+      }
     }
   }
-  return chatFriend;
+  if (isFr) {
+    return [chatFriend, frOfFr];
+  } else {
+    return chatFriend;
+  }
 }
 
 ///lấy  các thông báo của user-------------

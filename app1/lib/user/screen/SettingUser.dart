@@ -420,8 +420,8 @@ Future PostApi(String jwt, data, String pathApi) async {
       body: jsonEncode(data));
 
   if (response.statusCode == 200 || response.statusCode == 201) {
-    print("-----kêt quả post--------");
-    print(json.decode(response.body).toString());
+    // print("-----kêt quả post--------");
+    // print(json.decode(response.body).toString());
     return json.decode(response.body);
   } else {
     print("---------------post lỗi---------");
