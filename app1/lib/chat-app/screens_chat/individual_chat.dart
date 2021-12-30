@@ -200,7 +200,7 @@ class _IndividualChatState extends State<IndividualChat> {
       ]);
       print("kết quả new user chat là");
       print(result);
-      if (result[0] == "done") {
+      if (result[0] == "done" && result[1] == "done") {
         userProvider.userP.hadMessageList.add(widget.chatModel!.id.toString());
         MessageModel messageModel = MessageModel(
             message: message,
@@ -218,26 +218,26 @@ class _IndividualChatState extends State<IndividualChat> {
           "path": path,
         });
 
-        if (result[1] == "done") {
-          listMsg.add(messageModel);
-          Map<String, List<MessageModel>> newMsg = messageProvider.listMessageP;
-          newMsg[sourceId + "/" + targetId] = listMsg;
-          userProvider.listHadChatP[targetId] = UserModel(
-              avatarImg: [widget.chatModel!.avatar],
-              hadMessageList: [],
-              friendConfirm: [],
-              friendRequest: [],
-              friend: [],
-              coverImg: [],
-              realName: widget.chatModel!.realName,
-              id: widget.chatModel!.id);
-          print("list cả người mới");
-          print(sourceId);
-          print(targetId);
-          print(newMsg[targetId + "/" + sourceId]);
-          print(userProvider.userP.hadMessageList);
-          messageProvider.userMessage(newMsg);
-        }
+        listMsg.add(messageModel);
+        Map<String, List<MessageModel>> newMsg = messageProvider.listMessageP;
+        newMsg[sourceId + "/" + targetId] = listMsg;
+        userProvider.listHadChatP[targetId] = UserModel(
+            avatarImg: [widget.chatModel!.avatar],
+            hadMessageList: [],
+            friendConfirm: [],
+            feedImg: [],
+            feedVideo: [],
+            friendRequest: [],
+            friend: [],
+            coverImg: [],
+            realName: widget.chatModel!.realName,
+            id: widget.chatModel!.id);
+        print("list cả người mới");
+        print(sourceId);
+        print(targetId);
+        print(newMsg[targetId + "/" + sourceId]);
+        print(userProvider.userP.hadMessageList);
+        messageProvider.userMessage(newMsg);
       }
     } else {
       socket.emit("message", {

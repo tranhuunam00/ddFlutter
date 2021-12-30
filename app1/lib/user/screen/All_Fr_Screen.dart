@@ -319,6 +319,8 @@ Future<List<UserModel>> getAllFrApi(
           hadMessageList: result[i]["hadMessageList"],
           id: result[i]["_id"],
           coverImg: result[i]["coverImg"],
+          feedImg: result[i]["feedImg"],
+          feedVideo: result[i]["feedVideo"],
           realName: result[i]["realName"],
           friendConfirm: result[i]["friendConfirm"],
           friendRequest: result[i]["friendRequest"],

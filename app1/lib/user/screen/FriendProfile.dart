@@ -31,6 +31,8 @@ class _FriendProfileState extends State<FriendProfile> {
   UserModel inforFr = UserModel(
       friend: [],
       friendConfirm: [],
+      feedImg: [],
+      feedVideo: [],
       friendRequest: [],
       coverImg: [],
       avatarImg: [],
@@ -162,6 +164,8 @@ class _FriendProfileState extends State<FriendProfile> {
             friend: [],
             friendConfirm: [],
             friendRequest: [],
+            feedImg: [],
+            feedVideo: [],
             coverImg: [],
             hadMessageList: [],
             id: result[listFr[i]][2],
@@ -185,6 +189,8 @@ class _FriendProfileState extends State<FriendProfile> {
             realName: data["realName"],
             email: data["email"],
             id: data["_id"],
+            feedImg: data["feedImg"],
+            feedVideo: data["feedVideo"],
             friend: data["friend"],
             hadMessageList: data["hadMessageList"],
             avatarImg: data["avatarImg"] != null
@@ -197,6 +203,8 @@ class _FriendProfileState extends State<FriendProfile> {
             friend: [],
             friendConfirm: [],
             friendRequest: [],
+            feedImg: [],
+            feedVideo: [],
             coverImg: [],
             avatarImg: [],
             hadMessageList: []);
@@ -206,6 +214,8 @@ class _FriendProfileState extends State<FriendProfile> {
           friend: [],
           friendConfirm: [],
           friendRequest: [],
+          feedImg: [],
+          feedVideo: [],
           coverImg: [],
           avatarImg: [],
           hadMessageList: []);
@@ -266,6 +276,8 @@ class _FriendProfileState extends State<FriendProfile> {
               friend: [],
               friendConfirm: [],
               friendRequest: [],
+              feedImg: [],
+              feedVideo: [],
               coverImg: [],
               hadMessageList: [],
               id: result["_id"].toString(),

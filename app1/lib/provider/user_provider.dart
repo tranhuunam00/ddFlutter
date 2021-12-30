@@ -13,6 +13,8 @@ class UserProvider with ChangeNotifier {
   UserModel userP = UserModel(
       userName: "",
       friend: [],
+      feedImg: [],
+      feedVideo: [],
       friendConfirm: [],
       friendRequest: [],
       coverImg: [],
@@ -23,6 +25,8 @@ class UserProvider with ChangeNotifier {
       friend: [],
       friendConfirm: [],
       friendRequest: [],
+      feedImg: [],
+      feedVideo: [],
       coverImg: [],
       avatarImg: [],
       hadMessageList: []);
@@ -88,6 +92,8 @@ class UserProvider with ChangeNotifier {
         friendConfirm: [],
         friendRequest: [],
         coverImg: [],
+        feedImg: [],
+        feedVideo: [],
         avatarImg: [],
         hadMessageList: []);
   }

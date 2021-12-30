@@ -143,6 +143,8 @@ class _CommentScreenState extends State<CommentScreen> {
             UserModel user = UserModel(
                 friend: [],
                 hadMessageList: [],
+                feedImg: [],
+                feedVideo: [],
                 coverImg: [],
                 friendConfirm: [],
                 friendRequest: [],

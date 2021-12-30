@@ -1,3 +1,4 @@
+import 'package:app1/Screen/All_Image_Sceen.dart';
 import 'package:app1/chat-app/screens_chat/CameraScreen.dart';
 import 'package:app1/chat-app/screens_chat/LoginScreen.dart';
 import 'package:app1/chat-app/screens_chat/home.dart';
@@ -28,11 +29,13 @@ final storage = FlutterSecureStorage();
 final UserModel userMain = UserModel(
     friend: [],
     friendConfirm: [],
+    feedImg: [],
+    feedVideo: [],
     friendRequest: [],
     coverImg: [],
     avatarImg: [],
     hadMessageList: []);
-const SERVER_IP = 'http://f627-113-168-164-54.ngrok.io';
+const SERVER_IP = 'http://1565-113-168-164-54.ngrok.io';
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();

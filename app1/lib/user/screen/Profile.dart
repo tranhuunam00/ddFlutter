@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:app1/Screen/All_Image_Sceen.dart';
 import 'package:app1/auth/screen/AgainPassword.dart';
 import 'package:app1/user/screen/FriendProfile.dart';
 import 'package:app1/Screen/LoadScreen.dart';
@@ -503,10 +504,14 @@ class _ProfileState extends State<Profile> {
                               shrinkWrap: true,
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(right: 16),
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 8),
                                   child: Container(
+                                    // color: Colors.lightBlue[100],
                                     decoration: BoxDecoration(
                                         border: Border.all(
+                                          color:
+                                              Color.fromRGBO(100, 200, 30, 0.3),
                                           width:
                                               1, //                   <--- border width here
                                         ),
@@ -517,9 +522,16 @@ class _ProfileState extends State<Profile> {
                                           fixedSize: MaterialStateProperty.all(
                                               Size(120, 30)),
                                         ),
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (builder) =>
+                                                      All_Avatar_Screen(
+                                                          type: "feed")));
+                                        },
                                         icon: Icon(Icons.home),
-                                        label: Text("hình ảnh")),
+                                        label: Text("Ảnh")),
                                   ),
                                 ),
                                 Padding(
@@ -527,6 +539,8 @@ class _ProfileState extends State<Profile> {
                                       left: 8.0, right: 8),
                                   child: Container(
                                     decoration: BoxDecoration(
+                                        color:
+                                            Color.fromRGBO(100, 200, 30, 0.3),
                                         border: Border.all(
                                           width:
                                               1, //                   <--- border width here
@@ -538,30 +552,16 @@ class _ProfileState extends State<Profile> {
                                           fixedSize: MaterialStateProperty.all(
                                               Size(120, 30)),
                                         ),
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (builder) =>
+                                                      All_Avatar_Screen(
+                                                          type: "avatar")));
+                                        },
                                         icon: Icon(Icons.home),
-                                        label: Text("hình ảnh")),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 8),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          width:
-                                              1, //                   <--- border width here
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(16))),
-                                    child: TextButton.icon(
-                                        style: ButtonStyle(
-                                          fixedSize: MaterialStateProperty.all(
-                                              Size(120, 30)),
-                                        ),
-                                        onPressed: () {},
-                                        icon: Icon(Icons.home),
-                                        label: Text("hình ảnh")),
+                                        label: Text("Avatar")),
                                   ),
                                 ),
                                 Padding(
@@ -578,9 +578,16 @@ class _ProfileState extends State<Profile> {
                                           fixedSize: MaterialStateProperty.all(
                                               Size(120, 30)),
                                         ),
-                                        onPressed: () {},
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (builder) =>
+                                                      All_Avatar_Screen(
+                                                          type: "cover")));
+                                        },
                                         icon: Icon(Icons.home),
-                                        label: Text("hình ảnh")),
+                                        label: Text("Ảnh bìa")),
                                   ),
                                 ),
                               ],

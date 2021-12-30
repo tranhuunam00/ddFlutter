@@ -117,6 +117,8 @@ class _MainScreenState extends State<MainScreen> {
                 hadMessageList: [],
                 coverImg: [],
                 friendConfirm: [],
+                feedImg: [],
+                feedVideo: [],
                 friendRequest: [],
                 realName: result["realName"],
                 id: result["_id"],
@@ -197,6 +199,8 @@ class _MainScreenState extends State<MainScreen> {
             userProvider.listFriendsP[data["sourceUserId"]] = UserModel(
                 friend: [],
                 hadMessageList: [],
+                feedImg: [],
+                feedVideo: [],
                 coverImg: [],
                 friendConfirm: [],
                 friendRequest: [],

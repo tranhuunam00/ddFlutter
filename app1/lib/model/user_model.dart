@@ -4,7 +4,7 @@ class UserModel {
   late String userName;
   late String email;
   late String createdAt;
-
+  late String seenTimeNotifi;
   late List friend;
   late List hadMessageList;
   late String realName;
@@ -17,12 +17,18 @@ class UserModel {
   late String sex;
   late List friendRequest;
   late List friendConfirm;
+  late List feedImg;
+  late List feedVideo;
+
   UserModel(
       {this.userName = "",
       this.email = "",
       this.realName = "",
       this.createdAt = "",
+      this.seenTimeNotifi = "",
       required this.friend,
+      required this.feedImg,
+      required this.feedVideo,
       this.id = "",
       this.sex = "",
       this.addressTinh = "",

@@ -37,6 +37,8 @@ class _LoadScreenState extends State<LoadScreen> {
       friend: [],
       friendConfirm: [],
       friendRequest: [],
+      feedImg: [],
+      feedVideo: [],
       coverImg: [],
       avatarImg: [],
       hadMessageList: []);
@@ -90,7 +92,10 @@ class _LoadScreenState extends State<LoadScreen> {
         listIdFrOfFr = getFriendUser(result[0], userInit.friend, true)[1];
         var notifiInitNotAvatar = getNotiifiUserInitNotAvatar(result[2], jwt);
         List keyIdFrOfFr = [];
-        keyIdFrOfFr.addAll(listIdFrOfFr.keys);
+        if (listIdFrOfFr.keys != null) {
+          keyIdFrOfFr.addAll(listIdFrOfFr.keys);
+        }
+
         var userListResultApi = await Future.wait([
           PostApi(jwt, {"listUser": notifiInitNotAvatar[1]}, "/user/listUser"),
           PostApi(jwt, {"listUser": keyIdFrOfFr}, "/user/listUser"),
@@ -201,6 +206,8 @@ class _LoadScreenState extends State<LoadScreen> {
                                 userProvider.userFriends(listFrInit);
                                 userProvider.userHadChats(listHadChat);
                                 notifiProvider.userNotifi(notifiInit);
+                                notifiProvider.timeSeen =
+                                    userInit.seenTimeNotifi;
                                 userProvider.listFrOfFrP = listFrOfFr;
                                 userProvider.listConfirmFrP = listConfirmFr;
                                 feedProvider.userFeed(newListFeedOwnInit);
@@ -264,6 +271,9 @@ Future<UserModel> getUserJwt(String jwt) async {
             friendConfirm: data["friendConfirm"],
             friend: data["friend"],
             sex: data["sex"],
+            feedImg: data["feedImg"],
+            feedVideo: data["feedVideo"],
+            seenTimeNotifi: data["seenTimeNotifi"],
             createdAt: data["createdAt"],
             addressTinh: data["addressTinh"],
             addressDetails: data["addressDetails"],
@@ -283,6 +293,8 @@ Future<UserModel> getUserJwt(String jwt) async {
       friendConfirm: [],
       friendRequest: [],
       coverImg: [],
+      feedImg: [],
+      feedVideo: [],
       avatarImg: [],
       hadMessageList: []);
 }
@@ -329,12 +341,14 @@ getFriendUser(result, List listFr, bool isFr) {
   Map<String, int> frOfFr = {};
   print("ket qua la :");
   print(result);
-  if (result != "error" && result != "not jwt") {
+  if (result != "error" && result != "not jwt" && listFr.length > 0) {
     for (var i = 0; i < listFr.length; i++) {
       chatFriend[listFr[i]] = UserModel(
         friend: result[i]["friend"],
         friendConfirm: [],
         friendRequest: [],
+        feedImg: [],
+        feedVideo: [],
         coverImg: [],
         addressTinh: result[i]["addressTinh"],
         hadMessageList: [],
@@ -395,6 +409,8 @@ getNotiifiUserAll(result, List<NotifiModel> notifiInit, List idSources) {
       notifiUser[idSources[i]] = UserModel(
           friend: [],
           friendConfirm: [],
+          feedImg: [],
+          feedVideo: [],
           friendRequest: [],
           coverImg: [],
           hadMessageList: [],

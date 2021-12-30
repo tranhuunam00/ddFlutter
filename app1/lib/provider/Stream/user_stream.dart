@@ -10,6 +10,8 @@ class MyStream {
       friend: [],
       friendConfirm: [],
       friendRequest: [],
+      feedImg: [],
+      feedVideo: [],
       coverImg: [],
       avatarImg: [],
       hadMessageList: []);
@@ -74,6 +76,8 @@ class MyStream {
         friendConfirm: [],
         friendRequest: [],
         coverImg: [],
+        feedImg: [],
+        feedVideo: [],
         avatarImg: [],
         hadMessageList: []));
   }

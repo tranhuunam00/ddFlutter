@@ -85,7 +85,12 @@ class _Notify_CardState extends State<Notify_Card> {
               final userProvider =
                   Provider.of<UserProvider>(context, listen: false);
               notifiProvider.timeSeen = DateTime.now().toString();
-
+              var a = await putApi(
+                  userProvider.jwtP,
+                  {"seentime": DateTime.now().toString()},
+                  "/user/updateSeenTime");
+              print("seentime là");
+              print(a);
               print(widget.type);
               print(widget.idUserSource);
               if (widget.type == "addFr") {
@@ -133,6 +138,8 @@ class _Notify_CardState extends State<Notify_Card> {
                                     hadMessageList: [],
                                     coverImg: [],
                                     friendConfirm: [],
+                                    feedImg: [],
+                                    feedVideo: [],
                                     friendRequest: [],
                                     avatarImg: [widget.pathImgSource],
                                     realName: widget.realNameSource,
@@ -159,6 +166,7 @@ class _Notify_CardState extends State<Notify_Card> {
                               ),
                             )));
               }
+
               if (mounted) {
                 setState(() {});
               }
@@ -319,5 +327,28 @@ getFeedApi(sourceId, jwt) async {
     } else {
       return feedApi;
     }
+  }
+}
+
+putApi(String jwt, data, String sourcePath) async {
+  print("----chạy hàm post api feed---------------");
+  try {
+    http.Response response;
+    String path = SERVER_IP + sourcePath;
+    print(path);
+    response = await http.put(Uri.parse(path),
+        headers: {
+          'Content-type': 'application/json',
+          'Accept': 'application/json',
+          'cookie': "jwt=" + jwt,
+        },
+        body: jsonEncode(data));
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      return "error";
+    }
+  } catch (e) {
+    return "error";
   }
 }
