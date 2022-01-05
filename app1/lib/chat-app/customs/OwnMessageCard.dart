@@ -32,55 +32,56 @@ class OwnMessageCard extends StatelessWidget {
                       height: 100,
                       width: 100,
                       child: InkWell(
-                          onTap: () async {
-                            var result = await showOkCancelAlertDialog(
-                                context: context,
-                                onWillPop: () async {
-                                  return true;
-                                },
-                                title: "Bạn có chắc chắn muốn xóa?");
-                            if (result == OkCancelResult.ok) {
-                              print("đã đồng ý");
-                              print(msg.sourceId);
+                        onTap: () async {
+                          var result = await showOkCancelAlertDialog(
+                              context: context,
+                              onWillPop: () async {
+                                return true;
+                              },
+                              title: "Bạn có chắc chắn muốn xóa?");
+                          if (result == OkCancelResult.ok) {
+                            print("đã đồng ý");
+                            print(msg.sourceId);
 
-                              var res = await DeleteApi(
-                                  userProvider.jwtP,
-                                  {
-                                    "time": msg.time,
-                                    "targetId": msg.targetId,
-                                    "sourceId": msg.sourceId,
-                                    "path": "",
-                                    "message": msg.message,
-                                  },
-                                  "/message/individual");
-                              print("kết quả khi delete ");
-                              if (res != "error" && res != "not jwt") {
+                            var res = await DeleteApi(
+                                userProvider.jwtP,
+                                {
+                                  "time": msg.time,
+                                  "targetId": msg.targetId,
+                                  "sourceId": msg.sourceId,
+                                  "path": "",
+                                  "message": msg.message,
+                                },
+                                "/message/individual");
+                            print("kết quả khi delete ");
+                            if (res != "error" && res != "not jwt") {
+                              if (res == "done") {
                                 messageProvider.listMessageP[
                                         userProvider.userP.id +
                                             "/" +
                                             msg.targetId]!
                                     .remove(msg);
-                                if (res == "0") {
-                                  userProvider.userP.hadMessageList
-                                      .remove(msg.targetId);
-                                  userProvider.listHadChatP.remove(
-                                      userProvider.userP.id +
-                                          "/" +
-                                          msg.targetId);
-                                  messageProvider.listMessageP.remove(
-                                      userProvider.userP.id +
-                                          "/" +
-                                          msg.targetId);
-                                }
-                                messageProvider
-                                    .userMessage(messageProvider.listMessageP);
-                                Navigator.pop(context);
                               }
-                            } else {
-                              print("cancel");
+
+                              if (res == "0") {
+                                userProvider.userP.hadMessageList
+                                    .remove(msg.targetId);
+                                userProvider.listHadChatP.remove(
+                                    userProvider.userP.id + "/" + msg.targetId);
+                                messageProvider.listMessageP.remove(
+                                    userProvider.userP.id + "/" + msg.targetId);
+                              }
+                              messageProvider
+                                  .userMessage(messageProvider.listMessageP);
+                              Navigator.pop(context);
                             }
-                          },
-                          child: Icon(Icons.sports_basketball))));
+                          } else {
+                            print("cancel");
+                          }
+                        },
+                        child: Image.asset("assets/icons/deleteIcon.png",
+                            height: 45),
+                      )));
             });
       },
       child: Align(

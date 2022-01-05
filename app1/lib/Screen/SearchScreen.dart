@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app1/pageRoute/BourcePageRoute.dart';
 import 'package:app1/ui.dart';
 import 'package:app1/user/screen/FriendProfile.dart';
 import 'package:app1/main.dart';
@@ -126,10 +127,8 @@ class _SearchScreenState extends State<SearchScreen> {
                     InkWell(
                       onTap: () {
                         print(userProvider.listFrOfFrP);
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (builder) => SuggestFriendScreen()));
+                        Navigator.push(context,
+                            BourcePageRoute(widget: SuggestFriendScreen()));
                       },
                       child: Container(
                           alignment: Alignment.center,

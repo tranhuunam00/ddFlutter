@@ -81,15 +81,19 @@ class _ForgotScreenState extends State<ForgotScreen> {
     // _passwordController.text = "hihi";
     var currentFocus;
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Quên mật khẩu"),
+        backgroundColor: Color.fromRGBO(200, 100, 400, 0.2),
+      ),
       body: DismissKeyboard(
         child: Background(
             Column: Padding(
-          padding: const EdgeInsets.only(top: 100),
+          padding: const EdgeInsets.only(top: 80),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 100, bottom: 60),
+                padding: const EdgeInsets.only(top: 20, bottom: 60),
                 child: Text(
                   "Quên mật khẩu",
                   style: AppStyles.h2,
@@ -150,6 +154,7 @@ class _ForgotScreenState extends State<ForgotScreen> {
                       onTap: null,
                       color: Color.fromRGBO(255, 255, 255, 0.4),
                     ),
+              Divider(height: 60, color: Colors.black),
               TextButton(
                   onPressed: () {
                     Navigator.push(context,

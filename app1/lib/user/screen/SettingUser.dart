@@ -4,6 +4,8 @@ import 'dart:ui';
 
 import 'package:app1/auth/screen/LoginScreen.dart';
 import 'package:app1/Screen/MainScreen.dart';
+import 'package:app1/chat-app/screens_chat/CameraView.dart';
+import 'package:app1/model/user_model.dart';
 import 'package:app1/user/screen/Profile.dart';
 import 'package:app1/main.dart';
 import 'package:app1/provider/user_provider.dart';
@@ -11,10 +13,14 @@ import 'package:app1/widgets/app_button.dart';
 import 'package:app1/widgets/app_button_icon.dart';
 import 'package:app1/widgets/dismit_keybord.dart';
 import 'package:app1/widgets/text_input_style.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 import '../../ui.dart';
 
@@ -26,6 +32,35 @@ class SettingUser extends StatefulWidget {
 }
 
 class _SettingUser extends State<SettingUser> {
+  List<String> listHobbies = [
+    "Acapella",
+    'Aikido',
+    'BMX',
+    'Ba môn phối hợp',
+    'Bay khinh khí cầu',
+    'Beatbox',
+    'Bi-a lỗ & bi-a',
+    'Bowling',
+    'Bóng bàn',
+    'Bóng bầu dục',
+    'Bóng chuyền',
+    'Bóng chuyền bãi biển',
+    'Bóng chày',
+    'Bóng rổ',
+    'Bóng đá',
+    'Bơi lội',
+    'Bơi thuyền',
+    'Bắn cung',
+    'Bắn súng',
+    'Ca hát',
+    'Câu cá'
+        'Chiêm tinh học',
+    "Chà DJ",
+    "Chơi đàn ghi-ta",
+    "Chơi đàn violin",
+    'Nghe nhạc',
+    'Trò chơi điện tử'
+  ];
   List<String> listTinhThanhPho = [
     'An Giang',
     'Bà rịa – Vũng tàu',
@@ -94,15 +129,20 @@ class _SettingUser extends State<SettingUser> {
   //List<String> listHuyenPhuong = ['Bắc Từ Liêm','Nam Từ Liêm','Thanh Oai'];
   //List<String> listXaPhuong = ['Mỹ Đình 1','Mỹ Đình 2','Mỹ Đình 3'];
   final TextEditingController _inputNameController = TextEditingController();
+  final TextEditingController _inputNameSchoolController =
+      TextEditingController();
+  final TextEditingController _inputHistoryController = TextEditingController();
   var valueChooseTinh = 'Hà Nội';
-  var valueChooseHuyen = 'Hà Nội';
-  var valueChooseXa = 'Hà Nội';
+  var valueChooseHobbies;
   late DateTime _dateBirth;
   late String dateBirth;
   late bool valueCheckSexBoy;
   late bool valueCheckSexGirl;
   late bool valueCheckSexOther;
-
+  FocusNode focusNode = FocusNode();
+  int popTime = 0;
+  late UserModel _userProfile;
+  final ImagePicker _picker = ImagePicker();
   @override
   void initState() {
     valueCheckSexBoy = false;
@@ -115,130 +155,328 @@ class _SettingUser extends State<SettingUser> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final RoundedLoadingButtonController _btnLogoutController =
+        RoundedLoadingButtonController();
+    String pathAvatar = userProvider.userP.avatarImg != null &&
+            userProvider.userP.avatarImg.length != 0
+        ? SERVER_IP +
+            "/upload/" +
+            userProvider
+                .userP.avatarImg[userProvider.userP.avatarImg.length - 1]
+        : SERVER_IP + "/upload/avatarNull.jpg";
+    String pathCover = userProvider.userP.coverImg != null &&
+            userProvider.userP.coverImg.length != 0
+        ? SERVER_IP +
+            "/upload/" +
+            userProvider.userP.coverImg[userProvider.userP.coverImg.length - 1]
+        : SERVER_IP + "/upload/avatarNull.jpg";
+    void onImageSend(String path, String event, String jwt) async {
+      print("image.............${path}");
+      var request = http.MultipartRequest(
+          "POST", Uri.parse(SERVER_IP + "/file/img/upload"));
+      request.fields["eventChangeImgUser"] = event;
+      request.files.add(await http.MultipartFile.fromPath("img", path));
+      request.headers.addAll(
+          {"Content-type": "multipart/form-data", "cookie": "jwt=" + jwt});
+
+      http.StreamedResponse response = await request.send();
+
+      var httpResponse = await http.Response.fromStream(response);
+      print(httpResponse.statusCode);
+      if (httpResponse.statusCode == 201 || httpResponse.statusCode == 200) {
+        var data = json.decode(httpResponse.body).toString();
+
+        if (data == "error" || data == "not jwt") {
+          print(data);
+        } else {
+          print(data);
+          UserModel user = userProvider.userP;
+          if (event == "avatar") {
+            List avatar = user.avatarImg;
+            avatar.add(data);
+            user.avatarImg = avatar;
+          }
+          if (event == "cover") {
+            List cover = user.coverImg;
+            cover.add(data);
+            user.coverImg = cover;
+          }
+          userProvider.userLogin(user, userProvider.jwtP);
+          for (var i = 0; i < popTime; i++) {
+            if (mounted) Navigator.pop(context);
+          }
+          if (mounted)
+            setState(() {
+              popTime = 0;
+            });
+        }
+      } else {
+        print("er");
+      }
+    }
+
     return DismissKeyboard(
         child: Scaffold(
             resizeToAvoidBottomInset: false,
+            appBar: PreferredSize(
+              preferredSize: Size.fromHeight(60),
+              child: AppBar(
+                backgroundColor: Color.fromRGBO(200, 100, 400, 0.2),
+                title: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text("Chỉnh sửa trang cá nhân"),
+                ),
+                leading: Padding(
+                  padding: const EdgeInsets.only(left: 22, right: 12),
+                  child: InkWell(
+                      onTap: () async {
+                        print("oki");
+                        focusNode.unfocus();
+                        if (!focusNode.hasFocus) {
+                          Navigator.of(context).pop(true);
+                        }
+
+                        //
+                      },
+                      child: Icon(Icons.arrow_back, size: 24)),
+                ),
+                leadingWidth: 60,
+                titleSpacing: 0,
+              ),
+            ),
             body: Padding(
-              padding: EdgeInsets.symmetric(vertical: 50, horizontal: 30),
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 5),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: 30,
+                    ///ảnh đại diện
+
+                    ///Tiểu sử
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Tiểu sử ",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w400),
+                          textAlign: TextAlign.left,
+                        ),
+                        InkWell(
+                          onTap: () async {},
+                          child: Text(
+                            " Chỉnh sửa",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.blue),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      "Thông tin cá nhân",
-                      style: TextStyle(
-                          fontSize: 35,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.blue),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 15.0),
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        controller: _inputHistoryController,
+                        autofocus: false,
+                        decoration: InputDecoration(hintText: "..."),
+                      ),
                     ),
-                    Text(
-                      "Họ và tên",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.w400),
-                      textAlign: TextAlign.left,
+
+                    ///họ, tên
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Họ và tên ",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w400),
+                          textAlign: TextAlign.left,
+                        ),
+                        InkWell(
+                          onTap: () async {},
+                          child: Text(
+                            " Chỉnh sửa",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.blue),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ],
                     ),
-                    // SizedBox(height: 10,),
-                    TextField(
-                      controller: _inputNameController,
-                      autofocus: false,
-                      decoration: InputDecoration(
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 15.0),
+                      child: TextField(
+                        controller: _inputNameController,
+                        autofocus: false,
+                        decoration: InputDecoration(
                           hintText: "VD: Nguyễn Văn A",
-                          border: OutlineInputBorder()),
+                        ),
+                      ),
                     ),
 
-                    //Quê quán
-                    Text(
-                      "Quê quán",
-                      style:
-                          TextStyle(fontSize: 25, fontWeight: FontWeight.w400),
-                      textAlign: TextAlign.left,
+                    ///Quê quán
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Giới thiệu ",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w400),
+                          textAlign: TextAlign.left,
+                        ),
+                        InkWell(
+                          onTap: () async {},
+                          child: Text(
+                            " Chỉnh sửa",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.blue),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ],
                     ),
-                    Text(
-                      "Tỉnh/Thành phố",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
+                    Row(
+                      children: [
+                        Icon(Icons.home_outlined),
+                        Text(
+                          " Sống tại   ",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w400),
+                          textAlign: TextAlign.left,
+                        ),
+                        DropdownButton(
+                          dropdownColor: Colors.white,
+                          value: valueChooseTinh,
+                          onChanged: (value) {
+                            setState(() {
+                              valueChooseTinh = value as String;
+                            });
+                          },
+                          items: listTinhThanhPho.map((valueTinh) {
+                            return DropdownMenuItem(
+                              value: valueTinh,
+                              child: Text(
+                                valueTinh,
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w800),
+                                textAlign: TextAlign.left,
+                              ),
+                            ); //DropdownMenuItem
+                          }).toList(),
+                        ),
+                      ],
                     ),
-                    DropdownButton(
-                      isExpanded: true,
-                      hint: Text("..."),
-                      dropdownColor: Colors.white,
-                      value: valueChooseTinh,
-                      onChanged: (value) {
-                        setState(() {
-                          valueChooseTinh = value as String;
-                        });
-                      },
-                      items: listTinhThanhPho.map((valueTinh) {
-                        return DropdownMenuItem(
-                          value: valueTinh,
-                          child: Text(valueTinh),
-                        ); //DropdownMenuItem
-                      }).toList(),
-                    ), //Tỉnh
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 15.0),
+                      child: Divider(
+                        height: 1,
+                        color: Colors.black87,
+                      ),
+                    ),
 
-                    SizedBox(
-                      height: 8,
+                    ///Trường học
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Trường học ",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w400),
+                          textAlign: TextAlign.left,
+                        ),
+                        InkWell(
+                          onTap: () async {},
+                          child: Text(
+                            " Chỉnh sửa",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.blue),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ],
                     ),
-                    // Text("Quận/Huyện",style: TextStyle (fontSize: 20, fontWeight: FontWeight.w400),),
-                    // DropdownButton(
-                    //   isExpanded: true,
-                    //   hint: Text("..."),
-                    //   dropdownColor: Colors.white,
-                    //   value: valueChooseHuyen,
-                    //   onChanged: (value){
-                    //     setState(() {
-                    //       valueChooseHuyen = value as String;
-                    //     });
-                    //   },
-                    //   items: listHuyenPhuong.map((valueHuyen) {
-                    //     return  DropdownMenuItem(
-                    //       value: valueHuyen,
-                    //       child: Text(valueHuyen),
-                    //     ); //DropdownMenuItem
-                    //   }).toList(),
-                    // ),//Huyện
-                    //
-                    SizedBox(
-                      height: 8,
+                    Padding(
+                      padding: const EdgeInsets.only(top: 10.0, bottom: 15.0),
+                      child: TextField(
+                        controller: _inputNameSchoolController,
+                        autofocus: false,
+                        decoration: InputDecoration(
+                          hintText: "THPT ...",
+                        ),
+                      ),
                     ),
-                    //
-                    Text(
-                      "Xã/Phường",
-                      style:
-                          TextStyle(fontSize: 20, fontWeight: FontWeight.w400),
-                    ),
-                    // DropdownButton(
-                    //   isExpanded: true,
-                    //   hint: Text("..."),
-                    //   dropdownColor: Colors.white,
-                    //   value: valueChooseXa,
-                    //   onChanged: (value){
-                    //     setState(() {
-                    //       valueChooseXa = value as String;
-                    //     });
-                    //   },
-                    //   items: listXaPhuong.map((valueXa) {
-                    //   items: listXaPhuong.map((valueXa) {
-                    //     return  DropdownMenuItem(
-                    //       value: valueXa,
-                    //       child: Text(valueXa),
-                    //     ); //DropdownMenuItem
-                    //   }).toList(),
-                    // ),//Xã
 
-                    SizedBox(
-                      height: 20,
+                    /// sở thích
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Sở thích ",
+                          style: TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.w400),
+                          textAlign: TextAlign.left,
+                        ),
+                        InkWell(
+                          onTap: () async {},
+                          child: Text(
+                            " Chỉnh sửa",
+                            style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w400,
+                                color: Colors.blue),
+                            textAlign: TextAlign.left,
+                          ),
+                        ),
+                      ],
+                    ),
+                    Row(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Icon(Icons.face_unlock_rounded),
+                        ),
+                        DropdownButton(
+                          dropdownColor: Colors.white,
+                          value: valueChooseHobbies,
+                          onChanged: (value) {
+                            setState(() {
+                              valueChooseHobbies = value as String;
+                            });
+                          },
+                          items: listHobbies.map((valueHobbie) {
+                            return DropdownMenuItem(
+                              value: valueHobbie,
+                              child: Text(
+                                valueHobbie,
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.w800),
+                                textAlign: TextAlign.left,
+                              ),
+                            ); //DropdownMenuItem
+                          }).toList(),
+                        ),
+                      ],
                     ),
 
                     // ............ Ngày sinh
                     Row(
                       children: <Widget>[
-                        Text(
-                          "Ngày sinh:  ",
-                          style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w600),
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: Text(
+                            "Ngày sinh",
+                            style: TextStyle(
+                                fontSize: 16, fontWeight: FontWeight.w400),
+                            textAlign: TextAlign.left,
+                          ),
                         ),
                         RaisedButton(
                             child: Text("Chọn"),
@@ -262,15 +500,16 @@ class _SettingUser extends State<SettingUser> {
                               fontSize: 15, fontWeight: FontWeight.w400),
                         ),
                       ],
-                    ), // Ngày sinh
+                    ),
 
                     //..............Giới tính
                     Row(
                       children: [
                         Text(
-                          "Giới tính:",
+                          "Giới tính",
                           style: TextStyle(
-                              fontSize: 20, fontWeight: FontWeight.w600),
+                              fontSize: 16, fontWeight: FontWeight.w400),
+                          textAlign: TextAlign.left,
                         ),
                         Row(
                           children: [
@@ -365,6 +604,9 @@ class _SettingUser extends State<SettingUser> {
                             sex = "Other";
                             print("Giới tính  ---  Khác ");
                           }
+                          print("Tiểu sử là  ---  " +
+                              _inputHistoryController.text);
+                          print("Sở thích là  ---  " + valueChooseHobbies);
 
                           log('Đã lưu cài đặt');
                           var result = await PostApi(

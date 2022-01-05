@@ -134,10 +134,11 @@ class _LoginScreenState extends State<LoginScreen> {
     // _passwordController.text = "hihi";
     var currentFocus;
     return Scaffold(
+      appBar: AppBar(title: Text("Đăng nhập"),backgroundColor:Color.fromRGBO(200, 100, 400, 0.2) ,),
       body: DismissKeyboard(
         child: Background(
             Column: Padding(
-          padding: const EdgeInsets.only(top: 100),
+          padding: const EdgeInsets.only(top: 40),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -380,6 +381,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Color.fromRGBO(255, 255, 255, 0.4),
                       label: "Đăng nhập",
                     ),
+              Divider(height: 60, color: Colors.black),
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
                 child: TextButton(
@@ -388,8 +390,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           MaterialPageRoute(builder: (_) => ForgotScreen()));
                     },
                     child: Text(
-                      "quên mật khẩu",
-                      style: TextStyle(color: Colors.black, fontSize: 16),
+                      "Quên mật khẩu",
+                      style: TextStyle(color: Colors.black, fontSize: 20),
                     )),
               ),
               TextButton(

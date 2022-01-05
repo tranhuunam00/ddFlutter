@@ -9,11 +9,13 @@ import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:app1/sflashScreen/sfScreen.dart';
 import 'package:app1/test_emoji.dart';
 import 'package:app1/widgets/search.dart';
 import 'package:camera/camera.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:page_transition/page_transition.dart';
 import "package:app1/ui.dart";
 import "Screen/LoadScreen.dart";
@@ -25,6 +27,15 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:provider/provider.dart';
 
+FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+    FlutterLocalNotificationsPlugin();
+// initialise the plugin. app_icon needs to be a added as a drawable resource to the Android head project
+const AndroidInitializationSettings initializationSettingsAndroid =
+    AndroidInitializationSettings('app_icon');
+
+final InitializationSettings initializationSettings = InitializationSettings(
+  android: initializationSettingsAndroid,
+);
 final storage = FlutterSecureStorage();
 final UserModel userMain = UserModel(
     friend: [],
@@ -35,11 +46,23 @@ final UserModel userMain = UserModel(
     coverImg: [],
     avatarImg: [],
     hadMessageList: []);
-const SERVER_IP = 'http://1565-113-168-164-54.ngrok.io';
+const SERVER_IP = 'http://8521-27-67-87-192.ngrok.io';
+String _onNotificationClicked() {
+  return "";
+}
 
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+  const AndroidInitializationSettings initializationSettingsAndroid =
+      AndroidInitializationSettings('@mipmap/ic_launcher');
+
+  final InitializationSettings initializationSettings = InitializationSettings(
+    android: initializationSettingsAndroid,
+  );
+  var selectNotification;
+  await flutterLocalNotificationsPlugin.initialize(initializationSettings,
+      onSelectNotification: selectNotification);
   print("start");
   cameras = await availableCameras();
   runApp(MyApp());
@@ -73,24 +96,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
             title: "app1",
             // home: ChatLoginScreen()
-            home: AnimatedSplashScreen(
-                duration: 1400,
-                splash: Container(
-                    width: 200,
-                    height: 500,
-                    child: Column(
-                      children: [
-                        Text("407 GG", style: AppStyles.h3),
-                        Container(
-                            width: 200,
-                            height: 150,
-                            child: Image.asset("assets/icons/lolIcon.jpg")),
-                      ],
-                    )),
-                nextScreen: LoadScreen(),
-                splashTransition: SplashTransition.rotationTransition,
-                // pageTransitionType: PageTransitionType.scale,
-                backgroundColor: Colors.amber)
+            home: VideoPlayerScreen()
             //  home: Search()
             // home: Test()
             // home: Test()

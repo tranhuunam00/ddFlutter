@@ -14,8 +14,8 @@ class Background extends StatelessWidget {
         width: size.width,
         height: size.height,
         child: Image.asset(
-          "assets/images/nature5.jpg",
-          color: Color.fromRGBO(255, 255, 255, 0.7),
+          "assets/images/background1.jpg",
+          color: Color.fromRGBO(255, 255, 255, 0.3),
           colorBlendMode: BlendMode.modulate,
           fit: BoxFit.fitHeight,
         ),

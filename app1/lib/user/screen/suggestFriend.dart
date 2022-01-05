@@ -53,8 +53,8 @@ class _SuggestFriendScreenState extends State<SuggestFriendScreen> {
                         MaterialPageRoute(
                             builder: (builder) => FriendProfile(
                                 frId: userProvider
-                                    .listFrOfFrP[userProvider
-                                        .userP.friendConfirm[index - 1]]!
+                                    .listFrOfFrP[
+                                        userProvider.listFrOfFrP[index - 1]]!
                                     .id)));
                   },
                   child: ListTile(

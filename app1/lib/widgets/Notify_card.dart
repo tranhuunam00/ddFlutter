@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app1/api/notification.dart';
 import 'package:app1/feed/screen/comment.dart';
 import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/user/screen/FriendProfile.dart';
@@ -43,13 +44,16 @@ class _Notify_CardState extends State<Notify_Card> {
     final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
     print("thời gian trong card no");
     print(notifiProvider.timeSeen);
+    print(widget.type);
     bool isSeen = false;
     if (notifiProvider.timeSeen != "") {
       List time = [notifiProvider.timeSeen, widget.createdAt];
       time.sort((a, b) => a.compareTo(b));
-      if (time[1] == widget.createdAt) {
+      if (time[0] == widget.createdAt) {
         isSeen = true;
       }
+    } else {
+      print("bằng");
     }
 
     String textAction = "";
@@ -63,7 +67,7 @@ class _Notify_CardState extends State<Notify_Card> {
     if (widget.type == "tagFeed" || widget.type == "newTag") {
       textAction = " gắn thẻ bạn trong 1 bài viết mới";
     }
-    if (widget.type == "likeFeed") {
+    if (widget.type == "likeFeed" || widget.type == "like") {
       textAction = " yêu thích bài viết của bạn";
     }
     if (widget.type == "comment" || widget.type == "commentFeed") {
@@ -78,7 +82,7 @@ class _Notify_CardState extends State<Notify_Card> {
     return Column(
       children: [
         Container(
-          color: isSeen != true ? Colors.grey[300] : Colors.white,
+          color: isSeen == true ? Colors.grey[300] : Colors.white,
           child: InkWell(
             hoverColor: Colors.amber,
             onTap: () async {
@@ -200,8 +204,11 @@ class _Notify_CardState extends State<Notify_Card> {
                                           height: 100,
                                           width: 100,
                                           child: InkWell(
-                                              onTap: () {
+                                              onTap: () async {
                                                 print("xóa");
+                                                await NotificationApi
+                                                    .showNotification(
+                                                        "nam", "hey");
                                               },
                                               child: Text("xóa",
                                                   textAlign:

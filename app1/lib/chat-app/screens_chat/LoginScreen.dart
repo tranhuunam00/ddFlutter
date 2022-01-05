@@ -8,6 +8,8 @@ import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/chat-app/screens_chat/home.dart';
 import 'package:app1/chat-app/screens_chat/individual_chat.dart';
 import 'package:app1/main.dart';
+import 'package:app1/pageRoute/BourcePageRoute.dart';
+import 'package:app1/pageRoute/aBcPageRoute.dart';
 import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/cupertino.dart';
@@ -97,16 +99,14 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
                         print(hadMessageInit[index - 1].id);
                         Navigator.push(
                             context,
-                            MaterialPageRoute(
-                                builder: (builder) => IndividualChat(
-                                      chatModel: hadMessageInit[index - 1],
-                                      sourceChat: ChatModel(
-                                          id: userProvider.userP.id,
-                                          avatar: userProvider.userP.avatarImg[
-                                              userProvider
-                                                      .userP.avatarImg.length -
-                                                  1]),
-                                    )));
+                            BourcePageRoute(
+                                widget: IndividualChat(
+                              chatModel: hadMessageInit[index - 1],
+                              sourceChat: ChatModel(
+                                  id: userProvider.userP.id,
+                                  avatar: userProvider.userP.avatarImg[
+                                      userProvider.userP.avatarImg.length - 1]),
+                            )));
                       },
                       child: ContactCard(
                         contact: hadMessageInit[index - 1],
@@ -131,37 +131,28 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
                                         print(userProvider.userP.friend[index]);
                                         Navigator.push(
                                             context,
-                                            MaterialPageRoute(
-                                                builder: (builder) =>
-                                                    IndividualChat(
-                                                      chatModel: ChatModel(
-                                                        id: userProvider.userP
-                                                            .friend[index],
-                                                        avatar: chatFriend[
-                                                                userProvider
-                                                                        .userP
-                                                                        .friend[
-                                                                    index]]!
-                                                            .avatar,
-                                                        realName: chatFriend[
-                                                                userProvider
-                                                                        .userP
-                                                                        .friend[
-                                                                    index]]!
-                                                            .realName,
-                                                      ),
-                                                      sourceChat: ChatModel(
-                                                          id: userProvider
-                                                              .userP.id,
-                                                          avatar: userProvider
-                                                                  .userP
-                                                                  .avatarImg[
-                                                              userProvider
-                                                                      .userP
-                                                                      .avatarImg
-                                                                      .length -
-                                                                  1]),
-                                                    )));
+                                            A1PageRoute(
+                                                widget: IndividualChat(
+                                              chatModel: ChatModel(
+                                                id: userProvider
+                                                    .userP.friend[index],
+                                                avatar: chatFriend[userProvider
+                                                        .userP.friend[index]]!
+                                                    .avatar,
+                                                realName: chatFriend[
+                                                        userProvider.userP
+                                                            .friend[index]]!
+                                                    .realName,
+                                              ),
+                                              sourceChat: ChatModel(
+                                                  id: userProvider.userP.id,
+                                                  avatar: userProvider.userP
+                                                      .avatarImg[userProvider
+                                                          .userP
+                                                          .avatarImg
+                                                          .length -
+                                                      1]),
+                                            )));
                                       },
                                       child: AvatarCard(
                                           contact: chatFriend[userProvider

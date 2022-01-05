@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:app1/Screen/All_Image_Sceen.dart';
 import 'package:app1/auth/screen/AgainPassword.dart';
+import 'package:app1/sflashScreen/sfScreen.dart';
 import 'package:app1/user/screen/FriendProfile.dart';
 import 'package:app1/Screen/LoadScreen.dart';
 import 'package:app1/Screen/MainScreen.dart';
@@ -268,7 +269,7 @@ class _ProfileState extends State<Profile> {
                                                           context,
                                                           MaterialPageRoute(
                                                               builder: (builder) =>
-                                                                  LoadScreen()));
+                                                                  VideoPlayerScreen()));
                                                     }),
                                               ),
                                               Padding(
@@ -528,6 +529,8 @@ class _ProfileState extends State<Profile> {
                                               MaterialPageRoute(
                                                   builder: (builder) =>
                                                       All_Avatar_Screen(
+                                                          user: userProvider
+                                                              .userP,
                                                           type: "feed")));
                                         },
                                         icon: Icon(Icons.home),
@@ -558,6 +561,8 @@ class _ProfileState extends State<Profile> {
                                               MaterialPageRoute(
                                                   builder: (builder) =>
                                                       All_Avatar_Screen(
+                                                          user: userProvider
+                                                              .userP,
                                                           type: "avatar")));
                                         },
                                         icon: Icon(Icons.home),
@@ -584,6 +589,8 @@ class _ProfileState extends State<Profile> {
                                               MaterialPageRoute(
                                                   builder: (builder) =>
                                                       All_Avatar_Screen(
+                                                          user: userProvider
+                                                              .userP,
                                                           type: "cover")));
                                         },
                                         icon: Icon(Icons.home),

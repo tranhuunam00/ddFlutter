@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:app1/Screen/Notifications.dart';
 import 'package:app1/Screen/SearchScreen.dart';
+import 'package:app1/api/notification.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/model/message_model.dart';
 import 'package:app1/chat-app/screens_chat/LoginScreen.dart';
@@ -15,6 +16,7 @@ import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:bottom_navy_bar/bottom_navy_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -27,14 +29,17 @@ import 'package:http/http.dart' as http;
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key, required this.UserId}) : super(key: key);
   final String UserId;
+
   @override
   _MainScreenState createState() => _MainScreenState();
 }
 
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
-  int _numberNotifications = 0;
+  int numberNotifications = 0;
+  final PageController _pageController = PageController();
   bool isSigninSocket = true;
+  int _currentIndex = 0;
   late Socket socket;
   //----------connetc socket--------------------------------------------
   void connect(String id) {
@@ -57,21 +62,23 @@ class _MainScreenState extends State<MainScreen> {
           Provider.of<MessageProvider>(context, listen: false);
       final notifiProvider =
           Provider.of<NotifiProvider>(context, listen: false);
-      socket.on("newFeed", (feed) {
+      socket.on("newFeed", (feed) async {
         if (mounted) {
           print("---chạy setstate- số thông báo--");
 
-          _numberNotifications = _numberNotifications + 1;
+          numberNotifications = numberNotifications + 1;
 
           print(feed);
           print(feed["feedId"]);
+          await NotificationApi.showNotification(
+              feed["sourceRealnameUser"], "Đã thêm 1 bài viết mới");
           setListFeedP(feed);
         }
       });
-      socket.on("comment", (comment) {
+      socket.on("comment", (comment) async {
         print("---chạy setstate- số thông báo--");
 
-        _numberNotifications = _numberNotifications + 1;
+        numberNotifications = numberNotifications + 1;
         print(comment);
         Map<String, List<CommentFullModel>> listCommenPInit = {};
         CommentFullModel cmtNew = CommentFullModel(
@@ -87,30 +94,50 @@ class _MainScreenState extends State<MainScreen> {
         if (commentProvider.listCommentP[comment["feedId"]] == null &&
             commentProvider.feedId == comment["feedId"]) {
           listCommenPInit[comment["feedId"]] = [cmtNew];
-          commentProvider.userComment(listCommenPInit);
         }
         if (commentProvider.listCommentP[comment["feedId"]] != null &&
             commentProvider.feedId == comment["feedId"]) {
           listCommenPInit = commentProvider.listCommentP;
           listCommenPInit[comment["feedId"]]!.add(cmtNew);
-          commentProvider.userComment(listCommenPInit);
         }
+        NotifiModel not = NotifiModel(
+            targetIdUser: [],
+            type: "comment",
+            sourceIdUser: comment["id"],
+            sourceRealnameUser: comment["realName"],
+            sourceUserPathImg: comment["avatar"],
+            content: comment["feedId"],
+            createdAt: comment["createdAt"]);
+        List<NotifiModel> listNot = notifiProvider.listNotifiP;
+        listNot.insert(0, not);
+
+        await NotificationApi.showNotification(
+            comment["realName"], "Đã bình luận về bài viết");
+        setState(() {
+          notifiProvider.userNotifi(listNot);
+          commentProvider.userComment(listCommenPInit);
+        });
       });
       socket.on("newTag", (feed) {
         if (mounted) {
           print("---chạy setstate- số thông báo--");
 
-          _numberNotifications = _numberNotifications + 1;
+          numberNotifications = numberNotifications + 1;
           setNewTag(feed);
+          setState(() async {
+            await NotificationApi.showNotification(
+                feed["sourceRealnameUser"], "Đã thêm bạn vào 1 bài viết mới");
+          });
         }
       });
 
       socket.on("message", (msg) async {
+        var result =
+            await getApi(userProvider.jwtP, "/user/" + msg["sourceId"]);
         if (userProvider.userP.hadMessageList.indexOf(msg["sourceId"]) < 0) {
           userProvider.userP.hadMessageList.add(msg["sourceId"]);
           messageProvider.listMessageP;
-          var result =
-              await getApi(userProvider.jwtP, "/user/" + msg["sourceId"]);
+
           if (result != "not jwt" && result != "error") {
             userProvider.listHadChatP[msg["sourceId"]] = UserModel(
                 friend: [],
@@ -129,14 +156,17 @@ class _MainScreenState extends State<MainScreen> {
         }
         print("message");
         print(msg);
+        await NotificationApi.showNotification(
+            result["realName"], "Đã gửi tin nhắn cho bạn");
         if (mounted) {
           setState(() {
             setListMessageP(msg);
-            _numberNotifications = _numberNotifications + 1;
+
+            numberNotifications = numberNotifications + 1;
           });
         }
       });
-      socket.on("likeFeed", (msg) {
+      socket.on("likeFeed", (msg) async {
         NotifiModel not = NotifiModel(
             targetIdUser: [],
             sourceIdUser: msg["idUserLiked"],
@@ -156,10 +186,12 @@ class _MainScreenState extends State<MainScreen> {
         }
         notifiInit.insert(0, not);
 
-        notifiProvider.userNotifi(notifiInit);
+        await NotificationApi.showNotification(
+            msg["realNameLiked"], "Đã yêu thích bài viết của bạn");
         if (mounted) {
           setState(() {
-            _numberNotifications = _numberNotifications + 1;
+            numberNotifications = numberNotifications + 1;
+            notifiProvider.userNotifi(notifiInit);
           });
         }
       });
@@ -172,10 +204,6 @@ class _MainScreenState extends State<MainScreen> {
         }
         if (data["type"] == "removeFrConfirm") {
           userProvider.userP.friendRequest.remove(data["sourceUserId"]);
-
-          if (mounted) {
-            setState(() {});
-          }
         }
 
         if (data["type"] == "removeFriend") {
@@ -221,10 +249,12 @@ class _MainScreenState extends State<MainScreen> {
                   targetIdUser: data["targetUserId"],
                 ));
 
-            notifiProvider.userNotifi(notifiInit);
+            await NotificationApi.showNotification(
+                result["realName"], "Đã chấp nhận lời mời kết bạn");
             if (mounted) {
               setState(() {
-                _numberNotifications = _numberNotifications + 1;
+                notifiProvider.userNotifi(notifiInit);
+                numberNotifications = numberNotifications + 1;
               });
             }
           }
@@ -251,10 +281,13 @@ class _MainScreenState extends State<MainScreen> {
                   sourceIdUser: data["sourceUserId"],
                   targetIdUser: data["targetUserId"],
                 ));
-            notifiProvider.userNotifi(notifiInit);
+
+            await NotificationApi.showNotification(
+                result["realName"], "Đã gửi lời mời kết bạn");
             if (mounted) {
               setState(() {
-                _numberNotifications = _numberNotifications + 1;
+                notifiProvider.userNotifi(notifiInit);
+                numberNotifications = numberNotifications + 1;
               });
             }
           }
@@ -268,7 +301,7 @@ class _MainScreenState extends State<MainScreen> {
 
     setState(() {
       if (index == 4) {
-        _numberNotifications = 0;
+        numberNotifications = 0;
         print("Ấn vào thông váo");
 
         // notifiProvider.userTimeSeenNotifi(DateTime.now().toString());
@@ -289,7 +322,7 @@ class _MainScreenState extends State<MainScreen> {
             .listMessageP[userProvider.userP.id + "/" + msg["sourceId"]] !=
         null) {
       Map<String, List<MessageModel>> messagesI = {};
-      print("---đã nhắn tin rồi-----");
+      print("---Đã nhắn tin rồi-----");
       messageProvider
           .listMessageP[userProvider.userP.id + "/" + msg["sourceId"]]!
           .add(MessageModel(
@@ -361,9 +394,6 @@ class _MainScreenState extends State<MainScreen> {
       notifiProvider.userNotifi(notifiInit);
       messageProvider.userMessage(messagesI);
     }
-    if (mounted) {
-      setState(() {});
-    }
   }
 
   setListFeedP(feed) async {
@@ -388,7 +418,7 @@ class _MainScreenState extends State<MainScreen> {
       // feedProvider.userFeed(newFeeds);
 
     } else {
-      print("-- bạn đã đăng feed");
+      print("-- bạn Đã đăng feed");
       print(feed["messages"]);
       print(feed["sourceUserId"]);
       FeedBaseModel newFeed = FeedBaseModel(
@@ -421,11 +451,11 @@ class _MainScreenState extends State<MainScreen> {
               [feed["sourceUserPathImg"].length - 1]);
       List<NotifiModel> notifiInit = notifiProvider.listNotifiP;
       notifiInit.insert(0, not);
-      notifiProvider.userNotifi(notifiInit);
-    }
-
-    if (mounted) {
-      setState(() {});
+      if (mounted) {
+        setState(() {
+          notifiProvider.userNotifi(notifiInit);
+        });
+      }
     }
   }
 
@@ -447,14 +477,8 @@ class _MainScreenState extends State<MainScreen> {
     notifiInit.insert(0, not);
     notifiProvider.userNotifi(notifiInit);
   }
+
   //
-
-  @override
-  void dispose() {
-    super.dispose();
-    socket.dispose();
-  }
-
   @override
   void initState() {
     super.initState();
@@ -462,9 +486,40 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   @override
+  void dispose() {
+    _pageController.dispose();
+    socket.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    print(_numberNotifications.toString());
+    print(numberNotifications.toString());
+    numberNotifications = 0;
     final userProvider = Provider.of<UserProvider>(context, listen: false);
+    final notifiProvider = Provider.of<NotifiProvider>(context, listen: false);
+
+    if (notifiProvider.listNotifiP.length > 0) {
+      if (notifiProvider.timeSeen != "") {
+        print("main screen b ");
+
+        for (int i = 0; i < notifiProvider.listNotifiP.length; i++) {
+          List time = [
+            notifiProvider.timeSeen,
+            notifiProvider.listNotifiP[i].createdAt
+          ];
+          time.sort((a, b) => a.compareTo(b));
+          if (time[1] == notifiProvider.listNotifiP[i].createdAt) {
+            numberNotifications++;
+          }
+        }
+      } else {
+        print("main screen khac ");
+
+        numberNotifications = notifiProvider.listNotifiP.length;
+      }
+    }
+
     List<Widget> _widgetOptions = [
       HomeScreen(),
       Profile(),
@@ -474,80 +529,99 @@ class _MainScreenState extends State<MainScreen> {
     ];
     // final user = FirebaseAuth.instance.currentUser!;
     return Scaffold(
-      body: Center(
-        child: _widgetOptions.elementAt(_selectedIndex),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() => _currentIndex = index);
+        },
+        children: [
+          HomeScreen(),
+          Profile(),
+          SearchScreen(),
+          ChatLoginScreen(),
+          NotifiScreen()
+        ],
       ),
-      bottomNavigationBar: BottomNavigationBar(
-          items: <BottomNavigationBarItem>[
-            BottomNavigationBarItem(
-                icon: Image.asset("assets/icons/homeIcon.png", height: 30),
-                title: _selectedIndex == 0
-                    ? Container(
-                        child: Text("Trang chủ"),
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide()),
+      bottomNavigationBar: BottomNavyBar(
+        selectedIndex: _currentIndex,
+        onItemSelected: (index) => setState(() {
+          _selectedIndex = index;
+          setState(() => _currentIndex = index);
+          _pageController.jumpToPage(index);
+          print("numberNotifications");
+
+          print(numberNotifications);
+          // _pageController.animateToPage(index,
+          //     duration: Duration(milliseconds: 300), curve: Curves.ease);
+        }),
+        items: <BottomNavyBarItem>[
+          BottomNavyBarItem(
+            icon: Image.asset("assets/icons/homeIcon.png", height: 30),
+            title: _selectedIndex == 0
+                ? Container(
+                    child: Text("Trang chủ"),
+                    decoration: BoxDecoration(),
+                  )
+                : Container(),
+          ),
+          BottomNavyBarItem(
+            icon: Image.asset("assets/icons/profileIcon.png", height: 30),
+            title: _selectedIndex == 1
+                ? Center(
+                    child: Container(
+                      child: Text("Cá nhân"),
+                    ),
+                  )
+                : Container(),
+          ),
+          BottomNavyBarItem(
+            icon: Image.asset("assets/icons/findIcon.png", height: 30),
+            title: _selectedIndex == 2
+                ? Container(
+                    child: Text("Tìm kiếm"),
+                    decoration: BoxDecoration(),
+                  )
+                : Container(),
+          ),
+          BottomNavyBarItem(
+            icon: Image.asset("assets/icons/messageIcon.png", height: 30),
+            title: _selectedIndex == 3
+                ? Container(
+                    child: Text("Tin nhắn"),
+                    decoration: BoxDecoration(),
+                  )
+                : Container(),
+          ),
+          BottomNavyBarItem(
+              icon: Container(
+                  child: Stack(children: [
+                Image.asset("assets/icons/notifiIcon.png", height: 30),
+                Positioned(
+                    right: 0,
+                    bottom: 0,
+                    child: CircleAvatar(
+                      radius: 8,
+                      child: Center(
+                        child: Text(
+                          numberNotifications.toString(),
+                          style: TextStyle(color: Colors.red, fontSize: 16),
                         ),
-                      )
-                    : Container(),
-                backgroundColor: Colors.green),
-            BottomNavigationBarItem(
-                icon: Image.asset("assets/icons/profileIcon.png", height: 30),
-                title: _selectedIndex == 1
-                    ? Container(
-                        child: Text("Tôi"),
-                        decoration: BoxDecoration(
-                          border: Border(bottom: BorderSide()),
-                        ),
-                      )
-                    : Container(),
-                backgroundColor: Colors.yellow),
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/icons/findIcon.png", height: 30),
-              title: _selectedIndex == 2
-                  ? Container(
-                      child: Text("Tìm kiếm"),
-                      decoration: BoxDecoration(
-                        border: Border(bottom: BorderSide()),
                       ),
-                    )
-                  : Container(),
-              backgroundColor: Colors.blue,
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/icons/messageIcon.png", height: 30),
-              title: _selectedIndex == 3
-                  ? Container(
-                      child: Text("Tin nhắn"),
-                      decoration: BoxDecoration(
-                        border: Border(bottom: BorderSide()),
-                      ),
-                    )
-                  : Container(),
-              backgroundColor: Colors.blue,
-            ),
-            BottomNavigationBarItem(
-              icon: Image.asset("assets/icons/notifiIcon.png", height: 30),
-              title: _numberNotifications != 0
-                  ? CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      radius: 9,
-                      child: Text(_numberNotifications.toString(),
-                          style: TextStyle(color: Colors.red)),
-                    )
-                  : SizedBox(),
-              backgroundColor: Colors.blue,
-            ),
-          ],
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.white,
-          unselectedItemColor: Colors.grey[500],
-          selectedFontSize: 14,
-          unselectedFontSize: 14,
-          onTap: _onItemTapped,
-          currentIndex: _selectedIndex,
-          selectedItemColor: Colors.orange,
-          iconSize: 26,
-          elevation: 5),
+                    ))
+              ])),
+              title: Text("Thông báo")),
+        ],
+        // type: BottomNavigationBarType.fixed,
+        // backgroundColor: Colors.white,
+        // unselectedItemColor: Colors.grey[500],
+        // selectedFontSize: 14,
+        // unselectedFontSize: 14,
+        // onTap: _onItemTapped,
+        // currentIndex: _selectedIndex,
+        // selectedItemColor: Colors.orange,
+        // iconSize: 26,
+        // elevation: 5
+      ),
     );
   }
 }

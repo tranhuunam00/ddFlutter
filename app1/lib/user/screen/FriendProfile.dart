@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:app1/Screen/All_Image_Sceen.dart';
 import 'package:app1/user/screen/All_Fr_Screen.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/screens_chat/individual_chat.dart';
@@ -417,8 +418,9 @@ class _FriendProfileState extends State<FriendProfile> {
     }
 
     return Scaffold(
+        appBar: AppBar(),
         body: Padding(
-            padding: const EdgeInsets.all(4.0),
+            padding: const EdgeInsets.only(left: 4.0, right: 4, bottom: 4),
             child: ListView.builder(
                 shrinkWrap: true,
                 controller: _scrollController,
@@ -642,7 +644,111 @@ class _FriendProfileState extends State<FriendProfile> {
                                   })
                               : Container(),
                           Divider(
-                            height: 60,
+                            height: 20,
+                            color: Colors.black,
+                          ),
+                          Container(
+                            height: 40,
+                            child: ListView(
+                              physics: ClampingScrollPhysics(),
+                              scrollDirection: Axis.horizontal,
+                              shrinkWrap: true,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 8),
+                                  child: Container(
+                                    // color: Colors.lightBlue[100],
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                          color:
+                                              Color.fromRGBO(100, 200, 30, 0.3),
+                                          width:
+                                              1, //                   <--- border width here
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(16))),
+                                    child: TextButton.icon(
+                                        style: ButtonStyle(
+                                          fixedSize: MaterialStateProperty.all(
+                                              Size(120, 30)),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (builder) =>
+                                                      All_Avatar_Screen(
+                                                          user: inforFr,
+                                                          type: "feed")));
+                                        },
+                                        icon: Icon(Icons.home),
+                                        label: Text("Ảnh")),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                      left: 8.0, right: 8),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        color:
+                                            Color.fromRGBO(100, 200, 30, 0.3),
+                                        border: Border.all(
+                                          width:
+                                              1, //                   <--- border width here
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(16))),
+                                    child: TextButton.icon(
+                                        style: ButtonStyle(
+                                          fixedSize: MaterialStateProperty.all(
+                                              Size(120, 30)),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (builder) =>
+                                                      All_Avatar_Screen(
+                                                          user: inforFr,
+                                                          type: "avatar")));
+                                        },
+                                        icon: Icon(Icons.home),
+                                        label: Text("Avatar")),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 16),
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                          width: 1,
+                                        ),
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(16))),
+                                    child: TextButton.icon(
+                                        style: ButtonStyle(
+                                          fixedSize: MaterialStateProperty.all(
+                                              Size(120, 30)),
+                                        ),
+                                        onPressed: () {
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (builder) =>
+                                                      All_Avatar_Screen(
+                                                          user: inforFr,
+                                                          type: "cover")));
+                                        },
+                                        icon: Icon(Icons.home),
+                                        label: Text("Ảnh bìa")),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Divider(
+                            height: 20,
                             color: Colors.black,
                           ),
                         ],

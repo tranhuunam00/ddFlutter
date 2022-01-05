@@ -1,25 +1,28 @@
 import 'package:app1/main.dart';
+import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 class All_Avatar_Screen extends StatelessWidget {
-  const All_Avatar_Screen({Key? key, required this.type, String title: 'Ảnh'})
+  const All_Avatar_Screen(
+      {Key? key, required this.type, required this.user, String title: 'Ảnh'})
       : super(key: key);
   final String type;
+  final UserModel user;
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     List listImg = [];
     if (type == "feed") {
-      listImg = userProvider.userP.feedImg;
+      listImg = user.feedImg;
     }
     if (type == "avatar") {
-      listImg = userProvider.userP.avatarImg;
+      listImg = user.avatarImg;
     }
     if (type == "cover") {
-      listImg = userProvider.userP.coverImg;
+      listImg = user.coverImg;
     }
     //  List feedVideo = userProvider.userP.feedVideo;
 

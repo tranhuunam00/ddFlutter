@@ -92,6 +92,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // _passwordController.text = "hihi";
     var currentFocus;
     return Scaffold(
+      appBar: AppBar(
+        title: Text("Đăng ký"),
+        backgroundColor: Color.fromRGBO(200, 100, 400, 0.2),
+      ),
       body: DismissKeyboard(
         child: Background(
             Column: Padding(
@@ -100,7 +104,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Padding(
-                padding: const EdgeInsets.only(top: 100, bottom: 60),
+                padding: const EdgeInsets.only(top: 40, bottom: 60),
                 child: Text(
                   "Đăng ký",
                   style: AppStyles.h2,
@@ -234,6 +238,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       color: Color.fromRGBO(255, 255, 255, 0.4),
                       label: "Đăng ký",
                     ),
+              Divider(height: 40, color: Colors.black),
               //.......................button đã có tài khoản.......................
               TextButton(
                   onPressed: () {
