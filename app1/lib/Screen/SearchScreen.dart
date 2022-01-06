@@ -37,7 +37,9 @@ class _SearchScreenState extends State<SearchScreen> {
     TextEditingController _textModalController = TextEditingController();
     return DismissKeyboard(
       child: Scaffold(
-        appBar: AppBar(),
+        appBar: AppBar(
+          title: Text("Tìm kiếm"),
+        ),
         body: Column(children: [
           Container(
               height: 120,

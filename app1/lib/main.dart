@@ -46,7 +46,7 @@ final UserModel userMain = UserModel(
     coverImg: [],
     avatarImg: [],
     hadMessageList: []);
-const SERVER_IP = 'http://d65a-2401-d800-22e5-308-143-d1ff-cbff-c921.ngrok.io';
+const SERVER_IP = 'http://6e1c-2401-d800-22e5-308-f82a-5963-b545-2ad.ngrok.io';
 String _onNotificationClicked() {
   return "";
 }

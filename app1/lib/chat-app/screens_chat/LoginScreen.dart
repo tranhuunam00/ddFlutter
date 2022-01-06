@@ -51,8 +51,12 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
               id: userProvider.userP.friend[i],
               realName: userProvider
                   .listFriendsP[userProvider.userP.friend[i]]!.realName,
-              avatar: userProvider
-                  .listFriendsP[userProvider.userP.friend[i]]!.avatarImg[0]);
+              avatar: userProvider.listFriendsP[userProvider.userP.friend[i]]!
+                  .avatarImg[userProvider
+                      .listFriendsP[userProvider.userP.friend[i]]!
+                      .avatarImg
+                      .length -
+                  1]);
         }
       }
       //chuyen doi du lieu hadChatMsg thanh chatmodel
@@ -84,7 +88,9 @@ class _ChatLoginScreenState extends State<ChatLoginScreen> {
       hadMessageInit.sort((a, b) => b.time.compareTo(a.time));
 
       return Scaffold(
-          appBar: AppBar(),
+          appBar: AppBar(
+            title: Text("Tin nhắn"),
+          ),
           body: Stack(children: [
             ListView.builder(
                 itemCount: hadMessageInit.length + 1,

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:app1/Screen/All_Image_Sceen.dart';
+import 'package:app1/feed/widget/Card_feed_null.dart';
 import 'package:app1/user/screen/All_Fr_Screen.dart';
 import 'package:app1/chat-app/model/chat_modal.dart';
 import 'package:app1/chat-app/screens_chat/individual_chat.dart';
@@ -344,7 +345,7 @@ class _FriendProfileState extends State<FriendProfile> {
       if (isFr == "Kết bạn") {
         text = "Gửi yêu cầu kết bạn";
       }
-      if (isFr == "Chấp nhận lời mời") {
+      if (isFr == "Chấp nhận") {
         text = "Đồng ý kết bạn";
       }
       if (isFr == "Xóa lời mời") {
@@ -358,29 +359,25 @@ class _FriendProfileState extends State<FriendProfile> {
       }
 
       return Container(
-        width: 250,
-        height: 35,
         child: Material(
-          color: Color.fromRGBO(80, 0, 80, 0.2),
-          child: InkWell(
-              onTap: () async {
-                print(isFr);
-                print(text);
-                String a = await addFr(text, userProvider.jwtP, widget.frId);
-                print(a);
-                if (a != "not jwt" && a != "error") {
-                  setState(() {});
-                  Navigator.pop(
-                    context,
-                    isFr = a,
-                  );
-                } else {
-                  print("--addFr có lỗi");
-                }
-              },
-              hoverColor: Colors.amber,
-              child: Text(text,
-                  style: TextStyle(fontSize: 24), textAlign: TextAlign.center)),
+          child: AppBTnStyle(
+            label: text,
+            onTap: () async {
+              print(isFr);
+              print(text);
+              String a = await addFr(text, userProvider.jwtP, widget.frId);
+              print(a);
+              if (a != "not jwt" && a != "error") {
+                setState(() {});
+                Navigator.pop(
+                  context,
+                  isFr = a,
+                );
+              } else {
+                print("--addFr có lỗi");
+              }
+            },
+          ),
         ),
       );
     }
@@ -415,7 +412,7 @@ class _FriendProfileState extends State<FriendProfile> {
 
       if (userProvider.userP.friendConfirm != null &&
           userProvider.userP.friendConfirm.contains(widget.frId)) {
-        return "Chấp nhận lời mời";
+        return "Chấp nhận";
       }
       if (userProvider.userP.friendRequest != null &&
           userProvider.userP.friendRequest.contains(widget.frId)) {
@@ -432,8 +429,20 @@ class _FriendProfileState extends State<FriendProfile> {
               child: ListView.builder(
                   shrinkWrap: true,
                   controller: _scrollController,
-                  itemCount: listFeedsInit.length + 3,
+                  itemCount: listFeedsInit.length + 4,
                   itemBuilder: (context, index) {
+                    if (index == listFeedsInit.length + 3) {
+                      return CardFeedStyleNull(
+                          feed: FeedBaseModel(
+                              pathImg: ["khampha.jpg"],
+                              pathVideo: [],
+                              message: "Hãy cùng khám phá😉😍😘✌️🏖!",
+                              comment: [],
+                              createdAt: DateTime.now().toString(),
+                              tag: [],
+                              rule: ["every"],
+                              like: []));
+                    }
                     if (index == 0) {
                       return Container(
                         height: size.height / 3,
@@ -509,7 +518,7 @@ class _FriendProfileState extends State<FriendProfile> {
                         return Padding(
                           padding: const EdgeInsets.only(top: 32.0),
                           child: Center(
-                            child: Text(inforFr.userName, style: AppStyles.h2),
+                            child: Text(inforFr.realName, style: AppStyles.h2),
                           ),
                         );
                       }
@@ -537,86 +546,81 @@ class _FriendProfileState extends State<FriendProfile> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                               children: [
-                                Container(
-                                  width: size.width * 3 / 10,
-                                  child: RoundedLoadingButton(
-                                      child: Text("Nhắn tin"),
-                                      controller: _btnMsgController,
-                                      onPressed: inforFr.id == ""
-                                          ? null
-                                          : () {
-                                              print("nhắn tin");
-                                              ChatModel chatModel = ChatModel(
-                                                id: widget.frId,
-                                                realName: inforFr.realName,
-                                                avatar: inforFr.avatarImg[
-                                                    inforFr.avatarImg.length -
-                                                        1],
-                                              );
-                                              _btnMsgController.success();
-                                              Navigator.push(
-                                                  context,
-                                                  MaterialPageRoute(
-                                                      builder: (builder) =>
-                                                          IndividualChat(
-                                                            chatModel:
-                                                                chatModel,
-                                                            sourceChat: ChatModel(
-                                                                id: userProvider
-                                                                    .userP.id,
-                                                                avatar: userProvider
-                                                                    .userP
-                                                                    .avatarImg[userProvider
-                                                                        .userP
-                                                                        .avatarImg
-                                                                        .length -
-                                                                    1]),
-                                                          )));
-                                            }),
-                                ),
+                                AppBTnStyle(
+                                    label: "Nhắn tin",
+                                    onTap: inforFr.id == ""
+                                        ? null
+                                        : () {
+                                            print("nhắn tin");
+                                            ChatModel chatModel = ChatModel(
+                                              id: widget.frId,
+                                              realName: inforFr.realName,
+                                              avatar: inforFr.avatarImg[
+                                                  inforFr.avatarImg.length - 1],
+                                            );
+                                            // _btnMsgController.reset();
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (builder) =>
+                                                        IndividualChat(
+                                                          chatModel: chatModel,
+                                                          sourceChat: ChatModel(
+                                                              id: userProvider
+                                                                  .userP.id,
+                                                              avatar: userProvider
+                                                                      .userP
+                                                                      .avatarImg[
+                                                                  userProvider
+                                                                          .userP
+                                                                          .avatarImg
+                                                                          .length -
+                                                                      1]),
+                                                        )));
+                                          }),
                                 Consumer<UserProvider>(
                                     builder: (context, userProvider, child) {
-                                  return Container(
-                                    width: size.width * 5 / 10,
-                                    child: RoundedLoadingButton(
-                                        child: Text(getIsFr(userProvider)),
-                                        controller: _btnAddFrController,
-                                        onPressed: () async {
-                                          print(
-                                              "--- ấn vào nút bạn bè------------");
-                                          await showModalBottomSheet<String>(
-                                            context: context,
-                                            builder: (BuildContext context) {
-                                              return Container(
-                                                height: 200,
-                                                child: Center(
-                                                  child: Column(
-                                                    // crossAxisAlignment:
-                                                    //     CrossAxisAlignment.center,
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: <Widget>[
-                                                      SizedBox(),
-                                                      modalChild(
-                                                          getIsFr(userProvider),
-                                                          ""),
-                                                      isFr == "Chấp nhận lời mời"
-                                                          ? modalChild(
+                                  return AppBTnStyle(
+                                      label: (getIsFr(userProvider)),
+                                      onTap: inforFr.id == ""
+                                          ? null
+                                          : () async {
+                                              print(
+                                                  "--- ấn vào nút bạn bè------------");
+                                              await showModalBottomSheet<
+                                                  String>(
+                                                context: context,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  return Container(
+                                                    height: 200,
+                                                    child: Center(
+                                                      child: Column(
+                                                        // crossAxisAlignment:
+                                                        //     CrossAxisAlignment.center,
+                                                        mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                        children: <Widget>[
+                                                          SizedBox(),
+                                                          modalChild(
                                                               getIsFr(
                                                                   userProvider),
-                                                              "Xóa lời mời")
-                                                          : Container(),
-                                                      SizedBox(),
-                                                    ],
-                                                  ),
-                                                ),
+                                                              ""),
+                                                          isFr == "Chấp nhận"
+                                                              ? modalChild(
+                                                                  getIsFr(
+                                                                      userProvider),
+                                                                  "Xóa lời mời")
+                                                              : Container(),
+                                                          SizedBox(),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
                                               );
-                                            },
-                                          );
-                                          _btnAddFrController.success();
-                                        }),
-                                  );
+                                            });
                                 }),
                               ],
                             ),
@@ -651,21 +655,22 @@ class _FriendProfileState extends State<FriendProfile> {
                                   )
                                 : Container(),
                             userProvider.inforFrP.friend.length > 0
-                                ? RoundedLoadingButton(
-                                    child: Text("Xem tất cả bạn bè"),
-                                    controller: _btnAllFrController,
-                                    onPressed: () {
-                                      print(isFr);
-                                      print(userProvider.userP.friend);
-                                      _btnAllFrController.success();
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (builder) =>
-                                                  AllFriendScreen(
-                                                      tag: true,
-                                                      user: inforFr)));
-                                    })
+                                ? Container(
+                                    width: size.width / 4 * 3,
+                                    child: AppBTnStyle(
+                                        label: "Xem tất cả bạn bè",
+                                        onTap: () {
+                                          print(isFr);
+                                          print(userProvider.userP.friend);
+                                          Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                  builder: (builder) =>
+                                                      AllFriendScreen(
+                                                          tag: false,
+                                                          user: inforFr)));
+                                        }),
+                                  )
                                 : Container(),
                             Divider(
                               height: 20,
@@ -784,10 +789,21 @@ class _FriendProfileState extends State<FriendProfile> {
                         );
                       }
                       if (listFeedsInit.length > 0) {
-                        return CardFeedStyle(
-                          feed: listFeedsInit[index - 3],
-                          ownFeedUser: inforFr,
-                        );
+                        return index % 2 == 0
+                            ? Padding(
+                                padding: const EdgeInsets.only(left: 16.0),
+                                child: CardFeedStyle(
+                                  feed: listFeedsInit[index - 3],
+                                  ownFeedUser: inforFr,
+                                ),
+                              )
+                            : Padding(
+                                padding: const EdgeInsets.only(right: 16.0),
+                                child: CardFeedStyle(
+                                  feed: listFeedsInit[index - 3],
+                                  ownFeedUser: inforFr,
+                                ),
+                              );
                       } else {
                         return SizedBox(
                             height: 300, child: Text("chưa có bài viết nào"));
