@@ -11,6 +11,7 @@ import 'package:app1/widgets/dismit_keybord.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class VerifyCode extends StatefulWidget {
   const VerifyCode({Key? key, this.userCreate, this.userForgot})
@@ -29,6 +30,8 @@ class _VerifyCode extends State<VerifyCode> {
   final TextEditingController _3Controller = TextEditingController();
 
   final TextEditingController _4Controller = TextEditingController();
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   var urlRegisterConfirm = Uri.parse(SERVER_IP + '/auth/registerConfirm');
   var urlForgotConfirm = Uri.parse(SERVER_IP + '/auth/forgotPasswordConfirm');
 
@@ -148,9 +151,10 @@ class _VerifyCode extends State<VerifyCode> {
                           _2Controller.text.length >= 1 == true &&
                           _4Controller.text.length >= 1 == true &&
                           _3Controller.text.length >= 1 == true)
-                      ? AppBTnStyle(
-                          label: "Gửi",
-                          onTap: () async {
+                      ? RoundedLoadingButton(
+                          child: Text("Gửi"),
+                          controller: _btnController,
+                          onPressed: () async {
                             //
                             String token = _1Controller.text +
                                 _2Controller.text +
@@ -162,6 +166,7 @@ class _VerifyCode extends State<VerifyCode> {
                               print(widget.userCreate!.realName);
                               String a = await registerConfirmFunction(
                                   widget.userCreate!, token);
+                              _btnController.success();
                               if (a == "done") {
                                 //dang kis thanh cong
                                 print("dangki thanh cong");

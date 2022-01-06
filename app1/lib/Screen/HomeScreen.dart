@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:app1/feed/model/feed_model.dart';
 import 'package:app1/feed/screen/post_feed.dart';
+import 'package:app1/feed/widget/Card_feed_null.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/provider/feed_provider.dart';
@@ -118,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView.builder(
             shrinkWrap: true,
             controller: _scrollController,
-            itemCount: listFeedVision.length + 2,
+            itemCount: listFeedVision.length + 4,
             itemBuilder: (context, index) {
               if (index == 0) {
                 return Padding(
@@ -183,6 +184,31 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 );
+              }
+              if (index == listFeedVision.length + 2) {
+                return CardFeedStyleNull(
+                    feed: FeedBaseModel(
+                        pathImg: ["welcome.jpg"],
+                        pathVideo: [],
+                        message:
+                            "📢🌻🌻Chào mừng bạn đã đến với GGApp💓. Hãy kêt bạn , chia sẻ cảm xúc của mình✊!",
+                        comment: [],
+                        createdAt: DateTime.now().toString(),
+                        tag: [],
+                        rule: ["every"],
+                        like: []));
+              }
+              if (index == listFeedVision.length + 3) {
+                return CardFeedStyleNull(
+                    feed: FeedBaseModel(
+                        pathImg: ["khampha.jpg"],
+                        pathVideo: [],
+                        message: "Hãy cùng khám phá😉😍😘✌️🏖!",
+                        comment: [],
+                        createdAt: DateTime.now().toString(),
+                        tag: [],
+                        rule: ["every"],
+                        like: []));
               }
               if (listFeedVision.length != 0) {
                 return index % 2 == 0

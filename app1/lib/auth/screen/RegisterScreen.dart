@@ -5,6 +5,7 @@ import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
 
 import 'package:flutter/material.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import '../../widgets/text_input_style.dart';
 import 'package:http/http.dart' as http;
 import '../../widgets/dismit_keybord.dart';
@@ -26,6 +27,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _rePasswordController = TextEditingController();
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   var urlRegister = Uri.parse(SERVER_IP + '/auth/register');
   Future<UserCreateModel> registerFunction(
       String userName, String password, String email) async {
@@ -191,9 +194,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       _passwordController.text == _rePasswordController.text &&
                       RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                           .hasMatch(_emailController.text))
-                  ? AppBTnStyle(
-                      label: "Đăng Ký",
-                      onTap: () async {
+                  ? RoundedLoadingButton(
+                      child: Text("Đăng Ký"),
+                      controller: _btnController,
+                      onPressed: () async {
                         String userName = _userNameController.text;
                         String password = _passwordController.text;
                         String email = _emailController.text;
@@ -201,6 +205,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         UserCreateModel result =
                             await registerFunction(userName, password, email);
                         print("name" + result.token);
+                        _btnController.success();
                         UserCreateModel user = new UserCreateModel(
                             friend: [],
                             friendConfirm: [],

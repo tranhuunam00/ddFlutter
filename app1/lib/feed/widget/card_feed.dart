@@ -46,15 +46,17 @@ class _CardFeedStyleState extends State<CardFeedStyle> {
     super.initState();
     //-------------------------------lấy Api của Tag--------------------------
     WidgetsBinding.instance!.addPostFrameCallback((timeStamp) async {
-      final userProvider = Provider.of<UserProvider>(context, listen: false);
-      if (widget.feed.tag.length > 0) {
-        var getListUsertagApi = await PostApi(
-            userProvider.jwtP, {"listUser": widget.feed.tag}, "/user/listUser");
-        if (getListUsertagApi != "not jwt" && getListUsertagApi != "error") {
-          if (getListUsertagApi.length > 0) {
-            listRealNameTag = getRealNameApi(getListUsertagApi);
-            if (mounted) {
-              setState(() {});
+      if (mounted) {
+        final userProvider = Provider.of<UserProvider>(context, listen: false);
+        if (widget.feed.tag.length > 0) {
+          var getListUsertagApi = await PostApi(userProvider.jwtP,
+              {"listUser": widget.feed.tag}, "/user/listUser");
+          if (getListUsertagApi != "not jwt" && getListUsertagApi != "error") {
+            if (getListUsertagApi.length > 0) {
+              listRealNameTag = getRealNameApi(getListUsertagApi);
+              if (mounted) {
+                setState(() {});
+              }
             }
           }
         }

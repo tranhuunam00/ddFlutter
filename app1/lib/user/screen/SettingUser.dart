@@ -32,6 +32,8 @@ class SettingUser extends StatefulWidget {
 }
 
 class _SettingUser extends State<SettingUser> {
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   List<String> listHobbies = [
     "Acapella",
     'Aikido',
@@ -245,7 +247,7 @@ class _SettingUser extends State<SettingUser> {
               ),
             ),
             body: Padding(
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 5),
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 20),
               child: SingleChildScrollView(
                 child: Column(
                   children: [
@@ -257,20 +259,8 @@ class _SettingUser extends State<SettingUser> {
                       children: [
                         Text(
                           "Tiểu sử ",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w400),
+                          style: AppStyles.h3,
                           textAlign: TextAlign.left,
-                        ),
-                        InkWell(
-                          onTap: () async {},
-                          child: Text(
-                            " Chỉnh sửa",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.blue),
-                            textAlign: TextAlign.left,
-                          ),
                         ),
                       ],
                     ),
@@ -290,20 +280,8 @@ class _SettingUser extends State<SettingUser> {
                       children: [
                         Text(
                           "Họ và tên ",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w400),
+                          style: AppStyles.h3,
                           textAlign: TextAlign.left,
-                        ),
-                        InkWell(
-                          onTap: () async {},
-                          child: Text(
-                            " Chỉnh sửa",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.blue),
-                            textAlign: TextAlign.left,
-                          ),
                         ),
                       ],
                     ),
@@ -319,35 +297,13 @@ class _SettingUser extends State<SettingUser> {
                     ),
 
                     ///Quê quán
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Giới thiệu ",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w400),
-                          textAlign: TextAlign.left,
-                        ),
-                        InkWell(
-                          onTap: () async {},
-                          child: Text(
-                            " Chỉnh sửa",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.blue),
-                            textAlign: TextAlign.left,
-                          ),
-                        ),
-                      ],
-                    ),
+
                     Row(
                       children: [
                         Icon(Icons.home_outlined),
                         Text(
                           " Sống tại   ",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w400),
+                          style: AppStyles.h3,
                           textAlign: TextAlign.left,
                         ),
                         DropdownButton(
@@ -386,20 +342,8 @@ class _SettingUser extends State<SettingUser> {
                       children: [
                         Text(
                           "Trường học ",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w400),
+                          style: AppStyles.h3,
                           textAlign: TextAlign.left,
-                        ),
-                        InkWell(
-                          onTap: () async {},
-                          child: Text(
-                            " Chỉnh sửa",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.blue),
-                            textAlign: TextAlign.left,
-                          ),
                         ),
                       ],
                     ),
@@ -420,20 +364,8 @@ class _SettingUser extends State<SettingUser> {
                       children: [
                         Text(
                           "Sở thích ",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w400),
+                          style: AppStyles.h3,
                           textAlign: TextAlign.left,
-                        ),
-                        InkWell(
-                          onTap: () async {},
-                          child: Text(
-                            " Chỉnh sửa",
-                            style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w400,
-                                color: Colors.blue),
-                            textAlign: TextAlign.left,
-                          ),
                         ),
                       ],
                     ),
@@ -473,8 +405,7 @@ class _SettingUser extends State<SettingUser> {
                           padding: const EdgeInsets.only(right: 8.0),
                           child: Text(
                             "Ngày sinh",
-                            style: TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.w400),
+                            style: AppStyles.h3,
                             textAlign: TextAlign.left,
                           ),
                         ),
@@ -507,8 +438,7 @@ class _SettingUser extends State<SettingUser> {
                       children: [
                         Text(
                           "Giới tính",
-                          style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.w400),
+                          style: AppStyles.h3,
                           textAlign: TextAlign.left,
                         ),
                         Row(
@@ -584,65 +514,68 @@ class _SettingUser extends State<SettingUser> {
                     SizedBox(
                       height: 20,
                     ),
-                    AppBTnStyle(
-                        label: "Lưu cài đặt",
-                        onTap: () async {
-                          String sex;
-                          String selectTinh = valueChooseTinh;
-                          print("Họ, Tên  ---  " + _inputNameController.text);
-                          print("Tỉnh đã chọn là ---  " + selectTinh);
-                          //  print("Huyện đã chọn là ---  " + selectTinh);
-                          //  print("Xã đã chọn là ---  " + selectTinh);
-                          print("Ngày sinh  ---  " + dateBirth);
-                          if (valueCheckSexBoy) {
-                            sex = "Nam";
-                            print("Giới tính  --- Nam ");
-                          } else if (valueCheckSexGirl) {
-                            print("Giới tính  --- Nữ ");
-                            sex = "Nữ";
-                          } else {
-                            sex = "Other";
-                            print("Giới tính  ---  Khác ");
-                          }
-                          print("Tiểu sử là  ---  " +
-                              _inputHistoryController.text);
-                          print("Sở thích là  ---  " + valueChooseHobbies);
+                    RoundedLoadingButton(
+                      controller: _btnController,
+                      child: Text("Lưu cài đặt"),
+                      onPressed: () async {
+                        String sex;
+                        String selectTinh = valueChooseTinh;
+                        print("Họ, Tên  ---  " + _inputNameController.text);
+                        print("Tỉnh đã chọn là ---  " + selectTinh);
+                        //  print("Huyện đã chọn là ---  " + selectTinh);
+                        //  print("Xã đã chọn là ---  " + selectTinh);
+                        print("Ngày sinh  ---  " + dateBirth);
+                        if (valueCheckSexBoy) {
+                          sex = "Nam";
+                          print("Giới tính  --- Nam ");
+                        } else if (valueCheckSexGirl) {
+                          print("Giới tính  --- Nữ ");
+                          sex = "Nữ";
+                        } else {
+                          sex = "Other";
+                          print("Giới tính  ---  Khác ");
+                        }
+                        print(
+                            "Tiểu sử là  ---  " + _inputHistoryController.text);
+                        print("Sở thích là  ---  " + valueChooseHobbies);
 
-                          log('Đã lưu cài đặt');
-                          var result = await PostApi(
-                              userProvider.jwtP,
-                              {
-                                "realName": _inputNameController.text,
-                                "sex": sex,
-                                "addressTinh": selectTinh,
-                                "addressDetails": "",
-                                "birthDate": dateBirth
-                              },
-                              "/user/setting");
-                          print("kết quả là ---------");
-                          if (result == "not jwt") {
-                            Navigator.push(
+                        log('Đã lưu cài đặt');
+                        var result = await PostApi(
+                            userProvider.jwtP,
+                            {
+                              "realName": _inputNameController.text,
+                              "sex": sex,
+                              "addressTinh": selectTinh,
+                              "addressDetails": "",
+                              "birthDate": dateBirth
+                            },
+                            "/user/setting");
+                        print("kết quả là ---------");
+                        if (result == "not jwt") {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (builder) => LoginScreen()));
+                        }
+                        if (result == "done") {
+                          userProvider.userP.realName =
+                              _inputNameController.text;
+                          userProvider.userP.sex = sex;
+                          userProvider.userP.addressTinh = selectTinh;
+                          userProvider.userP.addressDetails = "";
+                          userProvider.userP.birthDate = dateBirth;
+                          _btnController.success();
+                          if (_inputNameController.text != "user") {
+                            Navigator.pushReplacement(
                                 context,
                                 MaterialPageRoute(
-                                    builder: (builder) => LoginScreen()));
+                                    builder: (builder) => MainScreen(
+                                        UserId: userProvider.userP.id)));
                           }
-                          if (result == "done") {
-                            userProvider.userP.realName =
-                                _inputNameController.text;
-                            userProvider.userP.sex = sex;
-                            userProvider.userP.addressTinh = selectTinh;
-                            userProvider.userP.addressDetails = "";
-                            userProvider.userP.birthDate = dateBirth;
-                            if (_inputNameController.text != "user") {
-                              Navigator.pushReplacement(
-                                  context,
-                                  MaterialPageRoute(
-                                      builder: (builder) => MainScreen(
-                                          UserId: userProvider.userP.id)));
-                            }
-                          }
-                          print(result);
-                        }),
+                        }
+                        print(result);
+                      },
+                    )
                   ], //nút lưu
                 ),
               ),

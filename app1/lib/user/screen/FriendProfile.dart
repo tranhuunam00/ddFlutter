@@ -14,11 +14,13 @@ import 'package:app1/ui.dart';
 import 'package:app1/widgets/app_button.dart';
 import 'package:app1/feed/widget/card_feed.dart';
 import 'package:app1/user/screen/friend_avatar.dart';
+import 'package:app1/widgets/background.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class FriendProfile extends StatefulWidget {
   const FriendProfile({Key? key, required this.frId}) : super(key: key);
@@ -227,7 +229,12 @@ class _FriendProfileState extends State<FriendProfile> {
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     final feedProvider = Provider.of<FeedProvider>(context, listen: false);
-
+    final RoundedLoadingButtonController _btnAddFrController =
+        RoundedLoadingButtonController();
+    final RoundedLoadingButtonController _btnMsgController =
+        RoundedLoadingButtonController();
+    final RoundedLoadingButtonController _btnAllFrController =
+        RoundedLoadingButtonController();
     Future<String> addFr(String isFrTextModal, String jwt, String id) async {
       if (isFrTextModal == "Hủy kết bạn") {
         print("huy ket bạn");
@@ -419,359 +426,382 @@ class _FriendProfileState extends State<FriendProfile> {
 
     return Scaffold(
         appBar: AppBar(),
-        body: Padding(
-            padding: const EdgeInsets.only(left: 4.0, right: 4, bottom: 4),
-            child: ListView.builder(
-                shrinkWrap: true,
-                controller: _scrollController,
-                itemCount: listFeedsInit.length + 3,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return Container(
-                      height: size.height / 3,
-                      child: Stack(
-                        children: [
-                          Container(
-                            height: size.height / 9 * 2,
-                            width: size.width,
-                            clipBehavior: Clip.hardEdge,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20.0),
-                                  topLeft: Radius.circular(20)),
-                            ),
-                            child: userProvider.inforFrP.coverImg != null &&
-                                    userProvider.inforFrP.coverImg.length > 0
-                                ? CachedNetworkImage(
-                                    imageUrl: SERVER_IP +
-                                        "/upload/" +
-                                        userProvider.inforFrP.coverImg[
-                                            userProvider
-                                                    .inforFrP.coverImg.length -
-                                                1],
-                                    fit: BoxFit.fitWidth,
-                                    placeholder: (context, url) =>
-                                        CircularProgressIndicator(),
-                                    errorWidget: (context, url, error) =>
-                                        Icon(Icons.error),
-                                  )
-                                : Image.asset(
-                                    "assets/images/nature.jpg",
-                                    fit: BoxFit.cover,
-                                  ),
-                          ),
-                          Positioned(
-                              left:
-                                  ((size.width - 16) - (size.height - 16) / 6) /
-                                          2 -
-                                      4,
-                              right: null,
-                              top: size.height / 36 * 5,
-                              child: CircleAvatar(
-                                radius: 78,
-                                backgroundImage:
-                                    AssetImage('assets/images/load.gif'),
-                                child: CircleAvatar(
-                                  radius: 75,
-                                  backgroundImage: userProvider
-                                                  .inforFrP.avatarImg !=
-                                              null &&
-                                          userProvider
-                                                  .inforFrP.avatarImg.length >
-                                              0
-                                      ? NetworkImage(SERVER_IP +
+        body: Background(
+          Column: Padding(
+              padding: const EdgeInsets.only(left: 4.0, right: 4, bottom: 4),
+              child: ListView.builder(
+                  shrinkWrap: true,
+                  controller: _scrollController,
+                  itemCount: listFeedsInit.length + 3,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return Container(
+                        height: size.height / 3,
+                        child: Stack(
+                          children: [
+                            Container(
+                              height: size.height / 9 * 2,
+                              width: size.width,
+                              clipBehavior: Clip.hardEdge,
+                              decoration: BoxDecoration(
+                                color: Colors.red,
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20.0),
+                                    topLeft: Radius.circular(20)),
+                              ),
+                              child: userProvider.inforFrP.coverImg != null &&
+                                      userProvider.inforFrP.coverImg.length > 0
+                                  ? CachedNetworkImage(
+                                      imageUrl: SERVER_IP +
                                           "/upload/" +
-                                          userProvider.inforFrP.avatarImg[
-                                              userProvider.inforFrP.avatarImg
+                                          userProvider.inforFrP.coverImg[
+                                              userProvider.inforFrP.coverImg
                                                       .length -
-                                                  1])
-                                      : NetworkImage(
-                                          SERVER_IP + "/upload/avatarNull.jpg"),
-                                  backgroundColor: Colors.transparent,
-                                ),
-                              )),
-                          //------camera bia--------------------------
-                        ],
-                      ),
-                    );
-                  }
-                  if (isTontai) {
-                    if (index == 1) {
-                      return Padding(
-                        padding: const EdgeInsets.only(top: 32.0),
-                        child: Center(
-                          child: Text(inforFr.userName, style: AppStyles.h2),
+                                                  1],
+                                      fit: BoxFit.fitWidth,
+                                      placeholder: (context, url) =>
+                                          CircularProgressIndicator(),
+                                      errorWidget: (context, url, error) =>
+                                          Icon(Icons.error),
+                                    )
+                                  : Image.asset(
+                                      "assets/images/nature.jpg",
+                                      fit: BoxFit.cover,
+                                    ),
+                            ),
+                            Positioned(
+                                left: ((size.width - 16) -
+                                            (size.height - 16) / 6) /
+                                        2 -
+                                    4,
+                                right: null,
+                                top: size.height / 36 * 5,
+                                child: CircleAvatar(
+                                  radius: 78,
+                                  backgroundImage:
+                                      AssetImage('assets/images/load.gif'),
+                                  child: CircleAvatar(
+                                    radius: 75,
+                                    backgroundImage: userProvider
+                                                    .inforFrP.avatarImg !=
+                                                null &&
+                                            userProvider
+                                                    .inforFrP.avatarImg.length >
+                                                0
+                                        ? NetworkImage(SERVER_IP +
+                                            "/upload/" +
+                                            userProvider.inforFrP.avatarImg[
+                                                userProvider.inforFrP.avatarImg
+                                                        .length -
+                                                    1])
+                                        : NetworkImage(SERVER_IP +
+                                            "/upload/avatarNull.jpg"),
+                                    backgroundColor: Colors.transparent,
+                                  ),
+                                )),
+                            //------camera bia--------------------------
+                          ],
                         ),
                       );
                     }
-                    if (index == 2) {
-                      return Column(
-                        children: [
-                          Row(
-                            children: [
-                              Icon(Icons.lock_clock),
-                              Text("   Bắt đầu từ 9/2021", style: AppStyles.h4),
-                            ],
+                    if (isTontai) {
+                      if (index == 1) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 32.0),
+                          child: Center(
+                            child: Text(inforFr.userName, style: AppStyles.h2),
                           ),
-                          Row(
-                            children: [
-                              Icon(Icons.badge),
-                              Text("   Học tại đh Công Nghệ",
-                                  style: AppStyles.h4),
-                            ],
-                          ),
-                          TextButton.icon(
-                              onPressed: () {},
-                              icon: Icon(Icons.wysiwyg),
-                              label: Text("   Xem chi tiết")),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            children: [
-                              AppBTnStyle(
-                                  label: "Nhắn tin",
-                                  onTap: inforFr.id == ""
-                                      ? null
-                                      : () {
-                                          print("nhắn tin");
-                                          ChatModel chatModel = ChatModel(
-                                            id: widget.frId,
-                                            realName: inforFr.realName,
-                                            avatar: inforFr.avatarImg[
-                                                inforFr.avatarImg.length - 1],
-                                          );
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (builder) =>
-                                                      IndividualChat(
-                                                        chatModel: chatModel,
-                                                        sourceChat: ChatModel(
-                                                            id: userProvider
-                                                                .userP.id,
-                                                            avatar: userProvider
+                        );
+                      }
+                      if (index == 2) {
+                        return Column(
+                          children: [
+                            Row(
+                              children: [
+                                Icon(Icons.lock_clock),
+                                Text("   Bắt đầu từ 9/2021",
+                                    style: AppStyles.h4),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                Icon(Icons.badge),
+                                Text("   Học tại đh Công Nghệ",
+                                    style: AppStyles.h4),
+                              ],
+                            ),
+                            TextButton.icon(
+                                onPressed: () {},
+                                icon: Icon(Icons.wysiwyg),
+                                label: Text("   Xem chi tiết")),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Container(
+                                  width: size.width * 3 / 10,
+                                  child: RoundedLoadingButton(
+                                      child: Text("Nhắn tin"),
+                                      controller: _btnMsgController,
+                                      onPressed: inforFr.id == ""
+                                          ? null
+                                          : () {
+                                              print("nhắn tin");
+                                              ChatModel chatModel = ChatModel(
+                                                id: widget.frId,
+                                                realName: inforFr.realName,
+                                                avatar: inforFr.avatarImg[
+                                                    inforFr.avatarImg.length -
+                                                        1],
+                                              );
+                                              _btnMsgController.success();
+                                              Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                      builder: (builder) =>
+                                                          IndividualChat(
+                                                            chatModel:
+                                                                chatModel,
+                                                            sourceChat: ChatModel(
+                                                                id: userProvider
+                                                                    .userP.id,
+                                                                avatar: userProvider
                                                                     .userP
-                                                                    .avatarImg[
-                                                                userProvider
+                                                                    .avatarImg[userProvider
                                                                         .userP
                                                                         .avatarImg
                                                                         .length -
                                                                     1]),
-                                                      )));
-                                        }),
-                              Consumer<UserProvider>(
-                                  builder: (context, userProvider, child) {
-                                return AppBTnStyle(
-                                    label: getIsFr(userProvider),
-                                    onTap: () async {
-                                      print(
-                                          "--- ấn vào nút bạn bè------------");
-                                      await showModalBottomSheet<String>(
-                                        context: context,
-                                        builder: (BuildContext context) {
-                                          return Container(
-                                            height: 200,
-                                            child: Center(
-                                              child: Column(
-                                                // crossAxisAlignment:
-                                                //     CrossAxisAlignment.center,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                children: <Widget>[
-                                                  SizedBox(),
-                                                  modalChild(
-                                                      getIsFr(userProvider),
-                                                      ""),
-                                                  isFr == "Chấp nhận lời mời"
-                                                      ? modalChild(
+                                                          )));
+                                            }),
+                                ),
+                                Consumer<UserProvider>(
+                                    builder: (context, userProvider, child) {
+                                  return Container(
+                                    width: size.width * 5 / 10,
+                                    child: RoundedLoadingButton(
+                                        child: Text(getIsFr(userProvider)),
+                                        controller: _btnAddFrController,
+                                        onPressed: () async {
+                                          print(
+                                              "--- ấn vào nút bạn bè------------");
+                                          await showModalBottomSheet<String>(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return Container(
+                                                height: 200,
+                                                child: Center(
+                                                  child: Column(
+                                                    // crossAxisAlignment:
+                                                    //     CrossAxisAlignment.center,
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                    children: <Widget>[
+                                                      SizedBox(),
+                                                      modalChild(
                                                           getIsFr(userProvider),
-                                                          "Xóa lời mời")
-                                                      : Container(),
-                                                  SizedBox(),
-                                                ],
-                                              ),
-                                            ),
+                                                          ""),
+                                                      isFr == "Chấp nhận lời mời"
+                                                          ? modalChild(
+                                                              getIsFr(
+                                                                  userProvider),
+                                                              "Xóa lời mời")
+                                                          : Container(),
+                                                      SizedBox(),
+                                                    ],
+                                                  ),
+                                                ),
+                                              );
+                                            },
                                           );
-                                        },
-                                      );
-                                    });
-                              }),
-                            ],
-                          ),
-                          Divider(height: 60, color: Colors.black),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(children: [
-                                Text("Bạn bè", style: AppStyles.h4),
-                                Text(frOfFr.length.toString(),
-                                    style: AppStyles.h4)
-                              ]),
-                              Icon(Icons.search)
-                            ],
-                          ),
-                          userProvider.inforFrP.friend.length > 0
-                              ? Material(
-                                  child: GridView.count(
-                                      crossAxisCount: 3,
-                                      crossAxisSpacing: 4,
-                                      mainAxisSpacing: 4,
-                                      childAspectRatio: 4 / 5,
-                                      physics:
-                                          NeverScrollableScrollPhysics(), // to disable GridView's scrolling
-                                      shrinkWrap:
-                                          true, // You won't see infinite size error
-                                      children: frGirdView(
-                                          frOfFr,
-                                          userProvider.inforFrP.friend != null
-                                              ? userProvider.inforFrP.friend
-                                              : [])),
-                                )
-                              : Container(),
-                          userProvider.inforFrP.friend.length > 0
-                              ? AppBTnStyle(
-                                  label: "Xem tất cả bạn bè",
-                                  onTap: () {
-                                    print(isFr);
-                                    print(userProvider.userP.friend);
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (builder) =>
-                                                AllFriendScreen(
-                                                    tag: true, user: inforFr)));
-                                  })
-                              : Container(),
-                          Divider(
-                            height: 20,
-                            color: Colors.black,
-                          ),
-                          Container(
-                            height: 40,
-                            child: ListView(
-                              physics: ClampingScrollPhysics(),
-                              scrollDirection: Axis.horizontal,
-                              shrinkWrap: true,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 8),
-                                  child: Container(
-                                    // color: Colors.lightBlue[100],
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          color:
-                                              Color.fromRGBO(100, 200, 30, 0.3),
-                                          width:
-                                              1, //                   <--- border width here
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(16))),
-                                    child: TextButton.icon(
-                                        style: ButtonStyle(
-                                          fixedSize: MaterialStateProperty.all(
-                                              Size(120, 30)),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (builder) =>
-                                                      All_Avatar_Screen(
-                                                          user: inforFr,
-                                                          type: "feed")));
-                                        },
-                                        icon: Icon(Icons.home),
-                                        label: Text("Ảnh")),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                      left: 8.0, right: 8),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        color:
-                                            Color.fromRGBO(100, 200, 30, 0.3),
-                                        border: Border.all(
-                                          width:
-                                              1, //                   <--- border width here
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(16))),
-                                    child: TextButton.icon(
-                                        style: ButtonStyle(
-                                          fixedSize: MaterialStateProperty.all(
-                                              Size(120, 30)),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (builder) =>
-                                                      All_Avatar_Screen(
-                                                          user: inforFr,
-                                                          type: "avatar")));
-                                        },
-                                        icon: Icon(Icons.home),
-                                        label: Text("Avatar")),
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 16),
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                          width: 1,
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                            Radius.circular(16))),
-                                    child: TextButton.icon(
-                                        style: ButtonStyle(
-                                          fixedSize: MaterialStateProperty.all(
-                                              Size(120, 30)),
-                                        ),
-                                        onPressed: () {
-                                          Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                  builder: (builder) =>
-                                                      All_Avatar_Screen(
-                                                          user: inforFr,
-                                                          type: "cover")));
-                                        },
-                                        icon: Icon(Icons.home),
-                                        label: Text("Ảnh bìa")),
-                                  ),
-                                ),
+                                          _btnAddFrController.success();
+                                        }),
+                                  );
+                                }),
                               ],
                             ),
-                          ),
-                          Divider(
-                            height: 20,
-                            color: Colors.black,
-                          ),
-                        ],
-                      );
-                    }
-                    if (listFeedsInit.length > 0) {
-                      return CardFeedStyle(
-                        feed: listFeedsInit[index - 3],
-                        ownFeedUser: inforFr,
-                      );
+                            Divider(height: 60, color: Colors.black),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(children: [
+                                  Text("Bạn bè", style: AppStyles.h4),
+                                  Text(frOfFr.length.toString(),
+                                      style: AppStyles.h4)
+                                ]),
+                                Icon(Icons.search)
+                              ],
+                            ),
+                            userProvider.inforFrP.friend.length > 0
+                                ? Material(
+                                    child: GridView.count(
+                                        crossAxisCount: 3,
+                                        crossAxisSpacing: 4,
+                                        mainAxisSpacing: 4,
+                                        childAspectRatio: 4 / 5,
+                                        physics:
+                                            NeverScrollableScrollPhysics(), // to disable GridView's scrolling
+                                        shrinkWrap:
+                                            true, // You won't see infinite size error
+                                        children: frGirdView(
+                                            frOfFr,
+                                            userProvider.inforFrP.friend != null
+                                                ? userProvider.inforFrP.friend
+                                                : [])),
+                                  )
+                                : Container(),
+                            userProvider.inforFrP.friend.length > 0
+                                ? RoundedLoadingButton(
+                                    child: Text("Xem tất cả bạn bè"),
+                                    controller: _btnAllFrController,
+                                    onPressed: () {
+                                      print(isFr);
+                                      print(userProvider.userP.friend);
+                                      _btnAllFrController.success();
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (builder) =>
+                                                  AllFriendScreen(
+                                                      tag: true,
+                                                      user: inforFr)));
+                                    })
+                                : Container(),
+                            Divider(
+                              height: 20,
+                              color: Colors.black,
+                            ),
+                            Container(
+                              height: 40,
+                              child: ListView(
+                                physics: ClampingScrollPhysics(),
+                                scrollDirection: Axis.horizontal,
+                                shrinkWrap: true,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8.0, right: 8),
+                                    child: Container(
+                                      // color: Colors.lightBlue[100],
+                                      decoration: BoxDecoration(
+                                          color: Color.fromRGBO(
+                                              700, 100, 700, 0.3),
+                                          border: Border.all(
+                                            width:
+                                                1, //                   <--- border width here
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(16))),
+                                      child: TextButton.icon(
+                                          style: ButtonStyle(
+                                            fixedSize:
+                                                MaterialStateProperty.all(
+                                                    Size(120, 30)),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (builder) =>
+                                                        All_Avatar_Screen(
+                                                            user: inforFr,
+                                                            type: "feed")));
+                                          },
+                                          icon: Icon(Icons.home),
+                                          label: Text("Ảnh")),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 8.0, right: 8),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color:
+                                              Color.fromRGBO(100, 200, 30, 0.3),
+                                          border: Border.all(
+                                            width:
+                                                1, //                   <--- border width here
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(16))),
+                                      child: TextButton.icon(
+                                          style: ButtonStyle(
+                                            fixedSize:
+                                                MaterialStateProperty.all(
+                                                    Size(120, 30)),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (builder) =>
+                                                        All_Avatar_Screen(
+                                                            user: inforFr,
+                                                            type: "avatar")));
+                                          },
+                                          icon: Icon(Icons.home),
+                                          label: Text("Avatar")),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 16),
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                          color: Color.fromRGBO(
+                                              700, 400, 200, 0.3),
+                                          border: Border.all(
+                                            width: 1,
+                                          ),
+                                          borderRadius: BorderRadius.all(
+                                              Radius.circular(16))),
+                                      child: TextButton.icon(
+                                          style: ButtonStyle(
+                                            fixedSize:
+                                                MaterialStateProperty.all(
+                                                    Size(120, 30)),
+                                          ),
+                                          onPressed: () {
+                                            Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                    builder: (builder) =>
+                                                        All_Avatar_Screen(
+                                                            user: inforFr,
+                                                            type: "cover")));
+                                          },
+                                          icon: Icon(Icons.home),
+                                          label: Text("Ảnh bìa")),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Divider(
+                              height: 20,
+                              color: Colors.black,
+                            ),
+                          ],
+                        );
+                      }
+                      if (listFeedsInit.length > 0) {
+                        return CardFeedStyle(
+                          feed: listFeedsInit[index - 3],
+                          ownFeedUser: inforFr,
+                        );
+                      } else {
+                        return SizedBox(
+                            height: 300, child: Text("chưa có bài viết nào"));
+                      }
                     } else {
-                      return SizedBox(
-                          height: 300, child: Text("chưa có bài viết nào"));
+                      if (index == 2) {
+                        return Expanded(
+                            child:
+                                Center(child: Text("tài khoản không tồn tại")));
+                      }
+                      return Container();
                     }
-                  } else {
-                    if (index == 2) {
-                      return Expanded(
-                          child:
-                              Center(child: Text("tài khoản không tồn tại")));
-                    }
-                    return Container();
-                  }
-                })));
+                  })),
+        ));
   }
 }
 

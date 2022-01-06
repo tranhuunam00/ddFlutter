@@ -6,6 +6,7 @@ import 'package:app1/main.dart';
 
 import 'package:app1/model/forgot_user.dart';
 import 'package:flutter/material.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import '../../ui.dart';
 import '../../widgets/text_input_style.dart';
 
@@ -28,7 +29,8 @@ class _ForgotScreenState extends State<ForgotScreen> {
   late FocusNode? myFocusNode;
   final TextEditingController _userNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
-
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   @override
   void initState() {
     super.initState();
@@ -128,11 +130,13 @@ class _ForgotScreenState extends State<ForgotScreen> {
               (_userNameController.text.length >= 6 == true &&
                       RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+")
                           .hasMatch(_emailController.text))
-                  ? AppBTnStyle(
-                      label: "Gửi",
-                      onTap: () async {
+                  ? RoundedLoadingButton(
+                      child: Text("Gửi"),
+                      controller: _btnController,
+                      onPressed: () async {
                         UserForgotModel a = await forgotPwFunction(
                             _userNameController.text, _emailController.text);
+                        _btnController.success();
                         if (a.userName != "") {
                           Navigator.push(
                               context,

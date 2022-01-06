@@ -6,6 +6,7 @@ import 'package:app1/model/forgot_user.dart';
 import 'package:app1/provider/user_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 import '../../ui.dart';
 import '../../widgets/text_input_style.dart';
 
@@ -36,7 +37,8 @@ class _AgainForgotScreenState extends State<AgainForgotScreen> {
 
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _rePasswordController = TextEditingController();
-
+  final RoundedLoadingButtonController _btnController =
+      RoundedLoadingButtonController();
   @override
   void initState() {
     super.initState();
@@ -150,9 +152,10 @@ class _AgainForgotScreenState extends State<AgainForgotScreen> {
               //...............Button ..gửi  nhập lại mk mới.............................
               (_passwordController.text.length >= 6 == true &&
                       _passwordController.text == _rePasswordController.text)
-                  ? AppBTnStyle(
-                      label: "Gửi",
-                      onTap: () async {
+                  ? RoundedLoadingButton(
+                      child: Text("Gửi"),
+                      controller: _btnController,
+                      onPressed: () async {
                         print(widget.userName);
                         if (widget.token != userProvider.jwtP) {
                           String a = await forgotPwConfirmFunction(
@@ -161,6 +164,7 @@ class _AgainForgotScreenState extends State<AgainForgotScreen> {
                             widget.token,
                             widget.email,
                           );
+                          _btnController.success();
                           if (a == "done") {
                             Navigator.pushReplacement(
                                 context,

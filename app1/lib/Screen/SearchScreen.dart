@@ -13,6 +13,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({Key? key}) : super(key: key);
@@ -29,7 +30,10 @@ class _SearchScreenState extends State<SearchScreen> {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
     Size size = MediaQuery.of(context).size;
     allFrConfirm = userProvider.listConfirmFrP;
-
+    final RoundedLoadingButtonController _btnIdController =
+        RoundedLoadingButtonController();
+    final RoundedLoadingButtonController _btnGmailController =
+        RoundedLoadingButtonController();
     TextEditingController _textModalController = TextEditingController();
     return DismissKeyboard(
       child: Scaffold(
@@ -50,7 +54,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             context: context,
                             builder: (BuildContext context) {
                               return Container(
-                                height: size.height * 2 / 3,
+                                height: size.height * 2 / 4,
                                 child: Center(
                                   child: Column(
                                     // crossAxisAlignment:
@@ -60,15 +64,20 @@ class _SearchScreenState extends State<SearchScreen> {
                                     children: <Widget>[
                                       SizedBox(),
                                       // Text("ảo"),
-                                      TextField(
-                                          controller: _textModalController,
-                                          decoration: InputDecoration(
-                                            hintText: "nhập tiềm kiếm",
-                                          )),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                            right: 20.0, left: 20),
+                                        child: TextField(
+                                            controller: _textModalController,
+                                            decoration: InputDecoration(
+                                              hintText: "Nhập tìm kiếm...",
+                                            )),
+                                      ),
                                       Material(
-                                        child: InkWell(
-                                          child: Text("Tìm theo Id"),
-                                          onTap: () async {
+                                        child: RoundedLoadingButton(
+                                          child: Text("Tìm bằng Id"),
+                                          controller: _btnIdController,
+                                          onPressed: () async {
                                             _textModalController.text;
                                             print(_textModalController.text);
                                             // await getApi(userProvider.jwtP,
@@ -77,9 +86,10 @@ class _SearchScreenState extends State<SearchScreen> {
                                         ),
                                       ),
                                       Material(
-                                        child: InkWell(
-                                          child: Text("Tìm theo email"),
-                                          onTap: () async {
+                                        child: RoundedLoadingButton(
+                                          child: Text("Tìm bằng Email"),
+                                          controller: _btnGmailController,
+                                          onPressed: () async {
                                             print("---ấn vào tìm- email--");
                                             var result = await getApi(
                                                 userProvider.jwtP,
