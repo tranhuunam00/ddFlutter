@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:app1/auth/screen/VerifyCodeScreen.dart';
 import 'package:app1/main.dart';
 import 'package:app1/model/user_model.dart';
+import 'package:cool_alert/cool_alert.dart';
 
 import 'package:flutter/material.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
@@ -206,6 +207,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             await registerFunction(userName, password, email);
                         print("name" + result.token);
                         _btnController.success();
+                        _btnController.reset();
                         UserCreateModel user = new UserCreateModel(
                             friend: [],
                             friendConfirm: [],
@@ -224,12 +226,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             password: result.password,
                             email: result.email);
                         print("name 2 " + user.token);
+                        _btnController.reset();
 
                         if (user.userName == "") {
                           print("sai roi");
+                          CoolAlert.show(
+                            context: context,
+                            type: CoolAlertType.error,
+                            text: "Tạo mới thất bại !",
+                          );
                           //bắn ra 1 cái thông báo là người dùng hoặc email đã tồn tại
                         } else {
                           print("ok");
+                          CoolAlert.show(
+                            context: context,
+                            type: CoolAlertType.success,
+                            text: "Tạo mới thành công !",
+                          );
                           Navigator.push(
                               context,
                               MaterialPageRoute(

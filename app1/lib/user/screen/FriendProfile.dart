@@ -453,7 +453,7 @@ class _FriendProfileState extends State<FriendProfile> {
                               width: size.width,
                               clipBehavior: Clip.hardEdge,
                               decoration: BoxDecoration(
-                                color: Colors.red,
+                                color: Colors.blue[50],
                                 borderRadius: BorderRadius.only(
                                     topRight: Radius.circular(20.0),
                                     topLeft: Radius.circular(20)),
@@ -712,7 +712,8 @@ class _FriendProfileState extends State<FriendProfile> {
                                                             user: inforFr,
                                                             type: "feed")));
                                           },
-                                          icon: Icon(Icons.home),
+                                          icon: Image.asset(
+                                              "assets/icons/imageIcon.png"),
                                           label: Text("Ảnh")),
                                     ),
                                   ),
@@ -744,7 +745,8 @@ class _FriendProfileState extends State<FriendProfile> {
                                                             user: inforFr,
                                                             type: "avatar")));
                                           },
-                                          icon: Icon(Icons.home),
+                                          icon: Image.asset(
+                                              "assets/icons/imageIcon.png"),
                                           label: Text("Avatar")),
                                     ),
                                   ),
@@ -774,7 +776,8 @@ class _FriendProfileState extends State<FriendProfile> {
                                                             user: inforFr,
                                                             type: "cover")));
                                           },
-                                          icon: Icon(Icons.home),
+                                          icon: Image.asset(
+                                              "assets/icons/imageIcon.png"),
                                           label: Text("Ảnh bìa")),
                                     ),
                                   ),

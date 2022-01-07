@@ -13,6 +13,7 @@ import 'package:app1/provider/feed_provider.dart';
 import 'package:app1/provider/message_provider.dart';
 import 'package:app1/provider/notifi_provider.dart';
 import 'package:app1/provider/user_provider.dart';
+import 'package:cool_alert/cool_alert.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_login_facebook/flutter_login_facebook.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
@@ -134,7 +135,10 @@ class _LoginScreenState extends State<LoginScreen> {
     // _passwordController.text = "hihi";
     var currentFocus;
     return Scaffold(
-      appBar: AppBar(title: Text("Đăng nhập"),backgroundColor:Color.fromRGBO(200, 100, 400, 0.2) ,),
+      appBar: AppBar(
+        title: Text("Đăng nhập"),
+        backgroundColor: Color.fromRGBO(200, 100, 400, 0.2),
+      ),
       body: DismissKeyboard(
         child: Background(
             Column: Padding(
@@ -333,7 +337,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     feedProvider.userFeed(newListFeedOwnInit);
                                     feedProvider.userFrFeed(newListFeedFrInit);
                                     isLoading = false;
-                                    _btnController.success();
+
                                     if (user.realName == "user") {
                                       print("---chưa nhập thông tin---mới ");
                                       Navigator.pushReplacement(
@@ -350,23 +354,25 @@ class _LoginScreenState extends State<LoginScreen> {
                                                   )));
                                     }
                                   } else {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) =>
-                                                LoginScreen()));
+                                    CoolAlert.show(
+                                      context: context,
+                                      type: CoolAlertType.error,
+                                      text: "Lỗi !",
+                                    );
                                   }
                                 } else {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => LoginScreen()));
+                                  CoolAlert.show(
+                                    context: context,
+                                    type: CoolAlertType.error,
+                                    text: "Lỗi !",
+                                  );
                                 }
                               } else {
-                                Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                        builder: (context) => LoginScreen()));
+                                CoolAlert.show(
+                                  context: context,
+                                  type: CoolAlertType.error,
+                                  text: "Lỗi !",
+                                );
                               }
                               // UserModel userTest = UserModel(userName: "linh tinh ");
                               // userProvider.userLogin(userTest);
@@ -374,6 +380,8 @@ class _LoginScreenState extends State<LoginScreen> {
                               //     context,
                               //     MaterialPageRoute(
                               //         builder: (context) => MainScreen()));
+
+                              _btnController.reset();
                             }
                           : null)
                   : AppBTnStyle(

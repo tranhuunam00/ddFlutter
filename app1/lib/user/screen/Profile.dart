@@ -563,7 +563,8 @@ class _ProfileState extends State<Profile> {
                                                                 .userP,
                                                             type: "feed")));
                                           },
-                                          icon: Icon(Icons.home),
+                                          icon: Image.asset(
+                                              "assets/icons/imageIcon.png"),
                                           label: Text("Ảnh")),
                                     ),
                                   ),
@@ -596,7 +597,8 @@ class _ProfileState extends State<Profile> {
                                                                 .userP,
                                                             type: "avatar")));
                                           },
-                                          icon: Icon(Icons.home),
+                                          icon: Image.asset(
+                                              "assets/icons/imageIcon.png"),
                                           label: Text("Avatar")),
                                     ),
                                   ),
@@ -627,7 +629,8 @@ class _ProfileState extends State<Profile> {
                                                                 .userP,
                                                             type: "cover")));
                                           },
-                                          icon: Icon(Icons.home),
+                                          icon: Image.asset(
+                                              "assets/icons/imageIcon.png"),
                                           label: Text("Ảnh bìa")),
                                     ),
                                   ),

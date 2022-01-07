@@ -8,6 +8,7 @@ import 'package:app1/model/forgot_user.dart';
 import 'package:app1/model/user_model.dart';
 import 'package:app1/widgets/app_button.dart';
 import 'package:app1/widgets/dismit_keybord.dart';
+import 'package:cool_alert/cool_alert.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -167,6 +168,7 @@ class _VerifyCode extends State<VerifyCode> {
                               String a = await registerConfirmFunction(
                                   widget.userCreate!, token);
                               _btnController.success();
+                              _btnController.reset();
                               if (a == "done") {
                                 //dang kis thanh cong
                                 print("dangki thanh cong");
@@ -176,6 +178,11 @@ class _VerifyCode extends State<VerifyCode> {
                                         builder: (builder) => LoginScreen()));
                               } else {
                                 print("Dang ki that bai");
+                                CoolAlert.show(
+                                  context: context,
+                                  type: CoolAlertType.error,
+                                  text: "Tạo mới thất bại !",
+                                );
                               }
                             }
                             if (widget.userForgot != null) {
@@ -183,7 +190,14 @@ class _VerifyCode extends State<VerifyCode> {
 
                               String a = await forgotConfirmFunction(
                                   widget.userForgot!, token);
+                              _btnController.reset();
+
                               if (a == "done") {
+                                CoolAlert.show(
+                                  context: context,
+                                  type: CoolAlertType.success,
+                                  text: "Tạo mới thành công !",
+                                );
                                 Navigator.pushReplacement(
                                     context,
                                     MaterialPageRoute(

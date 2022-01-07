@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:rounded_loading_button/rounded_loading_button.dart';
 
 class CameraViewPage extends StatelessWidget {
   const CameraViewPage(
@@ -27,10 +28,12 @@ class CameraViewPage extends StatelessWidget {
   final String? event;
   final Function? onImageSend;
   static TextEditingController _controller = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-
+    final RoundedLoadingButtonController _btnController =
+        RoundedLoadingButtonController();
     return Scaffold(
         backgroundColor: Colors.black12,
         appBar: AppBar(
@@ -74,33 +77,40 @@ class CameraViewPage extends StatelessWidget {
                           hintText: "Add Caption ... ",
                           prefixIcon: Icon(Icons.add_photo_alternate,
                               color: Colors.white),
-                          suffixIcon: InkWell(
-                            onTap: () async {
-                              print("-----ddang an vao ---");
-                              if (onImageSend != null) {
-                                if (event == "avatar" || event == "cover") {
-                                  onImageSend!(path, event, userProvider.jwtP);
+                          suffixIcon: Container(
+                            height: 30,
+                            width: 30,
+                            child: RoundedLoadingButton(
+                              controller: _btnController,
+                              onPressed: () async {
+                                print("-----ddang an vao ---");
+                                if (onImageSend != null) {
+                                  if (event == "avatar" || event == "cover") {
+                                    onImageSend!(
+                                        path, event, userProvider.jwtP);
+                                  }
+                                  if (event == "message") {
+                                    print("chạy hàm gửi");
+                                    onImageSend!(
+                                        path,
+                                        userProvider.jwtP,
+                                        userProvider.userP.id,
+                                        targetId,
+                                        DateTime.now().toString());
+                                  }
+                                  if (event == "comment") {
+                                    onImageSend!(
+                                        path, userProvider.jwtP, feedId);
+                                  }
                                 }
-                                if (event == "message") {
-                                  print("chạy hàm gửi");
-                                  onImageSend!(
-                                      path,
-                                      userProvider.jwtP,
-                                      userProvider.userP.id,
-                                      targetId,
-                                      DateTime.now().toString());
-                                }
-                                if (event == "comment") {
-                                  onImageSend!(path, userProvider.jwtP, feedId);
-                                }
-                              }
 
-                              _controller.clear();
-                            },
-                            child: CircleAvatar(
-                                radius: 27,
-                                backgroundColor: Colors.tealAccent,
-                                child: Icon(Icons.check, size: 27)),
+                                _controller.clear();
+                              },
+                              child: CircleAvatar(
+                                  radius: 27,
+                                  backgroundColor: Colors.tealAccent,
+                                  child: Icon(Icons.check, size: 27)),
+                            ),
                           ),
                           hintStyle:
                               TextStyle(color: Colors.white, fontSize: 17),

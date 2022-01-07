@@ -5,6 +5,7 @@ import 'package:app1/auth/screen/VerifyCodeScreen.dart';
 import 'package:app1/main.dart';
 
 import 'package:app1/model/forgot_user.dart';
+import 'package:cool_alert/cool_alert.dart';
 import 'package:flutter/material.dart';
 import 'package:rounded_loading_button/rounded_loading_button.dart';
 import '../../ui.dart';
@@ -137,6 +138,8 @@ class _ForgotScreenState extends State<ForgotScreen> {
                         UserForgotModel a = await forgotPwFunction(
                             _userNameController.text, _emailController.text);
                         _btnController.success();
+                        _btnController.reset();
+
                         if (a.userName != "") {
                           Navigator.push(
                               context,
@@ -151,6 +154,11 @@ class _ForgotScreenState extends State<ForgotScreen> {
                                   ));
                         } else {
                           print("sai");
+                          CoolAlert.show(
+                            context: context,
+                            type: CoolAlertType.error,
+                            text: "Lỗi !",
+                          );
                         }
                       })
                   : AppBTnStyle(

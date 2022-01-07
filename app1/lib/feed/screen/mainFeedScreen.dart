@@ -134,7 +134,13 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-
+    double sizeM = 0;
+    if (widget.feed.message.length > 20) {
+      sizeM = 26;
+    }
+    if (widget.feed.message.length > 40) {
+      sizeM = 22;
+    }
     for (int i = 0; i < feedApi.like.length; i++) {
       if (feedApi.like[i] == userProvider.userP.id) {
         print("------đã like-------");
@@ -256,7 +262,8 @@ class _MainFeedScreenState extends State<MainFeedScreen> {
                   child: Padding(
                       padding: const EdgeInsets.only(
                           left: 60, top: 30, right: 60, bottom: 30),
-                      child: Text(widget.feed.message, style: AppStyles.h2)),
+                      child: Text(widget.feed.message,
+                          style: AppStyles.h2.copyWith(fontSize: sizeM))),
                 );
               }
               if (index == listPathAll.length + 2) {

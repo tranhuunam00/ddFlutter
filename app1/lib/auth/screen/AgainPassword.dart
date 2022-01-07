@@ -165,6 +165,7 @@ class _AgainForgotScreenState extends State<AgainForgotScreen> {
                             widget.email,
                           );
                           _btnController.success();
+                          _btnController.reset();
                           if (a == "done") {
                             Navigator.pushReplacement(
                                 context,
